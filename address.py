@@ -1,6 +1,7 @@
 import math
 from wrapper import Wrapper
-from . import validateAddress, CHAIN_ID, NODE, API_KEY
+from . import validate_address, throw_error, CHAIN_ID, NODE, API_KEY, \
+    DEFAULT_TX_FEE, DEFAULT_FEE_SCALE, DEFAULT_LEASE_FEE, DEFAULT_CANCEL_LEASE_FEE, DEFAULT_ALIAS_FEE
 import axolotl_curve25519 as curve
 import os
 import crypto
@@ -8,9 +9,7 @@ import time
 import struct
 import json
 import base58
-import base64
 import logging
-import requests
 
 wordList = ['abandon', 'ability', 'able', 'about', 'above', 'absent', 'absorb', 'abstract', 'absurd', 'abuse', 'access',
             'accident', 'account', 'accuse', 'achieve', 'acid', 'acoustic', 'acquire', 'across', 'act', 'action',
@@ -210,7 +209,7 @@ class Address(object):
         elif public_key:
             self._generate(public_key=public_key)
         elif address:
-            if not validateAddress(address):
+            if not validate_address(address):
                 raise ValueError("Invalid address")
             else:
                 self.address = address
@@ -230,23 +229,25 @@ class Address(object):
         self.wrapper = Wrapper(NODE, API_KEY)
 
     def __str__(self):
-        if self.address:
-            ab = []
-            try:
-                assets_balances = self.wrapper.request('/assets/balance/%s' % self.address)['balances']
-                for a in assets_balances:
-                    if a['balance'] > 0:
-                        ab.append("  %s (%s) = %d" % (a['assetId'], a['issueTransaction']['name'].encode('ascii', 'ignore'), a['balance']))
-            except:
-                pass
-            return 'address = %s\npublicKey = %s\nprivateKey = %s\nseed = %s\nnonce = %d\nbalances:\n  Vee = %d%s' % \
-                   (self.address, self.publicKey, self.privateKey, self.seed, self.nonce, self.balance(), '\n'+'\n'.join(ab) if ab else '')
+        if not self.address:
+            raise ValueError("No address")
+        ab = []
+        try:
+            assets_balances = self.wrapper.request('/assets/balance/%s' % self.address)['balances']
+            for a in assets_balances:
+                if a['balance'] > 0:
+                    ab.append("  %s (%s) = %d" % (a['assetId'], a['issueTransaction']['name'].encode('ascii', 'ignore'), a['balance']))
+        except:
+            pass
+        return 'address = %s\npublicKey = %s\nprivateKey = %s\nseed = %s\nnonce = %d\nbalances:\n  Vee = %d%s' % \
+               (self.address, self.publicKey, self.privateKey, self.seed, self.nonce, self.balance(), '\n' + '\n'.join(ab) if ab else '')
 
     __repr__ = __str__
 
     def balance(self, confirmations=0):
         try:
-            return self.wrapper.request('/addresses/balance/%s%s' % (self.address, '' if confirmations==0 else '/%d' % confirmations))['balance']
+            confirmations_str = '' if confirmations == 0 else '/%d' % confirmations
+            return self.wrapper.request('/addresses/balance/%s%s' % (self.address, confirmations_str))['balance']
         except:
             return 0
 
@@ -290,3 +291,106 @@ class Address(object):
         self.publicKey = base58.b58encode(pubKey)
         if privKey != "":
             self.privateKey = base58.b58encode(privKey)
+
+    def send_payment(self, recipient, amount, attachment='', tx_fee=DEFAULT_TX_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
+        if not self.privateKey:
+            msg = 'Private key required'
+            logging.error(msg)
+            throw_error(msg)
+
+        elif amount <= 0:
+            msg = 'Amount must be > 0'
+            logging.error(msg)
+            throw_error(msg)
+        elif self.balance() < amount + tx_fee:
+            msg = 'Insufficient VEE balance'
+            logging.error(msg)
+            throw_error(msg)
+        else:
+            if timestamp == 0:
+                timestamp = int(time.time() * 1000)
+            sData = b'\x02' + \
+                    struct.pack(">Q", timestamp) + \
+                    struct.pack(">Q", amount) + \
+                    struct.pack(">Q", tx_fee) + \
+                    struct.pack(">Q", fee_scale) + \
+                    base58.b58decode(recipient.address) + \
+                    struct.pack(">H", len(attachment)) + \
+                    crypto.str2bytes(attachment)
+            signature = crypto.sign(self.privateKey, sData)
+            data = json.dumps({
+                "senderPublicKey": self.publicKey,
+                "recipient": recipient.address,
+                "amount": amount,
+                "fee": tx_fee,
+                "fee_scale": fee_scale,
+                "timestamp": timestamp,
+                "attachment": base58.b58encode(crypto.str2bytes(attachment)),
+                "signature": signature
+            })
+
+            return self.wrapper.request('/assets/broadcast/transfer', data)
+
+    def lease(self, recipient, amount, tx_fee=DEFAULT_LEASE_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
+        if not self.privateKey:
+            msg = 'Private key required'
+            logging.error(msg)
+            throw_error(msg)
+        elif amount <= 0:
+            msg = 'Amount must be > 0'
+            logging.error(msg)
+            throw_error(msg)
+        elif self.balance() < amount + tx_fee:
+            msg = 'Insufficient VEE balance'
+            logging.error(msg)
+            throw_error(msg)
+        else:
+            if timestamp == 0:
+                timestamp = int(time.time() * 1000)
+            sData = b'\x03' + \
+                    base58.b58decode(recipient.address) + \
+                    struct.pack(">Q", amount) + \
+                    struct.pack(">Q", tx_fee) + \
+                    struct.pack(">Q", fee_scale) + \
+                    struct.pack(">Q", timestamp)
+            signature = crypto.sign(self.privateKey, sData)
+            data = json.dumps({
+                "senderPublicKey": self.publicKey,
+                "recipient": recipient.address,
+                "amount": amount,
+                "fee": tx_fee,
+                "fee_scale": fee_scale,
+                "timestamp": timestamp,
+                "signature": signature
+            })
+            req = self.wrapper.request('/leasing/broadcast/lease', data)
+            return req
+
+    def lease_cancel(self, leaseId, tx_fee=DEFAULT_CANCEL_LEASE_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
+        if not self.privateKey:
+            msg = 'Private key required'
+            logging.error(msg)
+            throw_error(msg)
+        elif self.balance() < tx_fee:
+            msg = 'Insufficient VEE balance'
+            logging.error(msg)
+            throw_error(msg)
+        else:
+            if timestamp == 0:
+                timestamp = int(time.time() * 1000)
+            sData = b'\x04' + \
+                    struct.pack(">Q", tx_fee) + \
+                    struct.pack(">Q", fee_scale) + \
+                    struct.pack(">Q", timestamp) + \
+                    base58.b58decode(leaseId)
+            signature = crypto.sign(self.privateKey, sData)
+            data = json.dumps({
+                "senderPublicKey": self.publicKey,
+                "txId": leaseId,
+                "fee": tx_fee,
+                "fee_scale": fee_scale,
+                "timestamp": timestamp,
+                "signature": signature
+            })
+            req = self.wrapper.request('/leasing/broadcast/cancel', data)
+            return req

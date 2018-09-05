@@ -1,6 +1,16 @@
 from .address import *
 from .chain import *
 
+DEFAULT_TX_FEE = 10000000
+DEFAULT_LEASE_FEE = 10000000
+DEFAULT_CANCEL_LEASE_FEE = 10000000
+DEFAULT_ALIAS_FEE = 10000000
+DEFAULT_CONTEND_SLOT_FEE = 5000000000000
+DEFAULT_RELEASE_SLOT_FEE = 10000000
+DEFAULT_MINTING_FEE = 10000000
+DEFAULT_FEE_SCALE = 100
+
+THROW_EXCEPTION_ON_ERROR = False
 
 ADDRESS_VERSION = 1
 ADDRESS_CHECKSUM_LENGTH = 4
@@ -12,6 +22,20 @@ CHAIN_ID = 'M'
 
 NODE = 'http://127.0.0.1'
 API_KEY = ''
+
+
+class PyVeeException(Exception):
+    pass
+
+
+def throw_error(msg):
+    if THROW_EXCEPTION_ON_ERROR:
+        raise PyVeeException(msg)
+
+
+def setThrowOnError(throw=True):
+    global THROW_EXCEPTION_ON_ERROR
+    THROW_EXCEPTION_ON_ERROR = throw
 
 
 def setChain(chain_name=CHAIN, chain_id=None):
@@ -44,7 +68,7 @@ def getNode():
     return NODE
 
 
-def validateAddress(address):
+def validate_address(address):
     addr = crypto.bytes2str(base58.b58decode(address))
     if addr[0] != chr(ADDRESS_VERSION):
         logging.error("Wrong address version")
