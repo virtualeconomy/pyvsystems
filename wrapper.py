@@ -1,5 +1,4 @@
 import logging
-import pyvee
 import requests
 
 class Wrapper(object):

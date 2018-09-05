@@ -1,7 +1,7 @@
-import math
 from wrapper import Wrapper
-from . import validate_address, throw_error, CHAIN_ID, NODE, API_KEY, \
-    DEFAULT_TX_FEE, DEFAULT_FEE_SCALE, DEFAULT_LEASE_FEE, DEFAULT_CANCEL_LEASE_FEE, DEFAULT_ALIAS_FEE
+from util import validate_address, throw_error, ADDRESS_VERSION
+from setting import DEFAULT_TX_FEE, DEFAULT_FEE_SCALE, DEFAULT_LEASE_FEE, DEFAULT_CANCEL_LEASE_FEE
+import setting
 import axolotl_curve25519 as curve
 import os
 import crypto
@@ -200,6 +200,7 @@ wordList = ['abandon', 'ability', 'able', 'about', 'above', 'absent', 'absorb', 
 
 class Address(object):
     def __init__(self, address='', public_key='', private_key='', seed='', alias='', nonce=0):
+        self.wrapper = Wrapper(setting.get_node(), setting.get_api_key())
         if nonce < 0 or nonce > 4294967295:
             raise ValueError('Nonce must be between 0 and 4294967295')
         if seed:
@@ -226,29 +227,22 @@ class Address(object):
         else:
             self._generate(nonce=nonce)
         self.aliases = self.aliases()
-        self.wrapper = Wrapper(NODE, API_KEY)
 
     def __str__(self):
         if not self.address:
             raise ValueError("No address")
-        ab = []
-        try:
-            assets_balances = self.wrapper.request('/assets/balance/%s' % self.address)['balances']
-            for a in assets_balances:
-                if a['balance'] > 0:
-                    ab.append("  %s (%s) = %d" % (a['assetId'], a['issueTransaction']['name'].encode('ascii', 'ignore'), a['balance']))
-        except:
-            pass
-        return 'address = %s\npublicKey = %s\nprivateKey = %s\nseed = %s\nnonce = %d\nbalances:\n  Vee = %d%s' % \
-               (self.address, self.publicKey, self.privateKey, self.seed, self.nonce, self.balance(), '\n' + '\n'.join(ab) if ab else '')
+        return 'address = %s\npublicKey = %s\nprivateKey = %s\nseed = %s\nnonce = %d\nbalances: %d' % \
+               (self.address, self.publicKey, self.privateKey, self.seed, self.nonce, self.balance())
 
     __repr__ = __str__
 
     def balance(self, confirmations=0):
         try:
             confirmations_str = '' if confirmations == 0 else '/%d' % confirmations
-            return self.wrapper.request('/addresses/balance/%s%s' % (self.address, confirmations_str))['balance']
-        except:
+            resp = self.wrapper.request('/addresses/balance/%s%s' % (self.address, confirmations_str))
+            return resp['balance']
+        except Exception as ex:
+            logging.error(ex)
             return 0
 
     def aliases(self):
@@ -285,7 +279,7 @@ class Address(object):
             else:
                 privKey = base58.b58decode(private_key)
             pubKey = curve.generatePublicKey(privKey)
-        unhashedAddress = chr(1) + str(CHAIN_ID) + crypto.hashChain(pubKey)[0:20]
+        unhashedAddress = chr(ADDRESS_VERSION) + str(setting.get_chain_id()) + crypto.hashChain(pubKey)[0:20]
         addressHash = crypto.hashChain(crypto.str2bytes(unhashedAddress))[0:4]
         self.address = base58.b58encode(crypto.str2bytes(unhashedAddress + addressHash))
         self.publicKey = base58.b58encode(pubKey)
@@ -366,7 +360,7 @@ class Address(object):
             req = self.wrapper.request('/leasing/broadcast/lease', data)
             return req
 
-    def lease_cancel(self, leaseId, tx_fee=DEFAULT_CANCEL_LEASE_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
+    def lease_cancel(self, lease_id, tx_fee=DEFAULT_CANCEL_LEASE_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
         if not self.privateKey:
             msg = 'Private key required'
             logging.error(msg)
@@ -382,11 +376,11 @@ class Address(object):
                     struct.pack(">Q", tx_fee) + \
                     struct.pack(">Q", fee_scale) + \
                     struct.pack(">Q", timestamp) + \
-                    base58.b58decode(leaseId)
+                    base58.b58decode(lease_id)
             signature = crypto.sign(self.privateKey, sData)
             data = json.dumps({
                 "senderPublicKey": self.publicKey,
-                "txId": leaseId,
+                "txId": lease_id,
                 "fee": tx_fee,
                 "fee_scale": fee_scale,
                 "timestamp": timestamp,
