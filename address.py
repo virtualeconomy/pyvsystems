@@ -199,7 +199,7 @@ wordList = ['abandon', 'ability', 'able', 'about', 'above', 'absent', 'absorb', 
 class Address(object):
     def __init__(self, chain=pyvee.default_chain(), address='', public_key='', private_key='', seed='', alias='', nonce=0):
 
-        self.wrapper = chain.wrapper
+        self.wrapper = chain.api_wrapper
         if nonce < 0 or nonce > 4294967295:
             raise ValueError('Nonce must be between 0 and 4294967295')
         if seed:
