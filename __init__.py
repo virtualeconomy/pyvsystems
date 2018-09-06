@@ -19,7 +19,7 @@ def throw_error(msg):
         raise PyVeeException(msg)
 
 def create_api_wrapper(node_host=DEFAULT_NODE, api_key=DEFAULT_API_KEY):
-	return Wrapper(node_host, api_key)
+    return Wrapper(node_host, api_key)
 
 from .chain import *
 
@@ -27,7 +27,7 @@ def testnet_chain(api_wrapper=create_api_wrapper(DEFAULT_TESTNET_NODE, DEFAULT_T
     return Chain(TESTNET_CHAIN, TESTNET_CHAIN_ID, ADDRESS_VERSION, api_wrapper)
 
 def default_chain(api_wrapper=create_api_wrapper()):
-	return Chain(DEFAULT_CHAIN, DEFAULT_CHAIN_ID, ADDRESS_VERSION, api_wrapper)
+    return Chain(DEFAULT_CHAIN, DEFAULT_CHAIN_ID, ADDRESS_VERSION, api_wrapper)
 
 def set_throw_on_error(throw=True):
     global THROW_EXCEPTION_ON_ERROR

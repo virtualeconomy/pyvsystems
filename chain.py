@@ -23,7 +23,7 @@ class Chain(object):
     def tx(self, id):
         return self.api_wrapper.request('/transactions/info/%s' % id)
 
-    def validate_address(address):
+    def validate_address(self, address):
         addr = bytes2str(base58.b58decode(address))
         if addr[0] != chr(self.address_version):
             logging.error("Wrong address version")

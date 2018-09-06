@@ -280,10 +280,10 @@ class Address(object):
             pubKey = curve.generatePublicKey(privKey)
         unhashedAddress = chr(self.chain.address_version) + str(self.chain.chain_id) + hashChain(pubKey)[0:20]
         addressHash = hashChain(str2bytes(unhashedAddress))[0:4]
-        self.address = base58.b58encode(str2bytes(unhashedAddress + addressHash))
-        self.publicKey = base58.b58encode(pubKey)
+        self.address = bytes2str(base58.b58encode(str2bytes(unhashedAddress + addressHash)))
+        self.publicKey = bytes2str(base58.b58encode(pubKey))
         if privKey != "":
-            self.privateKey = base58.b58encode(privKey)
+            self.privateKey = bytes2str(base58.b58encode(privKey))
 
     def send_payment(self, recipient, amount, attachment='', tx_fee=DEFAULT_TX_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
         if not self.privateKey:
@@ -301,28 +301,29 @@ class Address(object):
             pyvee.throw_error(msg)
         else:
             if timestamp == 0:
-                timestamp = int(time.time() * 1000)
+                timestamp = int(time.time() * 1000000000)
             sData = b'\x02' + \
                     struct.pack(">Q", timestamp) + \
                     struct.pack(">Q", amount) + \
                     struct.pack(">Q", tx_fee) + \
-                    struct.pack(">Q", fee_scale) + \
+                    struct.pack(">H", fee_scale) + \
                     base58.b58decode(recipient.address) + \
                     struct.pack(">H", len(attachment)) + \
                     str2bytes(attachment)
-            signature = sign(self.privateKey, sData)
+            signature = bytes2str(sign(self.privateKey, sData))
+            attachment_str = bytes2str(base58.b58encode(str2bytes(attachment)))
             data = json.dumps({
                 "senderPublicKey": self.publicKey,
                 "recipient": recipient.address,
                 "amount": amount,
                 "fee": tx_fee,
-                "fee_scale": fee_scale,
+                "feeScale": fee_scale,
                 "timestamp": timestamp,
-                "attachment": base58.b58encode(str2bytes(attachment)),
+                "attachment": attachment_str,
                 "signature": signature
             })
 
-            return self.wrapper.request('/assets/broadcast/transfer', data)
+            return self.wrapper.request('/vee/broadcast/payment', data)
 
     def lease(self, recipient, amount, tx_fee=DEFAULT_LEASE_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
         if not self.privateKey:
@@ -339,20 +340,20 @@ class Address(object):
             pyvee.throw_error(msg)
         else:
             if timestamp == 0:
-                timestamp = int(time.time() * 1000)
+                timestamp = int(time.time() * 1000000000)
             sData = b'\x03' + \
                     base58.b58decode(recipient.address) + \
                     struct.pack(">Q", amount) + \
                     struct.pack(">Q", tx_fee) + \
-                    struct.pack(">Q", fee_scale) + \
+                    struct.pack(">H", fee_scale) + \
                     struct.pack(">Q", timestamp)
-            signature = sign(self.privateKey, sData)
+            signature = bytes2str(sign(self.privateKey, sData))
             data = json.dumps({
                 "senderPublicKey": self.publicKey,
                 "recipient": recipient.address,
                 "amount": amount,
                 "fee": tx_fee,
-                "fee_scale": fee_scale,
+                "feeScale": fee_scale,
                 "timestamp": timestamp,
                 "signature": signature
             })
@@ -370,18 +371,18 @@ class Address(object):
             pyvee.throw_error(msg)
         else:
             if timestamp == 0:
-                timestamp = int(time.time() * 1000)
+                timestamp = int(time.time() * 1000000000)
             sData = b'\x04' + \
                     struct.pack(">Q", tx_fee) + \
-                    struct.pack(">Q", fee_scale) + \
+                    struct.pack(">H", fee_scale) + \
                     struct.pack(">Q", timestamp) + \
                     base58.b58decode(lease_id)
-            signature = sign(self.privateKey, sData)
+            signature = bytes2str(sign(self.privateKey, sData))
             data = json.dumps({
                 "senderPublicKey": self.publicKey,
                 "txId": lease_id,
                 "fee": tx_fee,
-                "fee_scale": fee_scale,
+                "feeScale": fee_scale,
                 "timestamp": timestamp,
                 "signature": signature
             })
