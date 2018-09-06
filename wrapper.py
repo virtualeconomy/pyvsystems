@@ -1,5 +1,4 @@
 import logging
-import pyvee
 import requests
 
 class Wrapper(object):
@@ -15,8 +14,8 @@ class Wrapper(object):
             headers['api_key'] = self.api_key 
         if post_data:
             headers['Content-Type'] = 'application/json'
-            logging.info("curl -X POST %s %s" % (''.join(['--header \'{}\': \'{}\''.format(k, v) for k, v in headers.items()]),'-d {}'.format()))
+            logging.info("curl -X POST %s %s" % (' '.join(['--header \'{}\': \'{}\''.format(k, v) for k, v in headers.items()]),'-d {}'.format(post_data)))
             return requests.post(url, data=post_data, headers=headers).json()
         else:
-            logging.info("curl -X GET %s" % (''.join(['--header \'{}\': \'{}\''.format(k, v) for k, v in headers.items()])))
+            logging.info("curl -X GET %s" % (' '.join(['--header \'{}\': \'{}\''.format(k, v) for k, v in headers.items()])))
             return requests.get(url, headers=headers).json()
