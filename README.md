@@ -10,7 +10,7 @@ For now,
 
 ## usage
 
-### chain
+### chain object
 1. For testnet:
 ```python
 import pyvee as pv
@@ -36,7 +36,7 @@ custom_wrapper = pv.create_api_wrapper('http://0.0.0.0/', api_key='')
 ts_chain = pv.Chain(chain_name='aaa', chain_id='aaa', address_version=1, api_wrapper=custom_wrapper)
 ```
 
-### chain api
+### chain api list
 1. look up current block height of the chain:
 ```python
 ts_chain.height()
@@ -59,4 +59,5 @@ ts_chain.tx(tx_id)
 ```
 
 
-### address
+### address object
+### address api list
