@@ -14,7 +14,9 @@ class Wrapper(object):
             headers['api_key'] = self.api_key 
         if post_data:
             headers['Content-Type'] = 'application/json'
-            logging.info("curl -X POST %s %s" % (' '.join(['--header \'{}\': \'{}\''.format(k, v) for k, v in headers.items()]),'-d {}'.format(post_data)))
+            header_str = ' '.join(['--header \'{}: {}\''.format(k, v) for k, v in headers.items()])
+            data_str = '-d {}'.format(post_data)
+            logging.info("curl -X POST %s %s" % (header_str, data_str))
             return requests.post(url, data=post_data, headers=headers).json()
         else:
             logging.info("curl -X GET %s" % (' '.join(['--header \'{}\': \'{}\''.format(k, v) for k, v in headers.items()])))

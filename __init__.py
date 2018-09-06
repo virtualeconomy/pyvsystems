@@ -1,18 +1,36 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
+import logging
 
-ogging.getLogger("requests").setLevel(logging.WARNING)
+logging.getLogger("requests").setLevel(logging.WARNING)
 console = logging.StreamHandler()
 console.setLevel(logging.ERROR)
 formatter = logging.Formatter('[%(levelname)s] %(message)s')
 console.setFormatter(formatter)
 logging.getLogger('').addHandler(console)
 
+from .setting import *
+from .wrapper import *
 
-from .address import *
+class PyVeeException(Exception):
+    pass
+
+def throw_error(msg):
+    if THROW_EXCEPTION_ON_ERROR:
+        raise PyVeeException(msg)
+
+def create_api_wrapper(node_host=DEFAULT_NODE, api_key=DEFAULT_API_KEY):
+	return Wrapper(node_host, api_key)
+
 from .chain import *
 
-def testnet_chain(api_node_url='', api_key=''):
-    if api_node_url:
-        return Chain('testnet', 'T', api_node_url, api_key)
-    else: 
-        return Chain( ,api_node_url, api_key)
+def testnet_chain(api_wrapper=create_api_wrapper(DEFAULT_TESTNET_NODE, DEFAULT_TESTNET_API_KEY)):
+    return Chain(TESTNET_CHAIN, TESTNET_CHAIN_ID, ADDRESS_VERSION, api_wrapper)
+
+def default_chain(api_wrapper=create_api_wrapper()):
+	return Chain(DEFAULT_CHAIN, DEFAULT_CHAIN_ID, ADDRESS_VERSION, api_wrapper)
+
+def set_throw_on_error(throw=True):
+    global THROW_EXCEPTION_ON_ERROR
+    THROW_EXCEPTION_ON_ERROR = throw
+
+from .address import *
