@@ -1,14 +1,14 @@
 # pyvee
 A python wrapper for vee api
 
-## install
+## Install
 For now, 
 1. just clone the repo under you workspace 
 2. install packages in pyvee/requirement.txt by 
 ```pip install -r ./pyvee/requirements.txt```
 3. Then you can ```import pyvee```
 
-## usage
+## Usage
 
 ### chain object
 1. For testnet:
