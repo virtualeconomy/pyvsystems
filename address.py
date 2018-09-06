@@ -272,7 +272,7 @@ class Address(object):
             pubKey = base58.b58decode(public_key)
             privKey = ""
         else:
-            seedHash = crypto.hashChain(struct.pack(">L", nonce) + crypto.str2bytes(self.seed))
+            seedHash = crypto.hashChain(crypto.str2bytes(str(nonce)+self.seed))
             accountSeedHash = crypto.sha256(seedHash)
             if not private_key:
                 privKey = curve.generatePrivateKey(accountSeedHash)
