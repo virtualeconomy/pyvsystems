@@ -67,30 +67,45 @@ For now,
 1. create address by seed
     ```python
     from pyvee import Address
-    addr = Address(seed='<your seed>', nonce=0)
+    my_address = Address(chain=ts_chain, seed='<your seed>', nonce=0)
     ```
 2. create address by private key
     ```python
     from pyvee import Address
-    addr = Address(chain=ts_chain, private_key='<your base58 private key>')
+    my_address = Address(chain=ts_chain, private_key='<your base58 private key>')
+    ```
+3. create address by public key
+    ```python
+    from pyvee import Address
+    recipient = Address(chain=ts_chain, public_key='<base58 public key>')
+    ```
+4. create address by wallet address
+    ```python
+    from pyvee import Address
+    recipient = Address(chain=ts_chain, address='<base58 wallet address>')
     ```
  
 ### address api list
 1. Get balance
     ```python
-    addr.balance()
+    # get VEE balance
+    balance = my_address.balance()
+    print("The balance is {}".format(balance))
+    # get VEE balance after 5 confirmations 
+    balance = my_address.balance(confirmations = 5)
+    print("The balance is {}".format(balance))
     ```
 2. Send payment transaction
     ```python
     # 100000000 = 1 VEE
-    addr.send_payment(addr2, amount=100000000)
+    my_address.send_payment(recipient, amount=100000000)
     ```
 3. Send and cancel lease transaction
     ```python
     # 100000000 = 1 VEE
     # send lease
-    response = addr.lease(addr2, amount=100000000)
+    response = addr.lease(recipient, amount=100000000)
     tx_id = response["id"]
     # cancel lease
-    addr.lease_cancel(tx_id)
+    my_address.lease_cancel(tx_id)
     ```
