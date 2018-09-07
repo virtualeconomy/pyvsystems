@@ -64,22 +64,22 @@ For now,
     ```
 
 ### address object
-1. create address by seed
+1. constructed by seed
     ```python
     from pyvee import Address
     my_address = Address(chain=ts_chain, seed='<your seed>', nonce=0)
     ```
-2. create address by private key
+2. constructed by private key
     ```python
     from pyvee import Address
     my_address = Address(chain=ts_chain, private_key='<your base58 private key>')
     ```
-3. create address by public key
+3. constructed by public key
     ```python
     from pyvee import Address
     recipient = Address(chain=ts_chain, public_key='<base58 public key>')
     ```
-4. create address by wallet address
+4. constructed by wallet address
     ```python
     from pyvee import Address
     recipient = Address(chain=ts_chain, address='<base58 wallet address>')
@@ -97,14 +97,13 @@ For now,
     ```
 2. Send payment transaction
     ```python
-    # 100000000 = 1 VEE
+    # send payment (100000000 = 1 VEE)
     my_address.send_payment(recipient, amount=100000000)
     ```
 3. Send and cancel lease transaction
     ```python
-    # 100000000 = 1 VEE
-    # send lease
-    response = addr.lease(recipient, amount=100000000)
+    # send lease (100000000 = 1 VEE)
+    response = my_address.lease(recipient, amount=100000000)
     tx_id = response["id"]
     # cancel lease
     my_address.lease_cancel(tx_id)
