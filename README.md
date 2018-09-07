@@ -38,26 +38,30 @@ For now,
 
 ### chain api list
 1. look up current block height of the chain:
-  ```python
-  ts_chain.height()
-  ```
+    ```python
+    ts_chain.height()
+    ```
 
 2. look up the last block info of the chain:
-  ```python
-  ts_chain.lastblock()
-  ```
+    ```python
+    ts_chain.lastblock()
+    ```
 
 
 3. look up a block info at n in the chain:
-  ```python
-  ts_chain.block(n)
-  ```
+    ```python
+    ts_chain.block(n)
+    ```
 
 4. Get a transaction info by transacion id in the chain:
-  ```python
-  ts_chain.tx(tx_id)
-  ```
-
+    ```python
+    ts_chain.tx(tx_id)
+    ```
+    
+5. Validate an address of the chain:
+    ```python
+    ts_chain.validate_address(addr)
+    ```
 
 ### address object
 ### address api list
