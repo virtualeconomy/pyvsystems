@@ -3,10 +3,10 @@ A python wrapper for vee api
 
 ## Install
 For now, 
-1. just clone the repo under you workspace 
+1. clone the repo under you workspace
 2. install packages in pyvee/requirement.txt by 
 ```pip install -r ./pyvee/requirements.txt```
-3. Then you can ```import pyvee```
+3. Then you can ```import pyvee``` in your workspace
 
 ## Usage
 
