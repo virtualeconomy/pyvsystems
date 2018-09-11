@@ -431,7 +431,7 @@ class Address(object):
         else:
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
-            sData = b'\x7' + \
+            sData = b'\x07' + \
                     struct.pack(">I", slot_id) + \
                     struct.pack(">Q", tx_fee) + \
                     struct.pack(">H", fee_scale) + \
