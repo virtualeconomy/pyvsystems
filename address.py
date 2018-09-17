@@ -1,6 +1,4 @@
-from .setting import DEFAULT_TX_FEE, DEFAULT_FEE_SCALE, DEFAULT_LEASE_FEE, DEFAULT_CANCEL_LEASE_FEE, DEFAULT_CONTEND_SLOT_FEE, DEFAULT_RELEASE_SLOT_FEE
-import axolotl_curve25519 as curve
-import os
+from .setting import *
 from .crypto import * 
 import pyvee
 import time
@@ -389,7 +387,6 @@ class Address(object):
             req = self.wrapper.request('/leasing/broadcast/cancel', data)
             return req
 
-
     def contend(self, slot_id, tx_fee=DEFAULT_CONTEND_SLOT_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
         if not self.privateKey:
             msg = 'Private key required'
@@ -447,3 +444,43 @@ class Address(object):
             })
 
             return self.wrapper.request('/spos/broadcast/release', data)
+
+    def dbput(self, db_key, db_data, db_data_type="ByteArray", tx_fee=DEFAULT_DBPUT_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
+        if not self.privateKey:
+            msg = 'Private key required'
+            logging.error(msg)
+            pyvee.throw_error(msg)
+        elif self.balance() < tx_fee:
+            msg = 'Insufficient VEE balance'
+            logging.error(msg)
+            pyvee.throw_error(msg)
+        else:
+            if timestamp == 0:
+                timestamp = int(time.time() * 1000000000)
+            # "ByteArray" is the only supported type in first version
+            if db_data_type == "ByteArray":
+                data_type_id = b'\x01'
+            else:
+                raise ValueError('Unsupported data type: {}'.format(db_data_type))
+            sData = b'\x0a' + \
+                    struct.pack(">H", len(db_key)) + \
+                    str2bytes(db_key) + \
+                    struct.pack(">H", len(db_data)+1) + \
+                    data_type_id + \
+                    str2bytes(db_data) + \
+                    struct.pack(">Q", tx_fee) + \
+                    struct.pack(">H", fee_scale) + \
+                    struct.pack(">Q", timestamp)
+            signature = bytes2str(sign(self.privateKey, sData))
+            data = json.dumps({
+                  "senderPublicKey": self.publicKey,
+                  "dbKey": db_key,
+                  "dataType": db_data_type,
+                  "data": db_data,
+                  "fee": tx_fee,
+                  "feeScale": fee_scale,
+                  "timestamp": timestamp,
+                  "signature": signature
+            })
+
+            return self.wrapper.request('/database/broadcast/put', data)
