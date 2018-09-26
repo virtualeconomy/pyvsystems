@@ -250,6 +250,14 @@ class Address(object):
             logging.error(ex)
             return 0
 
+    def balance_detail(self):
+        try:
+            resp = self.wrapper.request('/addresses/balance/details/%s' % self.address)
+            return resp
+        except Exception as ex:
+            logging.error(ex)
+            return 0
+
     def _generate(self, public_key='', private_key='', seed='', nonce=0):
         self.seed = seed
         self.nonce = nonce
@@ -491,14 +499,8 @@ class Address(object):
             msg = 'Public key and address required'
             logging.error(msg)
             pyvee.throw_error(msg)
-        balance = self.balance()
-        effective_balance = self.effective_balance()
-        info = {
-            "address": self.address,
-            "publicKey": self.publicKey,
-            "balance": balance,
-            "effectiveBalance": effective_balance,
-        }
+        info = self.balance_detail()
+        info["publicKey"] = self.publicKey
         return info
 
     def get_tx_history(self, limit=100, type_filter=PAYMENT_TX_TYPE):
