@@ -223,7 +223,6 @@ class Address(object):
             self.nonce = 0
         else:
             self._generate(nonce=nonce)
-        # self.aliases = self.aliases()
 
     def __str__(self):
         if not self.address:
@@ -250,13 +249,6 @@ class Address(object):
         except Exception as ex:
             logging.error(ex)
             return 0
-
-    # def aliases(self):
-    #     a = self.wrapper.request('/alias/by-address/%s' % self.address)
-    #     if type(a) == list:
-    #         for i in range(len(a)):
-    #             a[i] = a[i][8:]
-    #     return a
 
     def _generate(self, public_key='', private_key='', seed='', nonce=0):
         self.seed = seed
