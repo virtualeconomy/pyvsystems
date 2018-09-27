@@ -499,8 +499,8 @@ class Address(object):
             msg = 'Address required'
             logging.error(msg)
             pyvee.throw_error(msg)
-        elif limit > 1000:
-            msg = 'Limit cannot greater than 1000.'
+        elif limit > 10000:
+            msg = 'Too big sequences requested (Max limitation is 10000).'
             logging.error(msg)
             pyvee.throw_error(msg)
         url = '/transactions/address/{}/limit/{}'.format(self.address, limit)
