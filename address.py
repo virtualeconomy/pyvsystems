@@ -241,15 +241,6 @@ class Address(object):
             logging.error(ex)
             return 0
 
-    def effective_balance(self, confirmations=0):
-        try:
-            confirmations_str = '' if confirmations == 0 else '/%d' % confirmations
-            resp = self.wrapper.request('/addresses/effectiveBalance/%s%s' % (self.address, confirmations_str))
-            return resp['balance']
-        except Exception as ex:
-            logging.error(ex)
-            return 0
-
     def balance_detail(self):
         try:
             resp = self.wrapper.request('/addresses/balance/details/%s' % self.address)
