@@ -300,7 +300,7 @@ class Address(object):
         else:
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
-            sData = struct.pack(">H", PAYMENT_TX_TYPE) + \
+            sData = struct.pack(">B", PAYMENT_TX_TYPE) + \
                     struct.pack(">Q", timestamp) + \
                     struct.pack(">Q", amount) + \
                     struct.pack(">Q", tx_fee) + \
@@ -339,7 +339,7 @@ class Address(object):
         else:
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
-            sData = struct.pack(">H", LEASE_TX_TYPE) + \
+            sData = struct.pack(">B", LEASE_TX_TYPE) + \
                     base58.b58decode(recipient.address) + \
                     struct.pack(">Q", amount) + \
                     struct.pack(">Q", tx_fee) + \
@@ -370,7 +370,7 @@ class Address(object):
         else:
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
-            sData = struct.pack(">H", LEASE_CANCEL_TX_TYPE) + \
+            sData = struct.pack(">B", LEASE_CANCEL_TX_TYPE) + \
                     struct.pack(">Q", tx_fee) + \
                     struct.pack(">H", fee_scale) + \
                     struct.pack(">Q", timestamp) + \
@@ -399,7 +399,7 @@ class Address(object):
         else:
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
-            sData = struct.pack(">H", CONTEND_SLOT_TX_TYPE) + \
+            sData = struct.pack(">B", CONTEND_SLOT_TX_TYPE) + \
                     struct.pack(">I", slot_id) + \
                     struct.pack(">Q", tx_fee) + \
                     struct.pack(">H", fee_scale) + \
@@ -428,7 +428,7 @@ class Address(object):
         else:
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
-            sData = struct.pack(">H", RELEASE_SLOT_TX_TYPE) + \
+            sData = struct.pack(">B", RELEASE_SLOT_TX_TYPE) + \
                     struct.pack(">I", slot_id) + \
                     struct.pack(">Q", tx_fee) + \
                     struct.pack(">H", fee_scale) + \
@@ -462,7 +462,7 @@ class Address(object):
                 data_type_id = b'\x01'
             else:
                 raise ValueError('Unsupported data type: {}'.format(db_data_type))
-            sData = struct.pack(">H", DBPUT_TX_TYPE) + \
+            sData = struct.pack(">B", DBPUT_TX_TYPE) + \
                     struct.pack(">H", len(db_key)) + \
                     str2bytes(db_key) + \
                     struct.pack(">H", len(db_data)+1) + \
