@@ -223,7 +223,6 @@ class Address(object):
             self.nonce = 0
         else:
             self._generate(nonce=nonce)
-        self.aliases = self.aliases()
 
     def __str__(self):
         if not self.address:
@@ -242,12 +241,13 @@ class Address(object):
             logging.error(ex)
             return 0
 
-    def aliases(self):
-        a = self.wrapper.request('/alias/by-address/%s' % self.address)
-        if type(a) == list:
-            for i in range(len(a)):
-                a[i] = a[i][8:]
-        return a
+    def balance_detail(self):
+        try:
+            resp = self.wrapper.request('/addresses/balance/details/%s' % self.address)
+            return resp
+        except Exception as ex:
+            logging.error(ex)
+            return 0
 
     def _generate(self, public_key='', private_key='', seed='', nonce=0):
         self.seed = seed
@@ -300,7 +300,7 @@ class Address(object):
         else:
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
-            sData = b'\x02' + \
+            sData = struct.pack(">B", PAYMENT_TX_TYPE) + \
                     struct.pack(">Q", timestamp) + \
                     struct.pack(">Q", amount) + \
                     struct.pack(">Q", tx_fee) + \
@@ -339,7 +339,7 @@ class Address(object):
         else:
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
-            sData = b'\x03' + \
+            sData = struct.pack(">B", LEASE_TX_TYPE) + \
                     base58.b58decode(recipient.address) + \
                     struct.pack(">Q", amount) + \
                     struct.pack(">Q", tx_fee) + \
@@ -370,7 +370,7 @@ class Address(object):
         else:
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
-            sData = b'\x04' + \
+            sData = struct.pack(">B", LEASE_CANCEL_TX_TYPE) + \
                     struct.pack(">Q", tx_fee) + \
                     struct.pack(">H", fee_scale) + \
                     struct.pack(">Q", timestamp) + \
@@ -399,7 +399,7 @@ class Address(object):
         else:
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
-            sData = b'\x06' + \
+            sData = struct.pack(">B", CONTEND_SLOT_TX_TYPE) + \
                     struct.pack(">I", slot_id) + \
                     struct.pack(">Q", tx_fee) + \
                     struct.pack(">H", fee_scale) + \
@@ -428,7 +428,7 @@ class Address(object):
         else:
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
-            sData = b'\x07' + \
+            sData = struct.pack(">B", RELEASE_SLOT_TX_TYPE) + \
                     struct.pack(">I", slot_id) + \
                     struct.pack(">Q", tx_fee) + \
                     struct.pack(">H", fee_scale) + \
@@ -462,7 +462,7 @@ class Address(object):
                 data_type_id = b'\x01'
             else:
                 raise ValueError('Unsupported data type: {}'.format(db_data_type))
-            sData = b'\x0a' + \
+            sData = struct.pack(">B", DBPUT_TX_TYPE) + \
                     struct.pack(">H", len(db_key)) + \
                     str2bytes(db_key) + \
                     struct.pack(">H", len(db_data)+1) + \
@@ -484,3 +484,27 @@ class Address(object):
             })
 
             return self.wrapper.request('/database/broadcast/put', data)
+
+    def get_info(self):
+        if not (self.address and self.publicKey):
+            msg = 'Public key and address required'
+            logging.error(msg)
+            pyvee.throw_error(msg)
+        info = self.balance_detail()
+        info["publicKey"] = self.publicKey
+        return info
+
+    def get_tx_history(self, limit=100, type_filter=PAYMENT_TX_TYPE):
+        if not self.address:
+            msg = 'Address required'
+            logging.error(msg)
+            pyvee.throw_error(msg)
+        elif limit > 10000:
+            msg = 'Too big sequences requested (Max limitation is 10000).'
+            logging.error(msg)
+            pyvee.throw_error(msg)
+        url = '/transactions/address/{}/limit/{}'.format(self.address, limit)
+        resp = self.wrapper.request(url)
+        if isinstance(resp, list) and type_filter:
+            resp = [tx for tx in resp[0] if tx['type'] == type_filter]
+        return resp
