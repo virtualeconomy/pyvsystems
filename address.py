@@ -315,7 +315,6 @@ class Address(object):
                 "timestamp": timestamp,
                 "signature": signature
             })
-
             return self.wrapper.request('/spos/broadcast/release', data)
 
     def dbput(self, db_key, db_data, db_data_type="ByteArray", tx_fee=DEFAULT_DBPUT_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
@@ -371,7 +370,7 @@ class Address(object):
     def get_info(self):
         if not (self.address and self.publicKey):
             msg = 'Address required'
-            pyvee.throw_error(msg, MissingAddressKeyException)
+            pyvee.throw_error(msg, MissingAddressException)
             return None
         if not self.publicKey:
             msg = 'Public key and address required'
@@ -388,7 +387,7 @@ class Address(object):
     def get_tx_history(self, limit=100, type_filter=PAYMENT_TX_TYPE):
         if not self.address:
             msg = 'Address required'
-            pyvee.throw_error(msg, MissingAddressKeyException)
+            pyvee.throw_error(msg, MissingAddressException)
         elif limit > MAX_TX_HISTORY_LIMIT:
             msg = 'Too big sequences requested (Max limitation is %d).' % MAX_TX_HISTORY_LIMIT
             pyvee.throw_error(msg, InvalidParameterException)

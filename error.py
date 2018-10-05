@@ -18,7 +18,7 @@ class MissingPublicKeyException(PyVeeException):
     pass
 
 
-class MissingAddressKeyException(PyVeeException):
+class MissingAddressException(PyVeeException):
     pass
 
 

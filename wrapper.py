@@ -1,5 +1,8 @@
 import logging
 import requests
+from requests.exceptions import RequestException
+from .error import NetworkException
+
 
 class Wrapper(object):
 
@@ -13,11 +16,15 @@ class Wrapper(object):
         if self.api_key:
             headers['api_key'] = self.api_key
         header_str = ' '.join(['--header \'{}: {}\''.format(k, v) for k, v in headers.items()])
-        if post_data:
-            headers['Content-Type'] = 'application/json'
-            data_str = '-d {}'.format(post_data)
-            logging.info("curl -X POST %s %s %s" % (header_str, data_str, url))
-            return requests.post(url, data=post_data, headers=headers).json()
-        else:
-            logging.info("curl -X GET %s %s" % (header_str, url))
-            return requests.get(url, headers=headers).json()
+        try:
+            if post_data:
+                headers['Content-Type'] = 'application/json'
+                data_str = '-d {}'.format(post_data)
+                logging.info("curl -X POST %s %s %s" % (header_str, data_str, url))
+                return requests.post(url, data=post_data, headers=headers).json()
+            else:
+                logging.info("curl -X GET %s %s" % (header_str, url))
+                return requests.get(url, headers=headers).json()
+        except RequestException as ex:
+            msg = 'Failed to get response: {}'.format(ex)
+            raise NetworkException(msg)
