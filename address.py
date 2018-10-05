@@ -198,8 +198,8 @@ class Address(object):
     def __init__(self, chain=pyvee.default_chain(), address='', public_key='', private_key='', seed='', alias='', nonce=0):
         self.chain = chain
         self.wrapper = chain.api_wrapper
-        if nonce < 0 or nonce > 4294967295:
-            raise ValueError('Nonce must be between 0 and 4294967295')
+        if nonce < 0 or nonce > MAX_NONCE:
+            raise ValueError('Nonce must be between 0 and %d' % MAX_NONCE)
         if seed:
             self._generate(seed=seed, nonce=nonce)
         elif private_key:
@@ -247,7 +247,7 @@ class Address(object):
             return resp
         except Exception as ex:
             logging.error(ex)
-            return 0
+            return None
 
     def _generate(self, public_key='', private_key='', seed='', nonce=0):
         self.seed = seed
@@ -283,14 +283,25 @@ class Address(object):
         if privKey != "":
             self.privateKey = bytes2str(base58.b58encode(privKey))
 
-    def send_payment(self, recipient, amount, attachment='', tx_fee=DEFAULT_TX_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
+    def send_payment(self, recipient, amount, attachment='', tx_fee=DEFAULT_PAYMENT_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
         if not self.privateKey:
             msg = 'Private key required'
             logging.error(msg)
             pyvee.throw_error(msg)
-
         elif amount <= 0:
             msg = 'Amount must be > 0'
+            logging.error(msg)
+            pyvee.throw_error(msg)
+        elif tx_fee < DEFAULT_PAYMENT_FEE:
+            msg = 'Transaction fee must be >= %d' % DEFAULT_PAYMENT_FEE
+            logging.error(msg)
+            pyvee.throw_error(msg)
+        elif len(attachment) > MAX_ATTACHMENT_SIZE:
+            msg = 'Attachment length must be <= %d' % MAX_ATTACHMENT_SIZE
+            logging.error(msg)
+            pyvee.throw_error(msg)
+        elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
+            msg = 'Wrong fee scale (currently fee scale must be %d).' % DEFAULT_FEE_SCALE
             logging.error(msg)
             pyvee.throw_error(msg)
         elif self.balance() < amount + tx_fee:
@@ -332,6 +343,14 @@ class Address(object):
             msg = 'Amount must be > 0'
             logging.error(msg)
             pyvee.throw_error(msg)
+        elif tx_fee < DEFAULT_LEASE_FEE:
+            msg = 'Transaction fee must be >= %d' % DEFAULT_LEASE_FEE
+            logging.error(msg)
+            pyvee.throw_error(msg)
+        elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
+            msg = 'Wrong fee scale (currently fee scale must be %d).' % DEFAULT_FEE_SCALE
+            logging.error(msg)
+            pyvee.throw_error(msg)
         elif self.balance() < amount + tx_fee:
             msg = 'Insufficient VEE balance'
             logging.error(msg)
@@ -359,8 +378,21 @@ class Address(object):
             return req
 
     def lease_cancel(self, lease_id, tx_fee=DEFAULT_CANCEL_LEASE_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
+        decode_lease_id = base58.b58decode(lease_id)
         if not self.privateKey:
             msg = 'Private key required'
+            logging.error(msg)
+            pyvee.throw_error(msg)
+        elif tx_fee < DEFAULT_CANCEL_LEASE_FEE:
+            msg = 'Transaction fee must be > %d' % DEFAULT_CANCEL_LEASE_FEE
+            logging.error(msg)
+            pyvee.throw_error(msg)
+        elif len(decode_lease_id) != LEASE_TX_ID_BYTES:
+            msg = 'Invalid lease transaction id'
+            logging.error(msg)
+            pyvee.throw_error(msg)
+        elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
+            msg = 'Wrong fee scale (currently fee scale must be %d).' % DEFAULT_FEE_SCALE
             logging.error(msg)
             pyvee.throw_error(msg)
         elif self.balance() < tx_fee:
@@ -374,7 +406,7 @@ class Address(object):
                     struct.pack(">Q", tx_fee) + \
                     struct.pack(">H", fee_scale) + \
                     struct.pack(">Q", timestamp) + \
-                    base58.b58decode(lease_id)
+                    decode_lease_id
             signature = bytes2str(sign(self.privateKey, sData))
             data = json.dumps({
                 "senderPublicKey": self.publicKey,
@@ -392,11 +424,11 @@ class Address(object):
             msg = 'Private key required'
             logging.error(msg)
             pyvee.throw_error(msg)
-        elif self.balance() < tx_fee:
-            msg = 'Insufficient VEE balance'
+        elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
+            msg = 'Wrong fee scale (currently fee scale must be %d).' % DEFAULT_FEE_SCALE
             logging.error(msg)
             pyvee.throw_error(msg)
-        else:
+        elif self.check_contend(slot_id, tx_fee):
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
             sData = struct.pack(">B", CONTEND_SLOT_TX_TYPE) + \
@@ -413,12 +445,54 @@ class Address(object):
                 "timestamp": timestamp,
                 "signature": signature
             })
-
             return self.wrapper.request('/spos/broadcast/contend', data)
+
+    def check_contend(self, slot_id, tx_fee):
+        if tx_fee < DEFAULT_CONTEND_SLOT_FEE:
+            msg = 'Transaction fee must be >= %d' % DEFAULT_CONTEND_SLOT_FEE
+            logging.error(msg)
+            pyvee.throw_error(msg)
+            return False
+        if slot_id >= 60 or slot_id < 0:
+            msg = 'Slot id must be in 0 to 59'
+            logging.error(msg)
+            pyvee.throw_error(msg)
+            return False
+        balance_detail = self.get_info()
+        min_effective_balance = MIN_CONTEND_SLOT_BALANCE + tx_fee
+        if balance_detail["effective"] < min_effective_balance:
+            msg = 'Insufficient VEE balance. (The effective balance must be >= %d)' % min_effective_balance
+            logging.error(msg)
+            pyvee.throw_error(msg)
+            return False
+        slot_info = self.chain.slot_info(slot_id)
+        if not slot_info or slot_info.get("mintingAverageBalance") is None:
+            msg = 'Failed to get slot minting average balance'
+            logging.error(msg)
+            pyvee.throw_error(msg)
+            return False
+        elif slot_info["mintingAverageBalance"] > balance_detail["mintingAverage"]:
+            msg = 'The minting average balance of slot %d is greater than you. You will contend this slot failed.' % slot_id
+            logging.error(msg)
+            pyvee.throw_error(msg)
+            return False
+        return True
 
     def release(self, slot_id, tx_fee=DEFAULT_RELEASE_SLOT_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
         if not self.privateKey:
             msg = 'Private key required'
+            logging.error(msg)
+            pyvee.throw_error(msg)
+        elif tx_fee < DEFAULT_RELEASE_SLOT_FEE:
+            msg = 'Transaction fee must be >= %d' % DEFAULT_RELEASE_SLOT_FEE
+            logging.error(msg)
+            pyvee.throw_error(msg)
+        elif slot_id >= 60 or slot_id < 0:
+            msg = 'Slot id must be in 0 to 59'
+            logging.error(msg)
+            pyvee.throw_error(msg)
+        elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
+            msg = 'Wrong fee scale (currently fee scale must be %d).' % DEFAULT_FEE_SCALE
             logging.error(msg)
             pyvee.throw_error(msg)
         elif self.balance() < tx_fee:
@@ -450,6 +524,18 @@ class Address(object):
             msg = 'Private key required'
             logging.error(msg)
             pyvee.throw_error(msg)
+        elif tx_fee < DEFAULT_DBPUT_FEE:
+            msg = 'Transaction fee must be >= %d' % DEFAULT_DBPUT_FEE
+            logging.error(msg)
+            pyvee.throw_error(msg)
+        elif len(db_key) > MAX_DB_KEY_SIZE or len(db_key) < MIN_DB_KEY_SIZE:
+            msg = 'DB key length must be greater than %d and smaller than %d' % (MIN_DB_KEY_SIZE, MAX_ATTACHMENT_SIZE)
+            logging.error(msg)
+            pyvee.throw_error(msg)
+        elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
+            msg = 'Wrong fee scale (currently fee scale must be %d).' % DEFAULT_FEE_SCALE
+            logging.error(msg)
+            pyvee.throw_error(msg)
         elif self.balance() < tx_fee:
             msg = 'Insufficient VEE balance'
             logging.error(msg)
@@ -460,8 +546,12 @@ class Address(object):
             # "ByteArray" is the only supported type in first version
             if db_data_type == "ByteArray":
                 data_type_id = b'\x01'
+            # TODO: add more DB data type here
             else:
-                raise ValueError('Unsupported data type: {}'.format(db_data_type))
+                msg = 'Unsupported data type: {}'.format(db_data_type)
+                logging.error(msg)
+                pyvee.throw_error(msg)
+                return
             sData = struct.pack(">B", DBPUT_TX_TYPE) + \
                     struct.pack(">H", len(db_key)) + \
                     str2bytes(db_key) + \
@@ -491,20 +581,26 @@ class Address(object):
             logging.error(msg)
             pyvee.throw_error(msg)
         info = self.balance_detail()
-        info["publicKey"] = self.publicKey
-        return info
+        if not info:
+            msg = 'Failed to get balance detail'
+            logging.error(msg)
+            pyvee.throw_error(msg)
+        else:
+            info["publicKey"] = self.publicKey
+            return info
 
     def get_tx_history(self, limit=100, type_filter=PAYMENT_TX_TYPE):
         if not self.address:
             msg = 'Address required'
             logging.error(msg)
             pyvee.throw_error(msg)
-        elif limit > 10000:
-            msg = 'Too big sequences requested (Max limitation is 10000).'
+        elif limit > MAX_TX_HISTORY_LIMIT:
+            msg = 'Too big sequences requested (Max limitation is %d).' % MAX_TX_HISTORY_LIMIT
             logging.error(msg)
             pyvee.throw_error(msg)
-        url = '/transactions/address/{}/limit/{}'.format(self.address, limit)
-        resp = self.wrapper.request(url)
-        if isinstance(resp, list) and type_filter:
-            resp = [tx for tx in resp[0] if tx['type'] == type_filter]
-        return resp
+        else:
+            url = '/transactions/address/{}/limit/{}'.format(self.address, limit)
+            resp = self.wrapper.request(url)
+            if isinstance(resp, list) and type_filter:
+                resp = [tx for tx in resp[0] if tx['type'] == type_filter]
+            return resp
