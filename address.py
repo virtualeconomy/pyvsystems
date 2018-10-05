@@ -288,6 +288,10 @@ class Address(object):
             msg = 'Private key required'
             logging.error(msg)
             pyvee.throw_error(msg)
+        if not self.chain.validate_address(recipient.address):
+            msg = 'Invalid recipient address'
+            logging.error(msg)
+            pyvee.throw_error(msg)
         elif amount <= 0:
             msg = 'Amount must be > 0'
             logging.error(msg)
