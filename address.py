@@ -301,7 +301,7 @@ class Address(object):
             logging.error(msg)
             pyvee.throw_error(msg)
         elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
-            msg = 'Wrong fee scale (currently fee scale must be %d).' % DEFAULT_FEE_SCALE
+            msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
             logging.error(msg)
             pyvee.throw_error(msg)
         elif self.balance() < amount + tx_fee:
@@ -339,6 +339,10 @@ class Address(object):
             msg = 'Private key required'
             logging.error(msg)
             pyvee.throw_error(msg)
+        if not self.chain.validate_address(recipient.address):
+            msg = 'Invalid recipient address'
+            logging.error(msg)
+            pyvee.throw_error(msg)
         elif amount <= 0:
             msg = 'Amount must be > 0'
             logging.error(msg)
@@ -348,7 +352,7 @@ class Address(object):
             logging.error(msg)
             pyvee.throw_error(msg)
         elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
-            msg = 'Wrong fee scale (currently fee scale must be %d).' % DEFAULT_FEE_SCALE
+            msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
             logging.error(msg)
             pyvee.throw_error(msg)
         elif self.balance() < amount + tx_fee:
@@ -392,7 +396,7 @@ class Address(object):
             logging.error(msg)
             pyvee.throw_error(msg)
         elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
-            msg = 'Wrong fee scale (currently fee scale must be %d).' % DEFAULT_FEE_SCALE
+            msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
             logging.error(msg)
             pyvee.throw_error(msg)
         elif self.balance() < tx_fee:
@@ -425,7 +429,7 @@ class Address(object):
             logging.error(msg)
             pyvee.throw_error(msg)
         elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
-            msg = 'Wrong fee scale (currently fee scale must be %d).' % DEFAULT_FEE_SCALE
+            msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
             logging.error(msg)
             pyvee.throw_error(msg)
         elif self.check_contend(slot_id, tx_fee):
@@ -471,8 +475,9 @@ class Address(object):
             logging.error(msg)
             pyvee.throw_error(msg)
             return False
-        elif slot_info["mintingAverageBalance"] > balance_detail["mintingAverage"]:
-            msg = 'The minting average balance of slot %d is greater than you. You will contend this slot failed.' % slot_id
+        elif slot_info["mintingAverageBalance"] >= balance_detail["mintingAverage"]:
+            msg = 'The minting average balance of slot %d is greater than or equals to yours. ' \
+                  'You will contend this slot failed.' % slot_id
             logging.error(msg)
             pyvee.throw_error(msg)
             return False
@@ -492,7 +497,7 @@ class Address(object):
             logging.error(msg)
             pyvee.throw_error(msg)
         elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
-            msg = 'Wrong fee scale (currently fee scale must be %d).' % DEFAULT_FEE_SCALE
+            msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
             logging.error(msg)
             pyvee.throw_error(msg)
         elif self.balance() < tx_fee:
@@ -533,7 +538,7 @@ class Address(object):
             logging.error(msg)
             pyvee.throw_error(msg)
         elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
-            msg = 'Wrong fee scale (currently fee scale must be %d).' % DEFAULT_FEE_SCALE
+            msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
             logging.error(msg)
             pyvee.throw_error(msg)
         elif self.balance() < tx_fee:
