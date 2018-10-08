@@ -96,9 +96,7 @@ class Address(object):
             else:
                 privKey = base58.b58decode(private_key)
             pubKey = curve.generatePublicKey(privKey)
-        unhashedAddress = chr(self.chain.address_version) + str(self.chain.chain_id) + hashChain(pubKey)[0:20]
-        addressHash = hashChain(str2bytes(unhashedAddress))[0:4]
-        self.address = bytes2str(base58.b58encode(str2bytes(unhashedAddress + addressHash)))
+        self.address = self.chain.public_key_to_address(pubKey)
         self.publicKey = bytes2str(base58.b58encode(pubKey))
         if privKey != "":
             self.privateKey = bytes2str(base58.b58encode(privKey))
