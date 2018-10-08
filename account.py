@@ -10,7 +10,7 @@ import base58
 import logging
 
 
-class Address(object):
+class Account(object):
     def __init__(self, chain=pyvee.default_chain(), address='', public_key='', private_key='', seed='', alias='', nonce=0):
         self.chain = chain
         self.wrapper = chain.api_wrapper

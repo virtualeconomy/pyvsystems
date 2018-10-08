@@ -47,4 +47,4 @@ def set_throw_on_error(throw=True):
     THROW_EXCEPTION_ON_ERROR = throw
 
 
-from .address import *
+from .account import *
