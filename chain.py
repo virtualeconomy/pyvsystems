@@ -3,6 +3,7 @@ import logging
 from .crypto import hashChain, bytes2str, str2bytes
 from .setting import ADDRESS_LENGTH, ADDRESS_CHECKSUM_LENGTH
 
+
 class Chain(object):
 
     def __init__(self, chain_name, chain_id, address_version, api_wrapper):
@@ -39,3 +40,9 @@ class Chain(object):
         else:
             return True
         return False
+
+    def public_key_to_address(self, public_key):
+        unhashedAddress = chr(self.address_version) + str(self.chain_id) + hashChain(public_key)[0:20]
+        addressHash = hashChain(str2bytes(unhashedAddress))[0:4]
+        address = bytes2str(base58.b58encode(str2bytes(unhashedAddress + addressHash)))
+        return address

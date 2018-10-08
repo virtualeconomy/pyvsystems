@@ -10,7 +10,7 @@ import base58
 import logging
 
 
-class Address(object):
+class Account(object):
     def __init__(self, chain=pyvee.default_chain(), address='', public_key='', private_key='', seed='', alias='', nonce=0):
         self.chain = chain
         self.wrapper = chain.api_wrapper
@@ -96,9 +96,7 @@ class Address(object):
             else:
                 privKey = base58.b58decode(private_key)
             pubKey = curve.generatePublicKey(privKey)
-        unhashedAddress = chr(self.chain.address_version) + str(self.chain.chain_id) + hashChain(pubKey)[0:20]
-        addressHash = hashChain(str2bytes(unhashedAddress))[0:4]
-        self.address = bytes2str(base58.b58encode(str2bytes(unhashedAddress + addressHash)))
+        self.address = self.chain.public_key_to_address(pubKey)
         self.publicKey = bytes2str(base58.b58encode(pubKey))
         if privKey != "":
             self.privateKey = bytes2str(base58.b58encode(privKey))
@@ -315,7 +313,6 @@ class Address(object):
                 "timestamp": timestamp,
                 "signature": signature
             })
-
             return self.wrapper.request('/spos/broadcast/release', data)
 
     def dbput(self, db_key, db_data, db_data_type="ByteArray", tx_fee=DEFAULT_DBPUT_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
@@ -371,7 +368,7 @@ class Address(object):
     def get_info(self):
         if not (self.address and self.publicKey):
             msg = 'Address required'
-            pyvee.throw_error(msg, MissingAddressKeyException)
+            pyvee.throw_error(msg, MissingAddressException)
             return None
         if not self.publicKey:
             msg = 'Public key and address required'
@@ -388,7 +385,7 @@ class Address(object):
     def get_tx_history(self, limit=100, type_filter=PAYMENT_TX_TYPE):
         if not self.address:
             msg = 'Address required'
-            pyvee.throw_error(msg, MissingAddressKeyException)
+            pyvee.throw_error(msg, MissingAddressException)
         elif limit > MAX_TX_HISTORY_LIMIT:
             msg = 'Too big sequences requested (Max limitation is %d).' % MAX_TX_HISTORY_LIMIT
             pyvee.throw_error(msg, InvalidParameterException)
