@@ -66,23 +66,23 @@ For now,
 ### address object
 1. constructed by seed
     ```python
-    from pyvee import Address
-    my_address = Address(chain=ts_chain, seed='<your seed>', nonce=0)
+    from pyvee import Account
+    my_address = Account(chain=ts_chain, seed='<your seed>', nonce=0)
     ```
 2. constructed by private key
     ```python
-    from pyvee import Address
-    my_address = Address(chain=ts_chain, private_key='<your base58 private key>')
+    from pyvee import Account
+    my_address = Account(chain=ts_chain, private_key='<your base58 private key>')
     ```
 3. constructed by public key
     ```python
-    from pyvee import Address
-    recipient = Address(chain=ts_chain, public_key='<base58 public key>')
+    from pyvee import Account
+    recipient = Account(chain=ts_chain, public_key='<base58 public key>')
     ```
 4. constructed by wallet address
     ```python
-    from pyvee import Address
-    recipient = Address(chain=ts_chain, address='<base58 wallet address>')
+    from pyvee import Account
+    recipient = Account(chain=ts_chain, address='<base58 wallet address>')
     ```
  
 ### address api list
