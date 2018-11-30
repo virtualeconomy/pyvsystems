@@ -18,10 +18,10 @@ logging.getLogger('').addHandler(console)
 
 from .setting import *
 from .wrapper import *
-from .error import PyVeeException
+from .error import PyVSYSException
 
 
-def throw_error(msg, exception=PyVeeException):
+def throw_error(msg, exception=PyVSYSException):
     logging.error(msg)
     if THROW_EXCEPTION_ON_ERROR:
         raise exception(msg)

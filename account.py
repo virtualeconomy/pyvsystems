@@ -2,7 +2,7 @@ from .setting import *
 from .crypto import *
 from .error import *
 from .words import WORDS
-import pyvee
+import pyvsys
 import time
 import struct
 import json
@@ -11,7 +11,7 @@ import logging
 
 
 class Account(object):
-    def __init__(self, chain=pyvee.default_chain(), address='', public_key='', private_key='', seed='', alias='', nonce=0):
+    def __init__(self, chain=pyvsys.default_chain(), address='', public_key='', private_key='', seed='', alias='', nonce=0):
         self.chain = chain
         self.wrapper = chain.api_wrapper
         if nonce < 0 or nonce > MAX_NONCE:
@@ -56,7 +56,7 @@ class Account(object):
             return resp['balance']
         except Exception as ex:
             msg = "Failed to get balance. ({})".format(ex)
-            pyvee.throw_error(msg, NetworkException)
+            pyvsys.throw_error(msg, NetworkException)
             return 0
 
     def balance_detail(self):
@@ -66,7 +66,7 @@ class Account(object):
             return resp
         except Exception as ex:
             msg = "Failed to get balance detail. ({})".format(ex)
-            pyvee.throw_error(msg, NetworkException)
+            pyvsys.throw_error(msg, NetworkException)
             return None
 
     def _generate(self, public_key='', private_key='', seed='', nonce=0):
@@ -104,25 +104,25 @@ class Account(object):
     def send_payment(self, recipient, amount, attachment='', tx_fee=DEFAULT_PAYMENT_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
         if not self.privateKey:
             msg = 'Private key required'
-            pyvee.throw_error(msg, MissingPrivateKeyException)
+            pyvsys.throw_error(msg, MissingPrivateKeyException)
         if not self.chain.validate_address(recipient.address):
             msg = 'Invalid recipient address'
-            pyvee.throw_error(msg, InvalidAddressException)
+            pyvsys.throw_error(msg, InvalidAddressException)
         elif amount <= 0:
             msg = 'Amount must be > 0'
-            pyvee.throw_error(msg, InvalidParameterException)
+            pyvsys.throw_error(msg, InvalidParameterException)
         elif tx_fee < DEFAULT_PAYMENT_FEE:
             msg = 'Transaction fee must be >= %d' % DEFAULT_PAYMENT_FEE
-            pyvee.throw_error(msg, InvalidParameterException)
+            pyvsys.throw_error(msg, InvalidParameterException)
         elif len(attachment) > MAX_ATTACHMENT_SIZE:
             msg = 'Attachment length must be <= %d' % MAX_ATTACHMENT_SIZE
-            pyvee.throw_error(msg, InvalidParameterException)
+            pyvsys.throw_error(msg, InvalidParameterException)
         elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
             msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
-            pyvee.throw_error(msg, InvalidParameterException)
+            pyvsys.throw_error(msg, InvalidParameterException)
         elif self.balance() < amount + tx_fee:
-            msg = 'Insufficient VEE balance'
-            pyvee.throw_error(msg, InsufficientBalanceException)
+            msg = 'Insufficient VSYS balance'
+            pyvsys.throw_error(msg, InsufficientBalanceException)
         else:
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
@@ -152,22 +152,22 @@ class Account(object):
     def lease(self, recipient, amount, tx_fee=DEFAULT_LEASE_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
         if not self.privateKey:
             msg = 'Private key required'
-            pyvee.throw_error(msg, MissingPrivateKeyException)
+            pyvsys.throw_error(msg, MissingPrivateKeyException)
         if not self.chain.validate_address(recipient.address):
             msg = 'Invalid recipient address'
-            pyvee.throw_error(msg, InvalidAddressException)
+            pyvsys.throw_error(msg, InvalidAddressException)
         elif amount <= 0:
             msg = 'Amount must be > 0'
-            pyvee.throw_error(msg, InvalidParameterException)
+            pyvsys.throw_error(msg, InvalidParameterException)
         elif tx_fee < DEFAULT_LEASE_FEE:
             msg = 'Transaction fee must be >= %d' % DEFAULT_LEASE_FEE
-            pyvee.throw_error(msg, InvalidParameterException)
+            pyvsys.throw_error(msg, InvalidParameterException)
         elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
             msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
-            pyvee.throw_error(msg, InvalidParameterException)
+            pyvsys.throw_error(msg, InvalidParameterException)
         elif self.balance() < amount + tx_fee:
-            msg = 'Insufficient VEE balance'
-            pyvee.throw_error(msg, InsufficientBalanceException)
+            msg = 'Insufficient VSYS balance'
+            pyvsys.throw_error(msg, InsufficientBalanceException)
         else:
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
@@ -194,19 +194,19 @@ class Account(object):
         decode_lease_id = base58.b58decode(lease_id)
         if not self.privateKey:
             msg = 'Private key required'
-            pyvee.throw_error(msg, MissingPrivateKeyException)
+            pyvsys.throw_error(msg, MissingPrivateKeyException)
         elif tx_fee < DEFAULT_CANCEL_LEASE_FEE:
             msg = 'Transaction fee must be > %d' % DEFAULT_CANCEL_LEASE_FEE
-            pyvee.throw_error(msg, InvalidParameterException)
+            pyvsys.throw_error(msg, InvalidParameterException)
         elif len(decode_lease_id) != LEASE_TX_ID_BYTES:
             msg = 'Invalid lease transaction id'
-            pyvee.throw_error(msg, InvalidParameterException)
+            pyvsys.throw_error(msg, InvalidParameterException)
         elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
             msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
-            pyvee.throw_error(msg, InvalidParameterException)
+            pyvsys.throw_error(msg, InvalidParameterException)
         elif self.balance() < tx_fee:
-            msg = 'Insufficient VEE balance'
-            pyvee.throw_error(msg, InsufficientBalanceException)
+            msg = 'Insufficient VSYS balance'
+            pyvsys.throw_error(msg, InsufficientBalanceException)
         else:
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
@@ -230,10 +230,10 @@ class Account(object):
     def contend(self, slot_id, tx_fee=DEFAULT_CONTEND_SLOT_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
         if not self.privateKey:
             msg = 'Private key required'
-            pyvee.throw_error(msg, MissingPrivateKeyException)
+            pyvsys.throw_error(msg, MissingPrivateKeyException)
         elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
             msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
-            pyvee.throw_error(msg, InvalidParameterException)
+            pyvsys.throw_error(msg, InvalidParameterException)
         elif self.check_contend(slot_id, tx_fee):
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
@@ -256,46 +256,46 @@ class Account(object):
     def check_contend(self, slot_id, tx_fee):
         if tx_fee < DEFAULT_CONTEND_SLOT_FEE:
             msg = 'Transaction fee must be >= %d' % DEFAULT_CONTEND_SLOT_FEE
-            pyvee.throw_error(msg, InvalidParameterException)
+            pyvsys.throw_error(msg, InvalidParameterException)
             return False
         if slot_id >= 60 or slot_id < 0:
             msg = 'Slot id must be in 0 to 59'
-            pyvee.throw_error(msg, InvalidParameterException)
+            pyvsys.throw_error(msg, InvalidParameterException)
             return False
         balance_detail = self.get_info()
         min_effective_balance = MIN_CONTEND_SLOT_BALANCE + tx_fee
         if balance_detail["effective"] < min_effective_balance:
-            msg = 'Insufficient VEE balance. (The effective balance must be >= %d)' % min_effective_balance
-            pyvee.throw_error(msg, InvalidParameterException)
+            msg = 'Insufficient VSYS balance. (The effective balance must be >= %d)' % min_effective_balance
+            pyvsys.throw_error(msg, InvalidParameterException)
             return False
         slot_info = self.chain.slot_info(slot_id)
         if not slot_info or slot_info.get("mintingAverageBalance") is None:
             msg = 'Failed to get slot minting average balance'
-            pyvee.throw_error(msg, NetworkException)
+            pyvsys.throw_error(msg, NetworkException)
             return False
         elif slot_info["mintingAverageBalance"] >= balance_detail["mintingAverage"]:
             msg = 'The minting average balance of slot %d is greater than or equals to yours. ' \
                   'You will contend this slot failed.' % slot_id
-            pyvee.throw_error(msg, InsufficientBalanceException)
+            pyvsys.throw_error(msg, InsufficientBalanceException)
             return False
         return True
 
     def release(self, slot_id, tx_fee=DEFAULT_RELEASE_SLOT_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
         if not self.privateKey:
             msg = 'Private key required'
-            pyvee.throw_error(msg, MissingPrivateKeyException)
+            pyvsys.throw_error(msg, MissingPrivateKeyException)
         elif tx_fee < DEFAULT_RELEASE_SLOT_FEE:
             msg = 'Transaction fee must be >= %d' % DEFAULT_RELEASE_SLOT_FEE
-            pyvee.throw_error(msg, InvalidParameterException)
+            pyvsys.throw_error(msg, InvalidParameterException)
         elif slot_id >= 60 or slot_id < 0:
             msg = 'Slot id must be in 0 to 59'
-            pyvee.throw_error(msg, InvalidParameterException)
+            pyvsys.throw_error(msg, InvalidParameterException)
         elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
             msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
-            pyvee.throw_error(msg, InvalidParameterException)
+            pyvsys.throw_error(msg, InvalidParameterException)
         elif self.balance() < tx_fee:
-            msg = 'Insufficient VEE balance'
-            pyvee.throw_error(msg, InsufficientBalanceException)
+            msg = 'Insufficient VSYS balance'
+            pyvsys.throw_error(msg, InsufficientBalanceException)
         else:
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
@@ -318,19 +318,19 @@ class Account(object):
     def dbput(self, db_key, db_data, db_data_type="ByteArray", tx_fee=DEFAULT_DBPUT_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
         if not self.privateKey:
             msg = 'Private key required'
-            pyvee.throw_error(msg, MissingPrivateKeyException)
+            pyvsys.throw_error(msg, MissingPrivateKeyException)
         elif tx_fee < DEFAULT_DBPUT_FEE:
             msg = 'Transaction fee must be >= %d' % DEFAULT_DBPUT_FEE
-            pyvee.throw_error(msg, InvalidParameterException)
+            pyvsys.throw_error(msg, InvalidParameterException)
         elif len(db_key) > MAX_DB_KEY_SIZE or len(db_key) < MIN_DB_KEY_SIZE:
             msg = 'DB key length must be greater than %d and smaller than %d' % (MIN_DB_KEY_SIZE, MAX_ATTACHMENT_SIZE)
-            pyvee.throw_error(msg, InvalidParameterException)
+            pyvsys.throw_error(msg, InvalidParameterException)
         elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
             msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
-            pyvee.throw_error(msg, InvalidParameterException)
+            pyvsys.throw_error(msg, InvalidParameterException)
         elif self.balance() < tx_fee:
-            msg = 'Insufficient VEE balance'
-            pyvee.throw_error(msg, InsufficientBalanceException)
+            msg = 'Insufficient VSYS balance'
+            pyvsys.throw_error(msg, InsufficientBalanceException)
         else:
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
@@ -340,7 +340,7 @@ class Account(object):
             # TODO: add more DB data type here
             else:
                 msg = 'Unsupported data type: {}'.format(db_data_type)
-                pyvee.throw_error(msg, InvalidParameterException)
+                pyvsys.throw_error(msg, InvalidParameterException)
                 return
             sData = struct.pack(">B", DBPUT_TX_TYPE) + \
                     struct.pack(">H", len(db_key)) + \
@@ -368,16 +368,16 @@ class Account(object):
     def get_info(self):
         if not (self.address and self.publicKey):
             msg = 'Address required'
-            pyvee.throw_error(msg, MissingAddressException)
+            pyvsys.throw_error(msg, MissingAddressException)
             return None
         if not self.publicKey:
             msg = 'Public key and address required'
-            pyvee.throw_error(msg, MissingPublicKeyException)
+            pyvsys.throw_error(msg, MissingPublicKeyException)
             return None
         info = self.balance_detail()
         if not info:
             msg = 'Failed to get balance detail'
-            pyvee.throw_error(msg, NetworkException)
+            pyvsys.throw_error(msg, NetworkException)
         else:
             info["publicKey"] = self.publicKey
             return info
@@ -385,10 +385,10 @@ class Account(object):
     def get_tx_history(self, limit=100, type_filter=PAYMENT_TX_TYPE):
         if not self.address:
             msg = 'Address required'
-            pyvee.throw_error(msg, MissingAddressException)
+            pyvsys.throw_error(msg, MissingAddressException)
         elif limit > MAX_TX_HISTORY_LIMIT:
             msg = 'Too big sequences requested (Max limitation is %d).' % MAX_TX_HISTORY_LIMIT
-            pyvee.throw_error(msg, InvalidParameterException)
+            pyvsys.throw_error(msg, InvalidParameterException)
         else:
             url = '/transactions/address/{}/limit/{}'.format(self.address, limit)
             resp = self.wrapper.request(url)
