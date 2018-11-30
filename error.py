@@ -1,30 +1,30 @@
-class PyVeeException(Exception):
+class PyVSYSException(Exception):
     pass
 
 
-class InvalidAddressException(PyVeeException):
+class InvalidAddressException(PyVSYSException):
     pass
 
 
-class InvalidParameterException(PyVeeException):
+class InvalidParameterException(PyVSYSException):
     pass
 
 
-class MissingPrivateKeyException(PyVeeException):
+class MissingPrivateKeyException(PyVSYSException):
     pass
 
 
-class MissingPublicKeyException(PyVeeException):
+class MissingPublicKeyException(PyVSYSException):
     pass
 
 
-class MissingAddressException(PyVeeException):
+class MissingAddressException(PyVSYSException):
     pass
 
 
-class InsufficientBalanceException(PyVeeException):
+class InsufficientBalanceException(PyVSYSException):
     pass
 
 
-class NetworkException(PyVeeException):
+class NetworkException(PyVSYSException):
     pass
