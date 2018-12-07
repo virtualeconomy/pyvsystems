@@ -147,7 +147,7 @@ class Account(object):
                 "signature": signature
             })
 
-            return self.wrapper.request('/vee/broadcast/payment', data)
+            return self.wrapper.request('/vsys/broadcast/payment', data)
 
     def lease(self, recipient, amount, tx_fee=DEFAULT_LEASE_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
         if not self.privateKey:
