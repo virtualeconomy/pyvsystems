@@ -1,15 +1,15 @@
 # pyvsys
 A python wrapper for vsys api.
 
-For more detail, please reference:
+For more detail, please refer:
 
 [PYVSYS User Guide Specification (English)](https://github.com/virtualeconomy/pyvsys/wiki/PYVSYS-User-Guide-Specification-%28English%29)
 
 [PYVSYS 使用详细指南(中文)](https://github.com/virtualeconomy/pyvsys/wiki/PYVSYS-使用详细指南%28中文%29)
 
-## Install
-For now, 
+## Install 
 1. clone the repo under you workspace
+```git clone https://github.com/virtualeconomy/pyvsys.git```
 2. install packages in pyvsys/requirement.txt by 
 ```pip install -r ./pyvsys/requirements.txt```
 3. Then you can ```import pyvsys``` in your workspace
@@ -119,4 +119,4 @@ For now,
     my_address.lease_cancel(tx_id)
     ```
     
-Sample code reference: https://github.com/virtualeconomy/pyvsys/wiki#sample-code
+[Sample code](https://github.com/virtualeconomy/pyvsys/wiki/PYVSYS-User-Guide-Specification-%28English%29#sample-code) for reference
