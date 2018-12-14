@@ -1,5 +1,11 @@
 # pyvsys
-A python wrapper for vsys api
+A python wrapper for vsys api.
+
+For more detail, please reference:
+
+[PYVSYS User Guide Specification (English)](https://github.com/virtualeconomy/pyvsys/wiki/PYVSYS-User-Guide-Specification-%28English%29)
+
+[PYVSYS 使用详细指南(中文)](https://github.com/virtualeconomy/pyvsys/wiki/PYVSYS-使用详细指南%28中文%29)
 
 ## Install
 For now, 
