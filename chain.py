@@ -1,7 +1,10 @@
 import base58
 import logging
+import time
 from .crypto import hashChain, bytes2str, str2bytes
-from .setting import ADDRESS_LENGTH, ADDRESS_CHECKSUM_LENGTH
+from .setting import ADDRESS_LENGTH, ADDRESS_CHECKSUM_LENGTH, DEFAULT_SUPER_NODE_NUM
+from .error import NetworkException
+from .wrapper import Wrapper
 
 
 class Chain(object):
@@ -15,6 +18,53 @@ class Chain(object):
     def height(self):
         return self.api_wrapper.request('/blocks/height')['height']
 
+    def self_check(self, super_node_num=DEFAULT_SUPER_NODE_NUM):
+        try:
+            # check connected peers
+            peers = self.get_connected_peers()
+            if not peers:
+                logging.error("The node {} does not connect any peers.".format(self.api_wrapper.node_host))
+                return False
+            # check height
+            h2 = h1 = self.height()
+            delay = max(int(60 / super_node_num), 1)
+            count = 0
+            while h2 <= h1 and count <= super_node_num:
+                time.sleep(delay)
+                h2 = self.height()
+                count += 1
+            if h2 <= h1:
+                logging.error("The height is not update. Full node has problem or stopped.")
+                return False
+            # Add more check if need
+            logging.debug("OK. Full node is alive.")
+            return True
+        except NetworkException:
+            logging.error("Fail to connect full node.")
+            return False
+
+    def check_with_other_node(self, node_host, super_node_num=DEFAULT_SUPER_NODE_NUM):
+        try:
+            h1 = self.height()
+        except NetworkException:
+            logging.error("Fail to connect {}.".format(node_host))
+            return False
+        try:
+            other_api = Wrapper(node_host)
+            h2 = other_api.request('/blocks/height')['height']
+        except NetworkException:
+            logging.error("Fail to connect {}.".format(node_host))
+            return False
+        # Add more check if need
+        return h2 - h1 <= super_node_num
+
+    def get_connected_peers(self):
+        response = self.api_wrapper.request('/peers/connected')
+        if not response.get("peers"):
+            return []
+        else:
+            return [peer["address"] for peer in response.get("peers")]
+
     def lastblock(self):
         return self.api_wrapper.request('/blocks/last')
 
@@ -23,6 +73,9 @@ class Chain(object):
 
     def tx(self, id):
         return self.api_wrapper.request('/transactions/info/%s' % id)
+
+    def unconfirmed_tx(self, id):
+        return self.api_wrapper.request('/transactions/unconfirmed/info/%s' % id)
 
     def slot_info(self, slot_id):
         return self.api_wrapper.request('/consensus/slotInfo/%s' % slot_id)

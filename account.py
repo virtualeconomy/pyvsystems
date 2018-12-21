@@ -398,3 +398,41 @@ class Account(object):
             if isinstance(resp, list) and type_filter:
                 resp = [tx for tx in resp[0] if tx['type'] == type_filter]
             return resp
+
+    def check_tx(self, tx_id, confirmations=0):
+        """Confirm tx on chain.
+        Return True if Transaction is fully confirmed.
+        Return False if Transaction is sent but not confirmed or failed.
+        Return None if Transaction does not exist!
+        """
+        utx_res = self.chain.unconfirmed_tx(tx_id)
+        if "id" in utx_res:
+            logging.error("Transaction {} is pending in UTX pool.".format(tx_id))
+            return False
+        else:
+            tx_res = self.chain.tx(tx_id)
+            if tx_res.get("status") == "Success":
+                tx_height = tx_res["height"]
+                cur_height = self.chain.height()
+                if cur_height >= tx_height + confirmations:
+                    logging.debug("Transaction {} is fully confirmed.".format(tx_id))
+                    return True
+                else:
+                    logging.info("Transaction {} is sent but not fully confirmed.".format(tx_id))
+                    return False
+            elif "id" not in tx_res:
+                logging.error("Transaction does not exist!")
+                logging.debug("Tx API response: {}".format(tx_res))
+                return None
+            else:
+                logging.error("Transaction failed to process!")
+                logging.debug("Tx API response: {}".format(tx_res))
+                return False
+
+    def check_node(self, other_node_host=None):
+        if other_node_host:
+            res = self.chain.check_with_other_node(other_node_host)
+        else:
+            res = self.chain.self_check()
+        # add more check if need
+        return res
