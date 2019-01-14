@@ -9,10 +9,10 @@ For more detail, please refer:
 
 ## Install 
 1. clone the repo under you workspace
-```git clone https://github.com/virtualeconomy/pyvsys.git```
-2. install packages in pyvsys/requirement.txt by 
-```pip install -r ./pyvsys/requirements.txt```
-3. Then you can ```import pyvsys``` in your workspace
+```git clone https://github.com/virtualeconomy/pyvsystems.git```
+2. install packages in pyvsystems/requirement.txt by 
+```pip install -r ./pyvsystems/requirements.txt```
+3. Then you can ```import pyvsystems``` in your workspace
 
 ## Usage
 
