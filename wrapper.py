@@ -11,6 +11,13 @@ class Wrapper(object):
         self.api_key = api_key
 
     def request(self, api, post_data=''):
+        global OFFLINE
+        if OFFLINE:
+            offlineTx = {}
+            offlineTx['api-type'] = 'POST' if post_data else 'GET'
+            offlineTx['api-endpoint'] = api
+            offlineTx['api-data'] = post_data
+            return offlineTx
         headers = {}
         url = self.node_host + api
         if self.api_key:

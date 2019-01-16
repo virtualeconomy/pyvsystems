@@ -16,6 +16,19 @@ formatter = logging.Formatter('[%(levelname)s] %(message)s')
 console.setFormatter(formatter)
 logging.getLogger('').addHandler(console)
 
+OFFLINE = False
+
+
+def set_offline():
+    global OFFLINE
+    OFFLINE = True
+
+
+def set_online():
+    global OFFLINE
+    OFFLINE = False
+
+
 from .setting import *
 from .wrapper import *
 from .error import PyVException
