@@ -2,6 +2,7 @@ from .setting import *
 from .crypto import *
 from .error import *
 from .words import WORDS
+from pyvsystems import is_offline
 import pyvsystems
 import time
 import struct
@@ -49,6 +50,9 @@ class Account(object):
     __repr__ = __str__
 
     def balance(self, confirmations=0):
+        if is_offline():
+            pyvsystems.throw_error("Cannot check balance in offline mode.", NetworkException)
+            return 0
         try:
             confirmations_str = '' if confirmations == 0 else '/%d' % confirmations
             resp = self.wrapper.request('/addresses/balance/%s%s' % (self.address, confirmations_str))
@@ -383,6 +387,9 @@ class Account(object):
             return info
 
     def get_tx_history(self, limit=100, type_filter=PAYMENT_TX_TYPE):
+        if is_offline():
+            pyvsystems.throw_error("Cannot check history in offline mode.", NetworkException)
+            return []
         if not self.address:
             msg = 'Address required'
             pyvsystems.throw_error(msg, MissingAddressException)
