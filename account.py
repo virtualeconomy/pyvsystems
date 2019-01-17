@@ -124,7 +124,7 @@ class Account(object):
         elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
             msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
             pyvsystems.throw_error(msg, InvalidParameterException)
-        elif self.balance() < amount + tx_fee:
+        elif not is_offline() and self.balance() < amount + tx_fee:
             msg = 'Insufficient VSYS balance'
             pyvsystems.throw_error(msg, InsufficientBalanceException)
         else:
