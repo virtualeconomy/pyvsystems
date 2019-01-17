@@ -40,8 +40,15 @@ class Account(object):
     def __str__(self):
         if not self.address:
             raise InvalidAddressException("No address")
-        return 'address = %s\npublicKey = %s\nprivateKey = %s\nseed = %s\nnonce = %d\nbalances: %d' % \
-               (self.address, self.publicKey, self.privateKey, self.seed, self.nonce, self.balance())
+        result = 'address = %s\npublicKey = %s\nprivateKey = %s\nseed = %s\nnonce = %d' % \
+               (self.address, self.publicKey, self.privateKey, self.seed, self.nonce)
+        if not is_offline():
+            try:
+                balance = self.balance()
+                result += "\nbalance: {}".format(balance)
+            except NetworkException:
+                logging.error("Failed to get balance")
+        return result
 
     __repr__ = __str__
 
