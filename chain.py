@@ -5,6 +5,8 @@ from .crypto import hashChain, bytes2str, str2bytes
 from .setting import ADDRESS_LENGTH, ADDRESS_CHECKSUM_LENGTH, DEFAULT_SUPER_NODE_NUM
 from .error import NetworkException
 from .wrapper import Wrapper
+from pyvsystems import is_offline
+import pyvsystems
 
 
 class Chain(object):
@@ -16,7 +18,11 @@ class Chain(object):
         self.api_wrapper = api_wrapper
 
     def height(self):
-        return self.api_wrapper.request('/blocks/height')['height']
+        if is_offline():
+            pyvsystems.throw_error("Cannot check height in offline mode.", NetworkException)
+            return 0
+        else:
+            return self.api_wrapper.request('/blocks/height')['height']
 
     def self_check(self, super_node_num=DEFAULT_SUPER_NODE_NUM):
         try:
@@ -44,6 +50,9 @@ class Chain(object):
             return False
 
     def check_with_other_node(self, node_host, super_node_num=DEFAULT_SUPER_NODE_NUM):
+        if is_offline():
+            pyvsystems.throw_error("Cannot check height in offline mode.", NetworkException)
+            return False
         try:
             h1 = self.height()
         except NetworkException:
@@ -59,6 +68,9 @@ class Chain(object):
         return h2 - h1 <= super_node_num
 
     def get_connected_peers(self):
+        if is_offline():
+            pyvsystems.throw_error("Cannot check peers in offline mode.", NetworkException)
+            return []
         response = self.api_wrapper.request('/peers/connected')
         if not response.get("peers"):
             return []

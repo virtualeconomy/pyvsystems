@@ -2,6 +2,7 @@ import logging
 import requests
 from requests.exceptions import RequestException
 from .error import NetworkException
+from pyvsystems import is_offline
 
 
 class Wrapper(object):
@@ -11,13 +12,12 @@ class Wrapper(object):
         self.api_key = api_key
 
     def request(self, api, post_data=''):
-        global OFFLINE
-        if OFFLINE:
-            offlineTx = {}
-            offlineTx['api-type'] = 'POST' if post_data else 'GET'
-            offlineTx['api-endpoint'] = api
-            offlineTx['api-data'] = post_data
-            return offlineTx
+        if is_offline():
+            offline_tx = {}
+            offline_tx['api-type'] = 'POST' if post_data else 'GET'
+            offline_tx['api-endpoint'] = api
+            offline_tx['api-data'] = post_data
+            return offline_tx
         headers = {}
         url = self.node_host + api
         if self.api_key:

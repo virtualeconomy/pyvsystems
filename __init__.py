@@ -29,6 +29,11 @@ def set_online():
     OFFLINE = False
 
 
+def is_offline():
+    global OFFLINE
+    return OFFLINE
+
+
 from .setting import *
 from .wrapper import *
 from .error import PyVException
