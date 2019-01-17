@@ -33,11 +33,7 @@ class Account(object):
                 self.seed = seed
                 self.nonce = nonce
         elif alias:
-            self.address = self.wrapper.request('/alias/by-alias/%s' % alias).get("address", "")
-            self.publicKey = ''
-            self.privateKey = ''
-            self.seed = ''
-            self.nonce = 0
+            raise InvalidParameterException("The alias is not support in V systems")
         else:
             self._generate(nonce=nonce)
 
@@ -169,7 +165,7 @@ class Account(object):
         elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
             msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
             pyvsystems.throw_error(msg, InvalidParameterException)
-        elif self.balance() < amount + tx_fee:
+        elif not is_offline() and self.balance() < amount + tx_fee:
             msg = 'Insufficient VSYS balance'
             pyvsystems.throw_error(msg, InsufficientBalanceException)
         else:
@@ -208,7 +204,7 @@ class Account(object):
         elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
             msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
             pyvsystems.throw_error(msg, InvalidParameterException)
-        elif self.balance() < tx_fee:
+        elif not is_offline() and self.balance() < tx_fee:
             msg = 'Insufficient VSYS balance'
             pyvsystems.throw_error(msg, InsufficientBalanceException)
         else:
@@ -266,6 +262,8 @@ class Account(object):
             msg = 'Slot id must be in 0 to 59'
             pyvsystems.throw_error(msg, InvalidParameterException)
             return False
+        if is_offline():  # if offline, skip other check
+            return True
         balance_detail = self.get_info()
         min_effective_balance = MIN_CONTEND_SLOT_BALANCE + tx_fee
         if balance_detail["effective"] < min_effective_balance:
@@ -297,7 +295,7 @@ class Account(object):
         elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
             msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
             pyvsystems.throw_error(msg, InvalidParameterException)
-        elif self.balance() < tx_fee:
+        elif not is_offline() and self.balance() < tx_fee:
             msg = 'Insufficient VSYS balance'
             pyvsystems.throw_error(msg, InsufficientBalanceException)
         else:
@@ -332,7 +330,7 @@ class Account(object):
         elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
             msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
             pyvsystems.throw_error(msg, InvalidParameterException)
-        elif self.balance() < tx_fee:
+        elif not is_offline() and self.balance() < tx_fee:
             msg = 'Insufficient VSYS balance'
             pyvsystems.throw_error(msg, InsufficientBalanceException)
         else:
@@ -378,6 +376,12 @@ class Account(object):
             msg = 'Public key and address required'
             pyvsystems.throw_error(msg, MissingPublicKeyException)
             return None
+        if is_offline():
+            info = {
+                "publicKey": self.publicKey,
+                "address": self.address
+            }
+            return info
         info = self.balance_detail()
         if not info:
             msg = 'Failed to get balance detail'
@@ -409,6 +413,9 @@ class Account(object):
         Return False if Transaction is sent but not confirmed or failed.
         Return None if Transaction does not exist!
         """
+        if is_offline():
+            pyvsystems.throw_error("Cannot check transaction in offline mode.", NetworkException)
+            return None
         utx_res = self.chain.unconfirmed_tx(tx_id)
         if "id" in utx_res:
             logging.error("Transaction {} is pending in UTX pool.".format(tx_id))
@@ -434,6 +441,9 @@ class Account(object):
                 return False
 
     def check_node(self, other_node_host=None):
+        if is_offline():
+            pyvsystems.throw_error("Cannot check node in offline mode.", NetworkException)
+            return False
         if other_node_host:
             res = self.chain.check_with_other_node(other_node_host)
         else:
