@@ -14,7 +14,6 @@ from opcode import *
 
 class Contract(object):
     def __init__(self):
-        self.str2bytes = lambda s: s.encode('hex')
         self.language_code_byte_length = 4
         self.language_version_byte_length = 4
         self.data_type_list = {'01': 'PublicKey', '02': 'Address', '03': 'Amount', '04': 'Int32', '05': 'ShortText',
@@ -259,8 +258,10 @@ class Contract(object):
     #
     # def get_token_balance(self):
     #
-    # def sign_register_contract(self):
+    # def sign_register_contract(self, privatekey):
+    #     a = 1
     #
     # def sign_execute_contract(self):
-    #
-    # def contract_permitted(self, split = True):
+
+    def contract_permitted(self, split = True):
+        a = 1
