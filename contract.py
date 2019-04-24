@@ -10,7 +10,7 @@ import json
 import base58
 import logging
 import copy
-from opcode import *
+from .opcode import *
 
 class Contract(object):
     def __init__(self):
@@ -18,7 +18,8 @@ class Contract(object):
         self.language_version_byte_length = 4
         self.data_type_list = {'01': 'PublicKey', '02': 'Address', '03': 'Amount', '04': 'Int32', '05': 'ShortText',
                                '06': 'ContractAccount', '07': 'Account'}
-        self.test = 'JC9U69xcoTWJ71v82TojKETj3SAsxyh3nYACiheZMDBgE6XKshzgupsRmSk3y1aijZJxWu4DSX96nMpStH2ESv3P4VC4MogHcN8UcCiaLiCt2af1b7zkhZtGq6ckrvHjijJ7ZHZugp8bzyUTs55SnZ5o2tockgM8jhtnfVNRPEPq8My9QNDDyZRJyxyJnE6p8kB3PDEPk1WsBxe68APAaLqjN4ACRCv5kyhKTjaEixRz6yn62W8PRi5PpzD4KEtg1DrxwhwqsFWCLrNPsw8vTuSB3DrNgCq72FEQJAAtdDS29kPmaQYeQG2YQzUrtKyteAdMzQw2B17wUsQj4tnkFkec5VbbV4mFZ5zhVsCv5UErZiKKPiBgefjQjfnuYNV6PA4r5T6XrtW2zi5MvzEym3vt3PpzodHd9xY5UftGRmkWjZ1atRfRsheDw6CKcsjdEGNS5J7bfvLj3KAckRPjp1wAP5CTKASSLvGVBCyieNyJLmdfguhEEg5xpKXiJdzTAnQDrBYdhCpRq9xTcBK5ueQZ5vqEZt1vbBBLVzkdmmt54tZXvpvW3TPwKqLtz26zdtAPntmjLyqqNKbmzb8MrgiyjyC8YmYgnLUkeU8q2ksmZKZ8aoHEW5zF3ztQ7qNvaxY86NY3AHkpcuUjbdaMxEMKAQ3Qc2fVcwHVoJoEz7pSSUHvnUcZcnYMMmGR52gwNasUxVAm2LmbNbuyQvnxpJXd2yQryWQjgHcgDoRSroRuV6rftvGz6d9FbhytyrUEc9Ae6uZu7W6cAtB75jBtaBUk9K9cootsqEu2Y1PUE7B832X3j4UWveC73XnkRsz5U8EStNWvJXYZ2QitmZBSpCYMP8bnEfnqtxmGk7B1iT3tqWaJ5QX5DgkQ189UXimGCjAs31LtFSCuGWzkJnoR3H5Yno465v7WHLkbewKqrDpaAbgj82pja8uuSj8uZGBrEDXu2KdP4R4UbfDUXYmGtiNTwDDfwdyAv4BrvyQFuWKVWnMDhkSjsjSVJmLx5qwNq3EBZzN7tZd9UBQ3552rSfu48Y7fvTh54x9FjYMDCmtUFmsxrnWFgbGe8Gypfwpk9qKHe4Pe7Qjx5ppzAW48FDtdtjznh6wk4wF33y46cfrTEogULvkifb8WjqoXaRytdxUzcm6M23XiKUfQAVygFJXBJfCU3VbxFZgLib2Lgp2dAeB5myJzRayKi9tJQVzLrYr4NEFWpzJbxiZxyY14XyHXWTyvGgQHW5DGkgRiWDm7mbybtb9BvKrEtkKCZ'
+        # self.test = 'JC9U69xcoTWJ71v82TojKETj3SAsxyh3nYACiheZMDBgE6XKshzgupsRmSk3y1aijZJxWu4DSX96nMpStH2ESv3P4VC4MogHcN8UcCiaLiCt2af1b7zkhZtGq6ckrvHjijJ7ZHZugp8bzyUTs55SnZ5o2tockgM8jhtnfVNRPEPq8My9QNDDyZRJyxyJnE6p8kB3PDEPk1WsBxe68APAaLqjN4ACRCv5kyhKTjaEixRz6yn62W8PRi5PpzD4KEtg1DrxwhwqsFWCLrNPsw8vTuSB3DrNgCq72FEQJAAtdDS29kPmaQYeQG2YQzUrtKyteAdMzQw2B17wUsQj4tnkFkec5VbbV4mFZ5zhVsCv5UErZiKKPiBgefjQjfnuYNV6PA4r5T6XrtW2zi5MvzEym3vt3PpzodHd9xY5UftGRmkWjZ1atRfRsheDw6CKcsjdEGNS5J7bfvLj3KAckRPjp1wAP5CTKASSLvGVBCyieNyJLmdfguhEEg5xpKXiJdzTAnQDrBYdhCpRq9xTcBK5ueQZ5vqEZt1vbBBLVzkdmmt54tZXvpvW3TPwKqLtz26zdtAPntmjLyqqNKbmzb8MrgiyjyC8YmYgnLUkeU8q2ksmZKZ8aoHEW5zF3ztQ7qNvaxY86NY3AHkpcuUjbdaMxEMKAQ3Qc2fVcwHVoJoEz7pSSUHvnUcZcnYMMmGR52gwNasUxVAm2LmbNbuyQvnxpJXd2yQryWQjgHcgDoRSroRuV6rftvGz6d9FbhytyrUEc9Ae6uZu7W6cAtB75jBtaBUk9K9cootsqEu2Y1PUE7B832X3j4UWveC73XnkRsz5U8EStNWvJXYZ2QitmZBSpCYMP8bnEfnqtxmGk7B1iT3tqWaJ5QX5DgkQ189UXimGCjAs31LtFSCuGWzkJnoR3H5Yno465v7WHLkbewKqrDpaAbgj82pja8uuSj8uZGBrEDXu2KdP4R4UbfDUXYmGtiNTwDDfwdyAv4BrvyQFuWKVWnMDhkSjsjSVJmLx5qwNq3EBZzN7tZd9UBQ3552rSfu48Y7fvTh54x9FjYMDCmtUFmsxrnWFgbGe8Gypfwpk9qKHe4Pe7Qjx5ppzAW48FDtdtjznh6wk4wF33y46cfrTEogULvkifb8WjqoXaRytdxUzcm6M23XiKUfQAVygFJXBJfCU3VbxFZgLib2Lgp2dAeB5myJzRayKi9tJQVzLrYr4NEFWpzJbxiZxyY14XyHXWTyvGgQHW5DGkgRiWDm7mbybtb9BvKrEtkKCZ'
+        self.test = 'kpUFTV4BMU2mLarm7iTmJMxw7RLSx2SBZvA22e26pEAp9CfxxppnPCaM4YMZYptdewVirdTdLPboQs9bn18VgeSSz3zRXSN8xAmgUs3JVr4v6Xw2YKHP8zKbngErdvr3YKZCu8hjjZv1MfRbPyWbaDCoXo4q3ngJrZ2hmDok1PxxaN8dwXT4M4PkfnQyaCqVhbNpwmYaSQoHVMfLAMnJXBtxfbrfTj6M8Gg6gjmnHcvXJy59oZtWhqK6H83fYuK8cydNj7cZWn43L5S9pZEjHFZZA37pxbdiwKRvbFNkocNuU9kpVySTPyLLUd5pSYMtUfNkMhQwkDASLrzdyfbQ8G9WxKNucbSbDzoA1F5tTP1a7LzeQZ14ABbztaJKaqStxXhX2hBEmxHGwdhiwNM2UbVLgjiomzw1s1EupH7zseoBpTPKZRsVso8j3SoSsfGpwf2YeCAds47SQqVsjGFMsp3WHeuRQd2U5DV2AQyYshHoTkad3akT7QYcrZ39ypMPj2KGizg2wdJSw3Z6LknyyKviu12vkpaMxsR74jGUAA54PkNRNEYyP62BWM35eDDkxS62tcRP5R1Xp9acsgJq2J9uqrrEseeTC8icMJUQY4E7bpQwdwgsnzeLHnfADEoaNBh45DEdB4mRoGCWoqiZeX341VDmBjQW44uTjXvQ46zHiR34g2KzDJ178cbmTaYzcBZHsqu8MZFDimsGALk81C1U5wKCN63x3FqcNS436M3f23op7hUm8Rf4FDsCvCu5NaytUvFKMmLfBtg6D3MqBVEzV6nuhSPHsnU5JiiAfUx93ZivtjmDAYGCcANrTzdDB1PeKj9BbE2SoyJ9TxkAXgUBZoZneZJnuqLAoEookS9zT7LKxyU4T7DwWVWDuX9j2XYB8Pi2DDYkydfbssics6XJjDkeG8cMPKi3p3jeZN8Qaf7KraE4SHZEatvCZb5fJdSPaDWQiJ6XhUpNCGYqb8htPou9bPqQL6hTj6yX44WSedMqw2bArrXAwh4MXvgxGJBt89CXG6qGm4wHYM6bjpQ8bNuQvUDNQ5HueHLSTJNtiCHTDgfH7MvmVm1xfJF7dFeKmeRwbFiRK7E3dBKr6wANmkUzM7ezdFMsPDr8PQkbipHJAM6j1uDujNci9TcQYgpviUg6uaUvqPKsZa3q3Hw4NsCxDNRGKFtwPUyTFXJAEeAqoiFmUQDfjeTFCFpHr4DfuqHdpwwVQebsEKUdcnQdoEgP1Dmav2JKbffTcL8wJgtGjoVpUzMb55DBe31uqf7Ri2UZFbAq3APw9yqCbLM1jNN9dBizQ48fdmgHxhHGAM1kiDdtFVJwPt974GPGQ7cnbTqdePbHFcEkkxXmrVjymmf'
 
         self.assert_opc = {'01': 'GteqZeroAssert', '02': 'LteqAssert', '03': 'LtInt64Assert', '04': 'GtZeroAssert',
                            '05': 'EqAssert', '06': 'IsCallerOriginAssert', '07': 'IsSignerOriginAssert'}
@@ -37,44 +38,46 @@ class Contract(object):
     def show_contract_function(self, byte_string = '', contract_json = ''):
         byte_string = self.test
         bytes_object = base58.b58decode(byte_string)
+        # print("all: ", bytes_object)
         start_position = 0
 
         language_code = bytes_object[start_position:self.language_code_byte_length]
         bytes_to_hex = self.convert_bytes_to_hex(language_code)
-        print("Language Code: " + "(" + str(len(bytes_to_hex)) + " Bytes)")
-        print(' '.join(bytes_to_hex))
+        # print("Language Code: " + "(" + str(len(bytes_to_hex)) + " Bytes)")
+        # print(' '.join(bytes_to_hex))
 
         language_version = bytes_object[self.language_code_byte_length:(self.language_code_byte_length
                                                                         + self.language_version_byte_length)]
         bytes_to_hex = self.convert_bytes_to_hex(language_version)
-        print("Language Version: " + "(" + str(len(bytes_to_hex)) + " Bytes)")
-        print(' '.join(bytes_to_hex))
+        # print("Language Version: " + "(" + str(len(bytes_to_hex)) + " Bytes)")
+        # print(' '.join(bytes_to_hex))
 
         [initializer, initializer_end] = self.parse_array_size(bytes_object, self.language_code_byte_length
                                                                + self.language_version_byte_length)
         bytes_to_hex = self.convert_bytes_to_hex(initializer)
-        print("Initializer: " + "(" + str(len(bytes_to_hex)) + " Bytes)")
-        print("id" + " | byte")
-        print("00 | " + ' '.join(bytes_to_hex))
+        # print("Initializer: " + "(" + str(len(bytes_to_hex)) + " Bytes)")
+        # print("id" + " | byte")
+        # print("00 | " + ' '.join(bytes_to_hex))
 
         [descriptor_arrays, descriptor_end] = self.parse_array_size(bytes_object, initializer_end)
         [descriptor, bytes_length]= self.parse_arrays(descriptor_arrays)
-        print("Descriptor: " + "(" + str(bytes_length) + " Bytes)")
-        print("id" + " | byte")
-        self.print_bytes_arrays(descriptor)
+        # print("Descriptor: " + "(" + str(bytes_length) + " Bytes)")
+        # print("id" + " | byte")
+        # self.print_bytes_arrays(descriptor)
 
         [state_var_arrays, state_var_end] = self.parse_array_size(bytes_object, descriptor_end)
         [state_var, bytes_length] = self.parse_arrays(state_var_arrays)
-        print("State Variable: " + "(" + str(bytes_length) + " Bytes)")
-        print("id" + " | byte")
-        self.print_bytes_arrays(state_var)
+        # print("State Variable: " + "(" + str(bytes_length) + " Bytes)")
+        # print("id" + " | byte")
+        # self.print_bytes_arrays(state_var)
 
+        print(bytes_object[state_var_end:len(bytes_object)], len(bytes_object[state_var_end:len(bytes_object)]))
         [texture, _] = self.parse_arrays(bytes_object[state_var_end:len(bytes_object)])
         all_info = self.texture_from_bytes(texture)
 
         functions = copy.deepcopy([initializer] + descriptor)
-        print("All Functions with Opcode:")
-        self.print_functions(functions, all_info)
+        # print("All Functions with Opcode:")
+        # self.print_functions(functions, all_info)
 
     def print_functions(self, functions_opcode, all_info):
         if len(functions_opcode) != (len(all_info[0]) + len(all_info[1])):
@@ -193,26 +196,26 @@ class Contract(object):
         specification_header = ['id', 'function_name', 'return_type', 'variables...']
         [initializer_bytes, _] = self.parse_arrays(bytes_arrays[0])
         initializer_spec = self.specification_from_bytes(initializer_bytes, 0)
-        print("Initializer Function:")
+        # print("Initializer Function:")
         info = copy.deepcopy([specification_header] + initializer_spec)
-        self.print_function_specification(info)
+        # self.print_function_specification(info)
         info.pop(0)
         all_info.append(info)
 
         [descriptor_bytes, _] = self.parse_arrays(bytes_arrays[1])
         descriptor_spec = self.specification_from_bytes(descriptor_bytes, 1)
-        print("Descriptor Functions:")
+        # print("Descriptor Functions:")
         info = copy.deepcopy([specification_header] + descriptor_spec)
-        self.print_function_specification(info)
+        # self.print_function_specification(info)
         info.pop(0)
         all_info.append(info)
 
         [state_var_bytes, _] = self.parse_arrays(bytes_arrays[2])
         state_var = self.specification_from_bytes(state_var_bytes, 2)
         specification_header = ['id', 'variable_name']
-        print("State Variables:")
+        # print("State Variables:")
         info = copy.deepcopy([specification_header] + state_var)
-        self.print_function_specification(info)
+        # self.print_function_specification(info)
         info.pop(0)
         all_info.append(info)
 
@@ -253,6 +256,39 @@ class Contract(object):
                 function_count += 1
         return string_list
 
+    def get_contract_info(self, wrapper, contract_id):
+        try:
+            resp = wrapper.request('/info/%s' % (contract_id))
+            logging.debug(resp)
+            return resp['info']
+        except Exception as ex:
+            msg = "Failed to get contract info. ({})".format(ex)
+            pyvsystems.throw_error(msg, NetworkException)
+            return 0
+
+    def get_contract_content(self, wrapper, contract_id):
+        try:
+            resp = wrapper.request('/content/%s' % (contract_id))
+            logging.debug(resp)
+            return resp
+        except Exception as ex:
+            msg = "Failed to get contract content. ({})".format(ex)
+            pyvsystems.throw_error(msg, NetworkException)
+            return 0
+
+    def get_token_balance(self, wrapper, address, token_id):
+        if not address:
+            msg = 'Address required'
+            pyvsystems.throw_error(msg, MissingAddressException)
+            return None
+        try:
+            resp = wrapper.request('/balance/%s/%s' % (address, token_id))
+            logging.debug(resp)
+            return resp
+        except Exception as ex:
+            msg = "Failed to get token balance. ({})".format(ex)
+            pyvsystems.throw_error(msg, NetworkException)
+            return 0
 
     # def get_contract_info(self):
     #
