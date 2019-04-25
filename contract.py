@@ -43,41 +43,41 @@ class Contract(object):
 
         language_code = bytes_object[start_position:self.language_code_byte_length]
         bytes_to_hex = self.convert_bytes_to_hex(language_code)
-        # print("Language Code: " + "(" + str(len(bytes_to_hex)) + " Bytes)")
-        # print(' '.join(bytes_to_hex))
+        print("Language Code: " + "(" + str(len(bytes_to_hex)) + " Bytes)")
+        print(' '.join(bytes_to_hex))
 
         language_version = bytes_object[self.language_code_byte_length:(self.language_code_byte_length
                                                                         + self.language_version_byte_length)]
         bytes_to_hex = self.convert_bytes_to_hex(language_version)
-        # print("Language Version: " + "(" + str(len(bytes_to_hex)) + " Bytes)")
-        # print(' '.join(bytes_to_hex))
+        print("Language Version: " + "(" + str(len(bytes_to_hex)) + " Bytes)")
+        print(' '.join(bytes_to_hex))
 
         [initializer, initializer_end] = self.parse_array_size(bytes_object, self.language_code_byte_length
                                                                + self.language_version_byte_length)
         bytes_to_hex = self.convert_bytes_to_hex(initializer)
-        # print("Initializer: " + "(" + str(len(bytes_to_hex)) + " Bytes)")
-        # print("id" + " | byte")
-        # print("00 | " + ' '.join(bytes_to_hex))
+        print("Initializer: " + "(" + str(len(bytes_to_hex)) + " Bytes)")
+        print("id" + " | byte")
+        print("00 | " + ' '.join(bytes_to_hex))
 
         [descriptor_arrays, descriptor_end] = self.parse_array_size(bytes_object, initializer_end)
         [descriptor, bytes_length]= self.parse_arrays(descriptor_arrays)
-        # print("Descriptor: " + "(" + str(bytes_length) + " Bytes)")
-        # print("id" + " | byte")
-        # self.print_bytes_arrays(descriptor)
+        print("Descriptor: " + "(" + str(bytes_length) + " Bytes)")
+        print("id" + " | byte")
+        self.print_bytes_arrays(descriptor)
 
         [state_var_arrays, state_var_end] = self.parse_array_size(bytes_object, descriptor_end)
         [state_var, bytes_length] = self.parse_arrays(state_var_arrays)
-        # print("State Variable: " + "(" + str(bytes_length) + " Bytes)")
-        # print("id" + " | byte")
-        # self.print_bytes_arrays(state_var)
+        print("State Variable: " + "(" + str(bytes_length) + " Bytes)")
+        print("id" + " | byte")
+        self.print_bytes_arrays(state_var)
 
         print(bytes_object[state_var_end:len(bytes_object)], len(bytes_object[state_var_end:len(bytes_object)]))
         [texture, _] = self.parse_arrays(bytes_object[state_var_end:len(bytes_object)])
         all_info = self.texture_from_bytes(texture)
 
         functions = copy.deepcopy([initializer] + descriptor)
-        # print("All Functions with Opcode:")
-        # self.print_functions(functions, all_info)
+        print("All Functions with Opcode:")
+        self.print_functions(functions, all_info)
 
     def print_functions(self, functions_opcode, all_info):
         if len(functions_opcode) != (len(all_info[0]) + len(all_info[1])):
@@ -156,8 +156,7 @@ class Contract(object):
         max_length = max([len(item) for items in nested_list for item in items])
         for items in nested_list:
             print(items[0] + " | ", end='')
-            items.pop(0)
-            for item in items:
+            for item in items[1:]:
                 if items.index(item) != (len(items) - 1):
                     print(item + " "*(max_length - len(item) + 1), end='')
                 else:
@@ -196,27 +195,30 @@ class Contract(object):
         specification_header = ['id', 'function_name', 'return_type', 'variables...']
         [initializer_bytes, _] = self.parse_arrays(bytes_arrays[0])
         initializer_spec = self.specification_from_bytes(initializer_bytes, 0)
-        # print("Initializer Function:")
+        print("Initializer Function:")
         info = copy.deepcopy([specification_header] + initializer_spec)
-        # self.print_function_specification(info)
+        self.print_function_specification(info)
         info.pop(0)
+        [item.pop(0) for item in info]
         all_info.append(info)
 
         [descriptor_bytes, _] = self.parse_arrays(bytes_arrays[1])
         descriptor_spec = self.specification_from_bytes(descriptor_bytes, 1)
-        # print("Descriptor Functions:")
+        print("Descriptor Functions:")
         info = copy.deepcopy([specification_header] + descriptor_spec)
-        # self.print_function_specification(info)
+        self.print_function_specification(info)
         info.pop(0)
+        [item.pop(0) for item in info]
         all_info.append(info)
 
         [state_var_bytes, _] = self.parse_arrays(bytes_arrays[2])
         state_var = self.specification_from_bytes(state_var_bytes, 2)
         specification_header = ['id', 'variable_name']
-        # print("State Variables:")
+        print("State Variables:")
         info = copy.deepcopy([specification_header] + state_var)
-        # self.print_function_specification(info)
+        self.print_function_specification(info)
         info.pop(0)
+        [item.pop(0) for item in info]
         all_info.append(info)
 
         return all_info

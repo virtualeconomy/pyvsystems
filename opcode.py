@@ -7,6 +7,7 @@ class Opcode(object):
         self.function_name = {'0106': 'opc_assert_caller', '0107': 'opc_assert_singer',
                               '0201': 'opc_load_env_signer', '0202': 'opc_load_env_caller',
                               '0301': 'opc_cdbv_set', '0401': 'opc_cdbvr_get', '0501': 'opc_tdb_new',
+                              '0502': 'opc_tdb_split',
                               '0601': 'opc_tdbr_get', '0602': 'opc_tdbr_total', '0701': 'opc_tdba_deposit',
                               '0702': 'opc_tdba_withdraw', '0703': 'opc_tdba_transfer', '0801': 'opc_tdbar_balance',
                               '0900': 'opc_return_last'}
@@ -71,6 +72,15 @@ class Opcode(object):
         function_name = sys._getframe().f_code.co_name
         print(function_name + ' ', end='')
         print(name_list[data[6]] + ' ' + name_list[data[7]] + ' ' + name_list[data[8]])
+        return name_list
+
+    @staticmethod
+    def opc_tdb_split(arg):
+        data = copy.deepcopy(arg[0])
+        name_list = copy.deepcopy(arg[1])
+        function_name = sys._getframe().f_code.co_name
+        print(function_name + ' ', end='')
+        print(name_list[data[3]] + ' ' + name_list[data[4]])
         return name_list
 
     @staticmethod
