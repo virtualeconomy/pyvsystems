@@ -4,870 +4,888 @@ import struct
 
 from pyvsystems import deser
 from pyvsystems.dataentry import DataEntry
-from pyvsystems.deser import serializeString
+from pyvsystems.deser import serialize_string
 
 
 class ContractBuild:
     # texture
-    initPara = ["max", "unity", "tokenDescription"]
-    supersedePara = ["newIssuer"]
-    issuePara = ["amount", "tokenIndex"]
-    destroyPara = ["amount", "tokenIndex"]
-    splitPara = ["newUnity", "tokenIndex"]
-    sendPara = ["receipt", "amount", "tokenIndex"]
-    transferPara = ["sender", "receipt", "amount", "tokenIndex"]
-    depositPara = ["sender", "smart", "amount", "tokenIndex"]
-    withdrawPara = ["smart", "receipt", "amount", "tokenIndex"]
-    totalSupplyPara = ["tokenIndex"]
-    maxSupplyPara = ["tokenIndex"]
-    balanceOfPara = ["address", "tokenIndex"]
-    getIssuerPara = []
+    trigger_para = ["max", "unity", "tokenDescription", "signer"]
+    supersede_para = ["newIssuer", "maker"]
+    issue_para = ["amount", "tokenIndex", "issuer"]
+    destroy_para = ["amount", "tokenIndex", "issuer"]
+    split_para = ["newUnity", "tokenIndex", "issuer"]
+    send_para = ["receipt", "amount", "tokenIndex", "caller"]
+    transfer_para = ["sender", "receipt", "amount", "tokenIndex"]
+    deposit_para = ["sender", "smart", "amount", "tokenIndex"]
+    withdraw_para = ["smart", "receipt", "amount", "tokenIndex"]
+    total_supply_para = ["tokenIndex", "total"]
+    max_supply_para = ["tokenIndex", "max"]
+    balance_of_para = ["address", "tokenIndex", "balance"]
+    get_issuer_para = ["issuer"]
 
     # statevar
-    statevar_issuer = bytes([0])
-    statevar_maker = bytes([1])
-    statevar_max = bytes([2])
-    statevar_total = bytes([3])
-    statevar_unity = bytes([4])
-    statevar_shortText = bytes([5])
+    state_var_issuer = bytes([0])
+    state_var_maker = bytes([1])
 
     # datatype
-    PublicKey = bytes([1])
-    Address = bytes([2])
-    Amount = bytes([3])
-    Int32 = bytes([4])
-    ShortText = bytes([5])
-    ContractAccount = bytes([6])
-    Account = bytes([7])
+    public_key = bytes([1])
+    address = bytes([2])
+    amount = bytes([3])
+    int32 = bytes([4])
+    short_text = bytes([5])
+    contract_account = bytes([6])
+    account = bytes([7])
 
     # assertype
-    GteqZeroAssert = bytes([1])
-    LteqAssert = bytes([2])
-    LtInt64Assert = bytes([3])
-    GtZeroAssert = bytes([4])
-    EqAssert =bytes([5])
-    IsCallerOriginAssert = bytes([6])
-    IsSignerOriginAssert = bytes([7])
+    gteq_zero_assert = bytes([1])
+    lteq_assert = bytes([2])
+    lt_int64_assert = bytes([3])
+    gt_zero_assert = bytes([4])
+    eq_assert =bytes([5])
+    is_caller_origin_assert = bytes([6])
+    is_signer_origin_assert = bytes([7])
 
     # cdbvtype
-    SetCDBV = bytes([1])
+    set_cdbv = bytes([1])
 
     # cdbvrtype
-    GetCDBVR = bytes([1])
+    get_cdbvr = bytes([1])
 
     # loadtype
-    SignerLoad = bytes([1])
-    CallerLoad =bytes([2])
+    signer_load = bytes([1])
+    caller_load =bytes([2])
 
     # opctype
-    AssertOpc = bytes([1])
-    LoadOpc = bytes([2])
-    CDBVOpc = bytes([3])
-    CDBVROpc = bytes([4])
-    TDBOpc = bytes([5])
-    TDBROpc = bytes([6])
-    TDBAOpc = bytes([7])
-    TDBAROpc = bytes([8])
-    ReturnOpc = bytes([9])
+    assert_opc = bytes([1])
+    load_opc = bytes([2])
+    cdbv_opc = bytes([3])
+    cdbvr_opc = bytes([4])
+    tdb_opc = bytes([5])
+    tdbr_opc = bytes([6])
+    tdba_opc = bytes([7])
+    tdbar_opc = bytes([8])
+    return_opc = bytes([9])
 
     # tdbatype
-    DepositTDBA = bytes([1])
-    WithdrawTDBA = bytes([2])
-    TransferTDBA = bytes([3])
+    deposit_tdba = bytes([1])
+    withdraw_tdba = bytes([2])
+    transfer_tdba = bytes([3])
 
     # tdbartype
-    BalanceTBDAR = bytes([1])
+    balance_tdbar = bytes([1])
 
     # tdbtype
-    NewTokenTDB = bytes([1])
-    SplitTDB = bytes([2])
+    new_token_tdb = bytes([1])
+    split_tdb = bytes([2])
 
     # tdbrtype
-    GetTDBR = bytes([1])
-    TotalTDBR = bytes([2])
+    get_tdbr = bytes([1])
+    total_tdbr = bytes([2])
 
     # funid
-    init = 0
-    supersede = 1
-    issue = 2
-    destroy = 3
-    split = 4
-    send = 5
-    transfer = 6
-    deposit = 7
-    withdraw = 8
-    totalSupply = 9
-    maxSupply = 10
-    balanceOf = 11
-    getIssuer = 12
+    trigger = 0
+    supersede = 0
+    issue = 1
+    destroy = 2
+    split = 3
+    send = 4
+    transfer = 5
+    deposit = 6
+    withdraw = 7
+    total_supply = 8
+    max_supply = 9
+    balance_of = 10
+    get_issuer = 11
 
-    supersedeIndex = bytes([0])
-    issueIndex = bytes([1])
-    destroyIndex = bytes([2])
-    splitIndex = bytes([3])
-    sendIndex = bytes([4])
-    transferIndex = bytes([5])
-    depositIndex = bytes([6])
-    withdrawIndex = bytes([7])
-    totalSupplyIndex = bytes([8])
-    maxSupplyIndex = bytes([9])
-    balanceOfIndex = bytes([10])
-    getIssuerIndex = bytes([11])
+    supersede_index = bytes([0])
+    issue_index = bytes([1])
+    destroy_index = bytes([2])
+    split_index = bytes([3])
+    send_index = bytes([4])
+    transfer_index = bytes([5])
+    deposit_index = bytes([6])
+    withdraw_index = bytes([7])
+    total_supply_index = bytes([8])
+    max_supply_index = bytes([9])
+    balance_of_index = bytes([10])
+    get_issuer_index = bytes([11])
+
+    # funtype
+    non_return_type = bytes('',encoding ='utf-8')
+    on_init_trigger_type = 0
+    public_func_type = 0
 
     # datastack
-    initInput_maxIndex = bytes([0])
-    initInput_unityIndex = bytes([1])
-    initInput_shortTextIndex = bytes([2])
-    initInput_issuerLoadIndex = bytes([3])
+    trigger_input_max_index = bytes([0])
+    trigger_input_unity_index = bytes([1])
+    trigger_input_short_text_index = bytes([2])
+    trigger_input_issuer_load_index = bytes([3])
 
-    supersedeInput_newIssuerIndex = bytes([0])
-    supersedeInput_maker = bytes([1])
+    supersede_input_new_issuer_index = bytes([0])
+    supersede_input_maker = bytes([1])
 
-    splitInput_newUnityIndex = bytes([0])
-    splitInput_tokenIndex = bytes([1])
-    splitInput_issuerGetIndex = bytes([2])
+    split_input_new_unity_index = bytes([0])
+    split_input_token_index = bytes([1])
+    split_input_issuer_get_index = bytes([2])
 
-    destroyInput_destroyAmountIndex = bytes([0])
-    destroyInput_tokenIndex = bytes([1])
-    destroyInput_issuerGetIndex = bytes([2])
+    destroy_input_destroy_amount_index = bytes([0])
+    destroy_input_token_index = bytes([1])
+    destroy_input_issuer_get_index = bytes([2])
 
-    issueInput_amountIndex = bytes([0])
-    issueInput_tokenIndex = bytes([1])
-    issueInput_issuerGetIndex = bytes([2])
+    issue_input_amount_index = bytes([0])
+    issue_input_token_index = bytes([1])
+    issue_input_issuer_get_index = bytes([2])
 
-    sendInput_recipientIndex = bytes([0])
-    sendInput_amountIndex = bytes([1])
-    sendInput_tokenIndex = bytes([2])
-    sendInput_senderIndex = bytes([3])
+    send_input_recipient_index = bytes([0])
+    send_input_amount_index = bytes([1])
+    send_input_token_index = bytes([2])
+    send_input_sender_index = bytes([3])
 
-    transferInput_senderIndex = bytes([0])
-    transferInput_recipientIndex = bytes([1])
-    transferInput_amountIndex = bytes([2])
-    transferInput_tokenIndex = bytes([3])
+    transfer_input_sender_index = bytes([0])
+    transfer_input_recipient_index = bytes([1])
+    transfer_input_amount_index = bytes([2])
+    transfer_input_token_index = bytes([3])
 
-    depositInput_senderIndex = bytes([0])
-    depositInput_smartContractIndex = bytes([1])
-    depositInput_amountIndex = bytes([2])
-    depositInput_tokenIndex = bytes([3])
+    deposit_input_sender_index = bytes([0])
+    deposit_input_smart_contract_index = bytes([1])
+    deposit_input_amount_index = bytes([2])
+    deposit_input_token_index = bytes([3])
 
-    withdrawInput_smartContractIndex = bytes([0])
-    withdrawInput_recipientIndex = bytes([1])
-    withdrawInput_amountIndex = bytes([2])
-    withdrawInput_tokenIndex = bytes([3])
+    withdraw_input_smart_contract_index = bytes([0])
+    withdraw_input_recipient_index = bytes([1])
+    withdraw_input_amount_index = bytes([2])
+    withdraw_input_token_index = bytes([3])
 
-    totalSupplyInput_tokenIndex = bytes([0])
+    total_supply_input_token_index = bytes([0])
 
-    maxSupplyInput_tokenIndex = bytes([0])
+    max_supply_input_token_index = bytes([0])
 
-    balanceOfInput_accountIndex = bytes([0])
-    balanceOfInput_tokenIndex = bytes([1])
+    balance_of_input_account_index = bytes([0])
+    balance_of_input_token_index = bytes([1])
 
-    def contractBuilder(self, languageCode, languageVersion, split=False):
-        langCode = self.languageCodeBuilder(languageCode)
-        langVer = self.languageVersionBuilder(languageVersion)
-        initializer = self.initializerBuilder()
-        descriptor = self.descriptorBuilder(split)
-        stateVar = self.stateVarBuilder()
-        texture = self.textureBuilder(split)
-        # print(texture, len(texture))
-        return langCode + langVer + initializer + descriptor + stateVar + texture
+    def contract_builder(self, language_code, language_version, split=False):
+        lang_code = self.language_code_builder(language_code)
+        lang_ver = self.language_version_builder(language_version)
+        trigger = self.trigger_builder()
+        descriptor = self.descriptor_builder(split)
+        state_var = self.state_var_builder()
+        texture = self.texture_builder(split)
+        return lang_code + lang_ver + trigger + descriptor + state_var + texture
 
     # OpcId
-    def assertGteqZeroGen(self):
-        return self.opcAssertGteqZero()
-    def assertLteqGen(self):
-        return self.opcAssertLteq()
-    def assertLtInt64Gen(self):
-        return self.opcAssertLtInt64()
-    def assertGtZeroGen(self):
-        return self.opcAssertGtZero()
-    def assertEqGen(self):
-        return self.opcAssertEq()
-    def assertIsCallerOriginGen(self):
-        return self.opcAssertIsCallerOrigin()
-    def assertIsSignerOriginGen(self):
-        return self.opcAssertIsSignerOrigin()
-    def loadSingerGen(self):
-        return self.opcLoadSigner()
-    def loadCallerGen(self):
-        return self.opcLoadCaller()
-    def CDBVSetGen(self):
-        return self.opcCDBVSet()
-    def CDBVRGetGen(self):
-        return self.opcCDBVRGet()
-    def TDBNewTokenGen(self):
-        return self.opcTDBNewToken()
-    def TDBSplitGen(self):
-        return self.opcTDBSplit()
-    def TDBROpcGet(self):
-        return self.opcTDBROpcGet()
-    def TDBROpcTotalGen(self):
-        return self.opcTDBROpcTotal()
-    def TDBADepositGen(self):
-        return self.opcTDBADeposit()
-    def TDBAWithdrawGen(self):
-        return self.opcTDBAWithdraw()
-    def TDBATransferGen(self):
-        return self.opcTDBATransfer()
-    def TDBARBalanceGen(self):
-        return self.opcTDBARBalance()
+    def assert_gteq_zero_gen(self):
+        return self.opc_assert_gteq_zero()
+    def assert_lteq_gen(self):
+        return self.opc_assert_lteq()
+    def assert_lt_int64_gen(self):
+        return self.opc_assert_lt_int64()
+    def assert_gt_zero_gen(self):
+        return self.opc_assert_gt_zero()
+    def assert_eq_gen(self):
+        return self.opc_assert_eq()
+    def assert_is_caller_origin_gen(self):
+        return self.opc_assert_is_caller_origin()
+    def assert_is_signer_origin_gen(self):
+        return self.opc_assert_is_signer_origin()
+    def load_signer_gen(self):
+        return self.opc_load_signer()
+    def load_caller_gen(self):
+        return self.opc_load_caller()
+    def cdbv_set_gen(self):
+        return self.opc_cdbv_set()
+    def cdbvr_get_gen(self):
+        return self.opc_cdbvr_get()
+    def tdb_new_token_gen(self):
+        return self.opc_tdb_new_token()
+    def tdb_split_gen(self):
+        return self.opc_tdb_split()
+    def tdbr_opc_max(self):
+        return self.opc_tdbr_opc_max()
+    def tdbr_opc_total_gen(self):
+        return self.opc_tdbr_opc_total()
+    def tdba_deposit_gen(self):
+        return self.opc_tdba_deposit()
+    def tdba_withdraw_gen(self):
+        return self.opc_tdba_withdraw()
+    def tdba_transfer_gen(self):
+        return self.opc_tdba_transfer()
+    def tdbar_balance_gen(self):
+        return self.opc_tdbar_balance()
 
-    def opcAssertGteqZero(self):
-        return self.AssertOpc + self.GteqZeroAssert
+    def opc_assert_gteq_zero(self):
+        return self.assert_opc + self.gteq_zero_assert
 
-    def opcAssertLteq(self):
-        return self.AssertOpc + self.LteqAssert
+    def opc_assert_lteq(self):
+        return self.assert_opc + self.lteq_assert
 
-    def opcAssertLtInt64(self):
-        return self.AssertOpc + self.LtInt64Assert
+    def opc_assert_lt_int64(self):
+        return self.assert_opc + self.lt_int64_assert
 
-    def opcAssertGtZero(self):
-        return self.AssertOpc + self.GtZeroAssert
+    def opc_assert_gt_zero(self):
+        return self.assert_opc + self.gt_zero_assert
 
-    def opcAssertEq(self):
-        return self.AssertOpc + self.EqAssert
+    def opc_assert_eq(self):
+        return self.assert_opc + self.eq_assert
 
-    def opcAssertIsCallerOrigin(self):
-        return self.AssertOpc + self.IsCallerOriginAssert
+    def opc_assert_is_caller_origin(self):
+        return self.assert_opc + self.is_caller_origin_assert
 
-    def opcAssertIsSignerOrigin(self):
-        return self.AssertOpc + self.IsSignerOriginAssert
+    def opc_assert_is_signer_origin(self):
+        return self.assert_opc + self.is_signer_origin_assert
 
-    def opcLoadSigner(self):
-        return self.LoadOpc + self.SignerLoad
+    def opc_load_signer(self):
+        return self.load_opc + self.signer_load
 
-    def opcLoadCaller(self):
-        return self.LoadOpc + self.CallerLoad
+    def opc_load_caller(self):
+        return self.load_opc + self.caller_load
 
-    def opcCDBVSet(self):
-        return self.CDBVOpc + self.SetCDBV
+    def opc_cdbv_set(self):
+        return self.cdbv_opc + self.set_cdbv
 
-    def opcCDBVRGet(self):
-        return self.CDBVROpc + self.GetCDBVR
+    def opc_cdbvr_get(self):
+        return self.cdbvr_opc + self.get_cdbvr
 
-    def opcTDBNewToken(self):
-        return self.TDBOpc + self.NewTokenTDB
+    def opc_tdb_new_token(self):
+        return self.tdb_opc + self.new_token_tdb
 
-    def opcTDBSplit(self):
-        return self.TDBOpc + self.SplitTDB
+    def opc_tdb_split(self):
+        return self.tdb_opc + self.split_tdb
 
-    def opcTDBROpcGet(self):
-        return self.TDBROpc + self.GetTDBR
+    def opc_tdbr_opc_max(self):
+        return self.tdbr_opc + self.get_tdbr
 
-    def opcTDBROpcTotal(self):
-        return self.TDBROpc + self.TotalTDBR
+    def opc_tdbr_opc_total(self):
+        return self.tdbr_opc + self.total_tdbr
 
-    def opcTDBADeposit(self):
-        return self.TDBAOpc + self.DepositTDBA
+    def opc_tdba_deposit(self):
+        return self.tdba_opc + self.deposit_tdba
 
-    def opcTDBAWithdraw(self):
-        return self.TDBAOpc + self.WithdrawTDBA
+    def opc_tdba_withdraw(self):
+        return self.tdba_opc + self.withdraw_tdba
 
-    def opcTDBATransfer(self):
-        return self.TDBAOpc + self.TransferTDBA
+    def opc_tdba_transfer(self):
+        return self.tdba_opc + self.transfer_tdba
 
-    def opcTDBARBalance(self):
-        return self.TDBAROpc + self.BalanceTBDAR
+    def opc_tdbar_balance(self):
+        return self.tdbar_opc + self.balance_tdbar
 
-    def opcReturnValue(self):
-        return self.ReturnOpc + bytes([0])
+    def opc_return_value(self):
+        return self.return_opc + bytes([1])
 
     # languageCode
-    def languageCodeBuilder(self, code):
-        languageCode = serializeString(code)
-        return languageCode
+    def language_code_builder(self, code):
+        language_code = deser.serialize_string(code)
+        return language_code
 
     # languageVersion
-    def languageVersionBuilder(self, version):
+    def language_version_builder(self, version):
         return struct.pack(">I", version)
 
-    # initializer
-    def initializerBuilder(self):
-        return deser.serializeArray(self.initFunGen())
+    # trigger
+    def trigger_builder(self):
+        return deser.serialize_array(self.trigger_fun_gen())
 
     # descriptor
-    def descriptorBuilder(self, split):
+    def descriptor_builder(self, split):
         if(split is False):
-            descriptor = deser.serializeArrays(
-                [self.supersedeFunGen(), self.issueFunGen(), self.destroyFunGen(),
-                 self.sendFunGen(), self.transferFunGen(), self.depositFunGen(), self.withdrawFunGen(), self.totalSupplyFunGen(),
-                 self.maxSupplyFunGen(), self.balanceOfFunGen(), self.getIssuerFunGen()])
+            descriptor = deser.serialize_arrays(
+                [self.supersede_fun_gen(), self.issue_fun_gen(), self.destroy_fun_gen(),
+                 self.send_fun_gen(), self.transfer_fun_gen(), self.deposit_fun_gen(), self.withdraw_fun_gen(), self.total_supply_fun_gen(),
+                 self.max_supply_fun_gen(), self.balance_of_fun_gen(), self.get_issuer_fun_gen()])
         else:
-            descriptor = deser.serializeArrays([self.supersedeFunGen(), self.issueFunGen(), self.destroyFunGen(), self.splitFunGen(), self.sendFunGen(),
-                                                self.transferFunGen(), self.depositFunGen(), self.withdrawFunGen(), self.totalSupplyFunGen(),
-                                                self.maxSupplyFunGen(), self.balanceOfFunGen(), self.getIssuerFunGen()])
-        # print(descriptor)
-        return deser.serializeArray(descriptor)
+            descriptor = deser.serialize_arrays([self.supersede_fun_gen(), self.issue_fun_gen(), self.destroy_fun_gen(), self.split_fun_gen(), self.send_fun_gen(),
+                                                self.transfer_fun_gen(), self.deposit_fun_gen(), self.withdraw_fun_gen(), self.total_supply_fun_gen(),
+                                                self.max_supply_fun_gen(), self.balance_of_fun_gen(), self.get_issuer_fun_gen()])
+
+        return deser.serialize_array(descriptor)
 
 
     # stateVar
-    def stateVarBuilder(self):
-        stateVar = self.stateVarGen([self.statevar_issuer + self.Address, self.statevar_maker + self.Address,
-                                self.statevar_max + self.Amount, self.statevar_total + self.Amount,
-                                self.statevar_unity + self.Amount, self.statevar_shortText + self.ShortText])
-        return deser.serializeArray(stateVar)
+    def state_var_builder(self):
+        state_var = self.state_var_gen([self.state_var_issuer + self.address, self.state_var_maker + self.address])
+        return deser.serialize_array(state_var)
 
     # texture
-    def textureBuilder(self, split):
-        self._fixedSize = 4
-        self.stateVarName = ["issuer", "maker", "max", "total", "unity", "description"]
-        self.stateVarTexture = deser.serializeArrays([deser.serializeString(name) for name in self.stateVarName])
-        self.initializerTexture = deser.serializeArrays([self.initFuncBytes()])
+    def texture_builder(self, split):
+        self._fixed_size = 4
+        self.state_var_name = ["issuer", "maker"]
+        self.state_var_texture = deser.serialize_arrays([deser.serialize_string(name) for name in self.state_var_name])
+        self.trigger_texture = deser.serialize_arrays([self.trigger_func_bytes()])
         if(split is False):
-            self.descriptorTexture = deser.serializeArrays([self.supersedeFuncBytes(),
-                                                            self.issueFuncBytes(),
-                                                            self.destroyFuncBytes(),
-                                                            self.sendFuncBytes(),
-                                                            self.transferFuncBytes(),
-                                                            self.depositFuncBytes(),
-                                                            self.withdrawFuncBytes(),
-                                                            self.totalSupplyFuncBytes(),
-                                                            self.maxSupplyFuncBytes(),
-                                                            self.balanceOfFuncBytes(),
-                                                            self.getIssuerFuncBytes()])
+            self.descriptor_texture = deser.serialize_arrays([self.supersede_func_bytes(),
+                                                            self.issue_func_bytes(),
+                                                            self.destroy_func_bytes(),
+                                                            self.send_func_bytes(),
+                                                            self.transfer_func_bytes(),
+                                                            self.deposit_func_bytes(),
+                                                            self.withdraw_func_bytes(),
+                                                            self.total_supply_func_bytes(),
+                                                            self.max_supply_func_bytes(),
+                                                            self.balance_of_func_bytes(),
+                                                            self.get_issuer_func_bytes()])
         else:
-            self.descriptorTexture = deser.serializeArrays([self.supersedeFuncBytes(),
-                                                            self.issueFuncBytes(),
-                                                            self.destroyFuncBytes(),
-                                                            self.splitFuncBytes(),
-                                                            self.sendFuncBytes(),
-                                                            self.transferFuncBytes(),
-                                                            self.depositFuncBytes(),
-                                                            self.withdrawFuncBytes(),
-                                                            self.totalSupplyFuncBytes(),
-                                                            self.maxSupplyFuncBytes(),
-                                                            self.balanceOfFuncBytes(),
-                                                            self.getIssuerFuncBytes()])
+            self.descriptor_texture = deser.serialize_arrays([self.supersede_func_bytes(),
+                                                            self.issue_func_bytes(),
+                                                            self.destroy_func_bytes(),
+                                                            self.split_func_bytes(),
+                                                            self.send_func_bytes(),
+                                                            self.transfer_func_bytes(),
+                                                            self.deposit_func_bytes(),
+                                                            self.withdraw_func_bytes(),
+                                                            self.total_supply_func_bytes(),
+                                                            self.max_supply_func_bytes(),
+                                                            self.balance_of_func_bytes(),
+                                                            self.get_issuer_func_bytes()])
 
-        self.textureRightGen = self.textureGen(self.initializerTexture, self.descriptorTexture, self.stateVarTexture)
-        return self.textureRightGen
+        self.texture_right_gen = self.texture_gen(self.trigger_texture, self.descriptor_texture, self.state_var_texture)
+        return self.texture_right_gen
 
-    def textureRandomGen(self):
-        texture = bytearray(os.urandom(self._fixedSize))
+    def texture_random_gen(self):
+        texture = bytearray(os.urandom(self._fixed_size))
         return texture
 
-    def textureGen(self, initialization, description, stateVar):
-        return deser.serializeArrays([initialization, description, stateVar])
+    def texture_gen(self, trigger, description, state_var):
+        return deser.serialize_arrays([trigger, description, state_var])
 
-    def textureFunGen(self, name, ret, para):
-        funcByte = deser.serializeArray(deser.serializeString(name))
-        retByte = deser.serializeArray(deser.serializeString(ret))
-        paraByte = deser.serializeArrays([deser.serializeString(p) for p in para])
-        texture = funcByte + retByte + paraByte
+    def texture_fun_gen(self, name, ret, para):
+        func_byte = deser.serialize_array(deser.serialize_string(name))
+        ret_byte = deser.serialize_array(deser.serialize_arrays([deser.serialize_string(r) for r in ret]))
+        para_byte = deser.serialize_arrays([deser.serialize_string(p) for p in para])
+        texture = func_byte + ret_byte + para_byte
         return texture
 
 
-    def initFuncBytes(self):
-        return self.textureFunGen("init", "void", self.initPara)
+    def trigger_func_bytes(self):
+        return self.texture_fun_gen("trigger", [], self.trigger_para)
 
-    def supersedeFuncBytes(self):
-        return self.textureFunGen("supersede", "void", self.supersedePara)
+    def supersede_func_bytes(self):
+        return self.texture_fun_gen("supersede", [], self.supersede_para)
 
-    def issueFuncBytes(self):
-        return self.textureFunGen("issue", "void", self.issuePara)
+    def issue_func_bytes(self):
+        return self.texture_fun_gen("issue", [], self.issue_para)
 
-    def destroyFuncBytes(self):
-        return self.textureFunGen("destroy", "void", self.destroyPara)
+    def destroy_func_bytes(self):
+        return self.texture_fun_gen("destroy", [], self.destroy_para)
 
-    def splitFuncBytes(self):
-        return self.textureFunGen("split", "void", self.splitPara)
+    def split_func_bytes(self):
+        return self.texture_fun_gen("split", [], self.split_para)
 
-    def sendFuncBytes(self):
-        return self.textureFunGen("send", "void", self.sendPara)
+    def send_func_bytes(self):
+        return self.texture_fun_gen("send", [], self.send_para)
 
-    def transferFuncBytes(self):
-        return self.textureFunGen("transfer", "void", self.transferPara)
+    def transfer_func_bytes(self):
+        return self.texture_fun_gen("transfer", [], self.transfer_para)
 
-    def depositFuncBytes(self):
-        return self.textureFunGen("deposit", "void", self.depositPara)
+    def deposit_func_bytes(self):
+        return self.texture_fun_gen("deposit", [], self.deposit_para)
 
-    def withdrawFuncBytes(self):
-        return self.textureFunGen("withdraw", "void", self.withdrawPara)
+    def withdraw_func_bytes(self):
+        return self.texture_fun_gen("withdraw", [], self.withdraw_para)
 
-    def totalSupplyFuncBytes(self):
-        return self.textureFunGen("totalSupply", "amount", self.totalSupplyPara)
+    def total_supply_func_bytes(self):
+        return self.texture_fun_gen("totalSupply", ["total"], self.total_supply_para)
 
-    def maxSupplyFuncBytes(self):
-        return self.textureFunGen("maxSupply", "amount", self.maxSupplyPara)
+    def max_supply_func_bytes(self):
+        return self.texture_fun_gen("maxSupply", ["max"], self.max_supply_para)
 
-    def balanceOfFuncBytes(self):
-        return self.textureFunGen("balanceOf", "amount", self.balanceOfPara)
+    def balance_of_func_bytes(self):
+        return self.texture_fun_gen("balanceOf", ["balance"], self.balance_of_para)
 
-    def getIssuerFuncBytes(self):
-        return self.textureFunGen("getIssuer", "issuer", self.getIssuerPara)
+    def get_issuer_func_bytes(self):
+        return self.texture_fun_gen("getIssuer", ["issuer"], self.get_issuer_para)
 
 
     # statevar
-    def statevar_builder(self):
-        self.fixedSize = 2
+    def state_var_random_gen(self):
+        self.fixed_size = 2
+        state_var = bytearray(os.urandom(self.fixed_size))
+        return state_var
 
-    def stateVarRandomGen(self):
-        statevar = bytearray(os.urandom(self.fixedSize))
-        return statevar
+    def state_var_gen(self, state_vars):
+        state_vars = deser.serialize_arrays(state_vars)
+        return state_vars
 
-    def stateVarGen(self, stateVars):
-        stateVars = deser.serializeArrays(stateVars)
-        return stateVars
-
-    def aFunctionGen(self, funIdx, protoType, listOpc):
-        fun = funIdx + protoType + listOpc
+    def a_function_gen(self, fun_idx, fun_type, proto_type, list_opc):
+        fun = fun_idx + fun_type + proto_type + list_opc
         return fun
 
-    def initFunGen(self):
-        fun = self.aFunctionGen(self.initFunIdGen(), self.protoTypeInitGen(), self.initOpcLineGen())
+    def trigger_fun_gen(self):
+        fun = self.a_function_gen(self.trigger_fun_id_gen(), self.trigger_fun_type_gen(), self.proto_type_trigger_gen(), self.trigger_opc_line_gen())
         return fun
 
-    def supersedeFunGen(self):
-        fun = self.aFunctionGen(self.supersedeFunIdGen(), self.protoTypeSupersedeGen(), self.supersedeOpcLineGen())
+    def supersede_fun_gen(self):
+        fun = self.a_function_gen(self.supersede_fun_id_gen(), self.supersede_fun_type_gen(), self.proto_type_supersede_gen(), self.supersede_opc_line_gen())
         return fun
 
-    def issueFunGen(self):
-        fun = self.aFunctionGen(self.issueFunIdGen(), self.protoTypeIssueGen(), self.issueOpcLineGen())
+    def issue_fun_gen(self):
+        fun = self.a_function_gen(self.issue_fun_id_gen(), self.issue_fun_type_gen(), self.proto_type_issue_gen(), self.issue_opc_line_gen())
         return fun
 
-    def destroyFunGen(self):
-        fun = self.aFunctionGen(self.destroyFunIdGen(), self.protoTypeDestroyGen(), self.destroyOpcLineGen())
+    def destroy_fun_gen(self):
+        fun = self.a_function_gen(self.destroy_fun_id_gen(), self.destroy_fun_type_gen(), self.proto_type_destroy_gen(), self.destroy_opc_line_gen())
         return fun
 
-    def splitFunGen(self):
-        fun = self.aFunctionGen(self.splitFunIdGen(), self.protoTypeSplitGen(), self.splitOpcLineGen())
+    def split_fun_gen(self):
+        fun = self.a_function_gen(self.split_fun_id_gen(), self.split_fun_type_gen(), self.proto_type_split_gen(), self.split_opc_line_gen())
         return fun
 
-    def sendFunGen(self):
-        fun = self.aFunctionGen(self.sendFunIdGen(), self.protoTypeSendGen(), self.sendOpcLineGen())
+    def send_fun_gen(self):
+        fun = self.a_function_gen(self.send_fun_id_gen(), self.send_fun_type_gen(), self.proto_type_send_gen(), self.send_opc_line_gen())
         return fun
 
-    def transferFunGen(self):
-        fun = self.aFunctionGen(self.transferFunIdGen(), self.protoTypeTransferGen(), self.transferOpcLineGen())
+    def transfer_fun_gen(self):
+        fun = self.a_function_gen(self.transfer_fun_id_gen(), self.transfer_fun_type_gen(), self.proto_type_transfer_gen(), self.transfer_opc_line_gen())
         return fun
 
-    def depositFunGen(self):
-        fun = self.aFunctionGen(self.depositFunIdGen(), self.protoTypeDepositGen(), self.depositOpcLineGen())
+    def deposit_fun_gen(self):
+        fun = self.a_function_gen(self.deposit_fun_id_gen(), self.deposit_fun_type_gen(), self.proto_type_deposit_gen(), self.deposit_opc_line_gen())
         return fun
 
-    def withdrawFunGen(self):
-        fun = self.aFunctionGen(self.withdrawFunIdGen(), self.protoTypeWithdrawGen(), self.withdrawOpcLineGen())
+    def withdraw_fun_gen(self):
+        fun = self.a_function_gen(self.withdraw_fun_id_gen(), self.withdraw_fun_type_gen(), self.proto_type_withdraw_gen(), self.withdraw_opc_line_gen())
         return fun
 
-    def totalSupplyFunGen(self):
-        fun = self.aFunctionGen(self.totalSupplyFunIdGen(), self.protoTypeTotalSupplyGen(), self.totalSupplyOpcLineGen())
+    def total_supply_fun_gen(self):
+        fun = self.a_function_gen(self.total_supply_fun_id_gen(), self.total_supply_fun_type_gen(), self.proto_type_total_supply_gen(), self.total_supply_opc_line_gen())
         return fun
 
-    def maxSupplyFunGen(self):
-        fun = self.aFunctionGen(self.maxSupplyFunIdGen(), self.protoTypeMaxSupplyGen(), self.maxSupplyOpcLineGen())
+    def max_supply_fun_gen(self):
+        fun = self.a_function_gen(self.max_supply_fun_id_gen(), self.max_supply_fun_type_gen(), self.proto_type_max_supply_gen(), self.max_supply_opc_line_gen())
         return fun
 
-    def balanceOfFunGen(self):
-        fun = self.aFunctionGen(self.balanceOfFunIdGen(), self.protoTypeBalanceOfGen(), self.balanceOfOpcLineGen())
+    def balance_of_fun_gen(self):
+        fun = self.a_function_gen(self.balance_of_fun_id_gen(), self.balance_of_fun_type_gen(), self.proto_type_balance_of_gen(), self.balance_of_opc_line_gen())
         return fun
 
-    def getIssuerFunGen(self):
-        fun = self.aFunctionGen(self.getIssuerFunIdGen(), self.protoTypeGetIssuerGen(), self.getIssuerOpcLineGen())
+    def get_issuer_fun_gen(self):
+        fun = self.a_function_gen(self.get_issuer_fun_id_gen(), self.get_issuer_fun_type_gen(), self.proto_type_get_issuer_gen(), self.get_issuer_opc_line_gen())
         return fun
 
     # funid
-    def initFunIdGen(self):
-        return struct.pack(">H", self.init)
-    def supersedeFunIdGen(self):
+    def trigger_fun_id_gen(self):
+        return struct.pack(">H", self.trigger)
+    def supersede_fun_id_gen(self):
         return struct.pack(">H", self.supersede)
-    def issueFunIdGen(self):
+    def issue_fun_id_gen(self):
         return struct.pack(">H", self.issue)
-    def destroyFunIdGen(self):
+    def destroy_fun_id_gen(self):
         return struct.pack(">H", self.destroy)
-    def splitFunIdGen(self):
+    def split_fun_id_gen(self):
         return struct.pack(">H", self.split)
-    def sendFunIdGen(self):
+    def send_fun_id_gen(self):
         return struct.pack(">H", self.send)
-    def transferFunIdGen(self):
+    def transfer_fun_id_gen(self):
         return struct.pack(">H", self.transfer)
-    def depositFunIdGen(self):
+    def deposit_fun_id_gen(self):
         return struct.pack(">H", self.deposit)
-    def withdrawFunIdGen(self):
+    def withdraw_fun_id_gen(self):
         return struct.pack(">H", self.withdraw)
-    def totalSupplyFunIdGen(self):
-        return struct.pack(">H", self.totalSupply)
-    def maxSupplyFunIdGen(self):
-        return struct.pack(">H", self.maxSupply)
-    def balanceOfFunIdGen(self):
-        return struct.pack(">H", self.balanceOf)
-    def getIssuerFunIdGen(self):
-        return struct.pack(">H", self.getIssuer)
+    def total_supply_fun_id_gen(self):
+        return struct.pack(">H", self.total_supply)
+    def max_supply_fun_id_gen(self):
+        return struct.pack(">H", self.max_supply)
+    def balance_of_fun_id_gen(self):
+        return struct.pack(">H", self.balance_of)
+    def get_issuer_fun_id_gen(self):
+        return struct.pack(">H", self.get_issuer)
+
+    # funtype
+    def trigger_fun_type_gen(self):
+        return bytes([self.on_init_trigger_type])
+    def supersede_fun_type_gen(self):
+        return bytes([self.public_func_type])
+    def issue_fun_type_gen(self):
+        return bytes([self.public_func_type])
+    def destroy_fun_type_gen(self):
+        return bytes([self.public_func_type])
+    def split_fun_type_gen(self):
+        return bytes([self.public_func_type])
+    def send_fun_type_gen(self):
+        return bytes([self.public_func_type])
+    def transfer_fun_type_gen(self):
+        return bytes([self.public_func_type])
+    def deposit_fun_type_gen(self):
+        return bytes([self.public_func_type])
+    def withdraw_fun_type_gen(self):
+        return bytes([self.public_func_type])
+    def total_supply_fun_type_gen(self):
+        return bytes([self.public_func_type])
+    def max_supply_fun_type_gen(self):
+        return bytes([self.public_func_type])
+    def balance_of_fun_type_gen(self):
+        return bytes([self.public_func_type])
+    def get_issuer_fun_type_gen(self):
+        return bytes([self.public_func_type])
 
     # prototype
-    def protoTypeGen(self, returnType, listParaTypes):
-        length = struct.pack(">H", len(listParaTypes) + 1)
-        protoType = length + returnType + listParaTypes
-        return protoType
+    def proto_type_gen(self, return_type, list_para_types):
+        proto_type = deser.serialize_array(return_type) + deser.serialize_array(list_para_types)
+        return proto_type
 
-    def returnType(self):
-        return bytes([1])
+    def trigger_para_type_wrong(self):
+        return [self.amount, self.amount]
 
-    def initParaTypeWrong(self):
-        return self.Amount + self.Amount
+    def trigger_para_type(self):
+        return [self.amount, self.amount, self.short_text]
 
-    def initParaType(self):
-        return self.Amount + self.Amount + self.ShortText
+    def supersede_para_type(self):
+        return [self.account]
 
-    def supersedeParaType(self):
-        return self.Account
+    def issue_para_type(self):
+        return [self.amount, self.int32]
 
-    def issueParaType(self):
-        return self.Amount + self.Int32
+    def destroy_para_type(self):
+        return [self.amount + self.int32]
 
-    def destroyParaType(self):
-        return self.Amount + self.Int32
+    def split_para_type(self):
+        return [self.amount + self.int32]
 
-    def splitParaType(self):
-        return self.Amount + self.Int32
+    def send_para_type(self):
+        return [self.account + self.amount + self.int32]
 
-    def sendParaType(self):
-        return self.Account + self.Amount + self.Int32
+    def transfer_para_type(self):
+        return [self.account + self.account + self.amount + self.int32]
 
-    def transferParaType(self):
-        return self.Account + self.Account + self.Amount + self.Int32
+    def deposit_para_type(self):
+        return [self.account + self.contract_account + self.amount + self.int32]
 
-    def depositParaType(self):
-        return self.Account + self.ContractAccount + self.Amount + self.Int32
+    def withdraw_para_type(self):
+        return [self.contract_account + self.account + self.amount + self.int32]
 
-    def withdrawParaType(self):
-        return self.ContractAccount + self.Account + self.Amount + self.Int32
+    def total_supply_para_type(self):
+        return [self.int32]
 
-    def totalSupplyParaType(self):
-        return self.Int32
+    def max_supply_para_type(self):
+        return [self.int32]
 
-    def maxSupplyParaType(self):
-        return self.Int32
+    def balance_of_para_type(self):
+        return [self.account + self.int32]
 
-    def balanceOfParaType(self):
-        return self.Account + self.Int32
+    def get_issuer_para_type(self):
+        return [bytes('',encoding ='utf-8')]
 
-    def getIssuerParaType(self):
-        return bytes('',encoding ='utf-8')
+    def proto_type_trigger_wrong_gen(self):
+        return self.proto_type_gen(self.non_return_type, self.trigger_para_type_wrong())
 
-    def protoTypeInitWrongGen(self):
-        return self.protoTypeGen(self.returnType(), self.initParaTypeWrong())
+    def proto_type_trigger_gen(self):
+        return self.proto_type_gen(self.non_return_type, self.trigger_para_type())
 
-    def protoTypeInitGen(self):
-        return self.protoTypeGen(self.returnType(), self.initParaType())
+    def proto_type_supersede_gen(self):
+        return self.proto_type_gen(self.non_return_type, self.supersede_para_type())
 
-    def protoTypeSupersedeGen(self):
-        return self.protoTypeGen(self.returnType(), self.supersedeParaType())
+    def proto_type_issue_gen(self):
+        return self.proto_type_gen(self.non_return_type, self.issue_para_type())
 
-    def protoTypeIssueGen(self):
-        return self.protoTypeGen(self.returnType(), self.issueParaType())
+    def proto_type_destroy_gen(self):
+        return self.proto_type_gen(self.non_return_type, self.destroy_para_type())
 
-    def protoTypeDestroyGen(self):
-        return self.protoTypeGen(self.returnType(), self.destroyParaType())
+    def proto_type_split_gen(self):
+        return self.proto_type_gen(self.non_return_type, self.split_para_type())
 
-    def protoTypeSplitGen(self):
-        return self.protoTypeGen(self.returnType(), self.splitParaType())
+    def proto_type_send_gen(self):
+        return self.proto_type_gen(self.non_return_type, self.send_para_type())
 
-    def protoTypeSendGen(self):
-        return self.protoTypeGen(self.returnType(), self.sendParaType())
+    def proto_type_transfer_gen(self):
+        return self.proto_type_gen(self.non_return_type, self.transfer_para_type())
 
-    def protoTypeTransferGen(self):
-        return self.protoTypeGen(self.returnType(), self.transferParaType())
+    def proto_type_deposit_gen(self):
+        return self.proto_type_gen(self.non_return_type, self.deposit_para_type())
 
-    def protoTypeDepositGen(self):
-        return self.protoTypeGen(self.returnType(), self.depositParaType())
+    def proto_type_withdraw_gen(self):
+        return self.proto_type_gen(self.non_return_type, self.withdraw_para_type())
 
-    def protoTypeWithdrawGen(self):
-        return self.protoTypeGen(self.returnType(), self.withdrawParaType())
+    def proto_type_total_supply_gen(self):
+        return self.proto_type_gen([self.amount], self.total_supply_para_type())
 
-    def protoTypeTotalSupplyGen(self):
-        return self.protoTypeGen(self.returnType(), self.totalSupplyParaType())
+    def proto_type_max_supply_gen(self):
+        return self.proto_type_gen([self.amount], self.max_supply_para_type())
 
-    def protoTypeMaxSupplyGen(self):
-        return self.protoTypeGen(self.returnType(), self.maxSupplyParaType())
+    def proto_type_balance_of_gen(self):
+        return self.proto_type_gen([self.amount], self.balance_of_para_type())
 
-    def protoTypeBalanceOfGen(self):
-        return self.protoTypeGen(self.returnType(), self.balanceOfParaType())
-
-    def protoTypeGetIssuerGen(self):
-        return self.protoTypeGen(self.returnType(), self.getIssuerParaType())
+    def proto_type_get_issuer_gen(self):
+        return self.proto_type_gen([self.account], self.get_issuer_para_type())
 
 
     # listopc
-    def listOpcGen(self, ids, indexInput):
-        length = struct.pack(">H", sum(list(map(lambda x: len(x[0]+x[1])+2, list(zip(ids, indexInput))))) + 2)
-        numOpc = struct.pack(">H", len(ids))
-        listOpc = bytes(itertools.chain.from_iterable(list(map(lambda x: struct.pack(">H",len(x[0]+x[1]))+x[0]+x[1], list(zip(ids, indexInput))))))
-        lenListOpc = length + numOpc + listOpc
-        return lenListOpc
+    def list_opc_gen(self, ids, index_input):
+        length = struct.pack(">H", sum(list(map(lambda x: len(x[0]+x[1])+2, list(zip(ids, index_input))))) + 2)
+        num_opc = struct.pack(">H", len(ids))
+        list_opc = bytes(itertools.chain.from_iterable(list(map(lambda x: struct.pack(">H",len(x[0]+x[1]))+x[0]+x[1], list(zip(ids, index_input))))))
+        len_list_opc = length + num_opc + list_opc
+        return len_list_opc
 
 
-    def initOpcLineWrongTDBGen(self):
-        return self.listOpcGen(self.initWrongTDBOpc(), self.initOpcIndex())
+    def trigger_opc_line_wrong_tdb_gen(self):
+        return self.list_opc_gen(self.trigger_wrong_tdb_opc(), self.trigger_opc_index())
 
-    def initOpcLineGen(self):
-        return self.listOpcGen(self.initOpc(), self.initOpcIndex())
+    def trigger_opc_line_gen(self):
+        return self.list_opc_gen(self.trigger_opc(), self.trigger_opc_index())
 
-    def supersedeOpcLineGen(self):
-        return self.listOpcGen(self.supersedeOpc(), self.supersedeOpcIndex())
+    def supersede_opc_line_gen(self):
+        return self.list_opc_gen(self.supersede_opc(), self.supersede_opc_index())
 
-    def issueOpcLineGen(self):
-        return self.listOpcGen(self.issueOpc(), self.issueOpcIndex())
+    def issue_opc_line_gen(self):
+        return self.list_opc_gen(self.issue_opc(), self.issue_opc_index())
 
-    def destroyOpcLineGen(self):
-        return self.listOpcGen(self.destroyOpc(), self.destroyOpcIndex())
+    def destroy_opc_line_gen(self):
+        return self.list_opc_gen(self.destroy_opc(), self.destroy_opc_index())
 
-    def splitOpcLineGen(self):
-        return self.listOpcGen(self.splitOpc(), self.splitOpcIndex())
+    def split_opc_line_gen(self):
+        return self.list_opc_gen(self.split_opc(), self.split_opc_index())
 
-    def sendOpcLineGen(self):
-        return self.listOpcGen(self.sendOpc(), self.sendOpcIndex())
+    def send_opc_line_gen(self):
+        return self.list_opc_gen(self.send_opc(), self.send_opc_index())
 
-    def transferOpcLineGen(self):
-        return self.listOpcGen(self.transferOpc(), self.transferOpcIndex())
+    def transfer_opc_line_gen(self):
+        return self.list_opc_gen(self.transfer_opc(), self.transfer_opc_index())
 
-    def depositOpcLineGen(self):
-        return self.listOpcGen(self.depositOpc(), self.depositOpcIndex())
+    def deposit_opc_line_gen(self):
+        return self.list_opc_gen(self.deposit_opc(), self.deposit_opc_index())
 
-    def withdrawOpcLineGen(self):
-        return self.listOpcGen(self.withdrawOpc(), self.withdrawOpcIndex())
+    def withdraw_opc_line_gen(self):
+        return self.list_opc_gen(self.withdraw_opc(), self.withdraw_opc_index())
 
-    def totalSupplyOpcLineGen(self):
-        return self.listOpcGen(self.totalSupplyOpc(), self.totalSupplyOpcIndex())
+    def total_supply_opc_line_gen(self):
+        return self.list_opc_gen(self.total_supply_opc(), self.total_supply_opc_index())
 
-    def maxSupplyOpcLineGen(self):
-        return self.listOpcGen(self.maxSupplyOpc(), self.maxSupplyOpcIndex())
+    def max_supply_opc_line_gen(self):
+        return self.list_opc_gen(self.max_supply_opc(), self.max_supply_opc_index())
 
-    def balanceOfOpcLineGen(self):
-        return self.listOpcGen(self.balanceOfOpc(), self.balanceOfOpcIndex())
+    def balance_of_opc_line_gen(self):
+        return self.list_opc_gen(self.balance_of_opc(), self.balance_of_opc_index())
 
-    def getIssuerOpcLineGen(self):
-        return self.listOpcGen(self.getIssuerOpc(), self.getIssuerOpcIndex())
+    def get_issuer_opc_line_gen(self):
+        return self.list_opc_gen(self.get_issuer_opc(), self.get_issuer_opc_index())
 
-    def opcLoadSignerIndex(self):
-        return bytes('',encoding ='utf-8')
+    def opc_load_signer_index(self):
+        return bytes([3])
 
-    def opcLoadCallerIndex(self):
-        return bytes('',encoding ='utf-8')
+    def opc_load_caller_index(self):
+        return bytes([3])
 
-    def initOpcCDBVSetSignerIndex(self):
-        return self.statevar_issuer + self.initInput_issuerLoadIndex
+    def trigger_opc_cdbv_set_signer_index(self):
+        return self.state_var_issuer + self.trigger_input_issuer_load_index
 
-    def initOpcCDBVSetMakerIndex(self):
-        return self.statevar_maker + self.initInput_issuerLoadIndex
+    def trigger_opc_cdbv_set_maker_index(self):
+        return self.state_var_maker + self.trigger_input_issuer_load_index
 
-    def initOpcTDBNewTokenIndex(self):
-        return self.statevar_max + self.statevar_total + self.statevar_unity + \
-               self.statevar_shortText + self.initInput_maxIndex + self.initInput_unityIndex +\
-               self.initInput_shortTextIndex
+    def trigger_opc_tdb_new_token_index(self):
+        return self.trigger_input_max_index + self.trigger_input_unity_index + self.trigger_input_short_text_index
 
-    def initWrongTDBOpc(self):
-        return [self.opcLoadSigner(), self.opcCDBVSet(), self.opcCDBVSet(), bytes([5]), bytes([3])]
+    def trigger_wrong_tdb_opc(self):
+        return [self.opc_load_signer(), self.opc_cdbv_set(), self.opc_cdbv_set(), bytes([5]), bytes([3])]
 
-    def initOpc(self):
-        return [self.opcLoadSigner(), self.opcCDBVSet(), self.opcCDBVSet(), self.opcTDBNewToken()]
+    def trigger_opc(self):
+        return [self.opc_load_signer(), self.opc_cdbv_set(), self.opc_cdbv_set(), self.opc_tdb_new_token()]
 
-    def initOpcIndex(self):
-        return [self.opcLoadSignerIndex(), self.initOpcCDBVSetSignerIndex(), self.initOpcCDBVSetMakerIndex(), self.initOpcTDBNewTokenIndex()]
+    def trigger_opc_index(self):
+        return [self.opc_load_signer_index(), self.trigger_opc_cdbv_set_signer_index(), self.trigger_opc_cdbv_set_maker_index(), self.trigger_opc_tdb_new_token_index()]
 
-    def supersedeOpcCDBVRGetIndex(self):
-        return self.statevar_maker
+    def supersede_opc_cdbvr_get_index(self):
+        return self.state_var_maker + bytes([1])
 
-    def superAssertIsSignerOriginIndex(self):
-        return self.supersedeInput_maker
+    def supersede_assert_is_signer_origin_index(self):
+        return self.supersede_input_maker
 
-    def supersedeOpcCDBVSetIndex(self):
-        return self.statevar_issuer + self.supersedeInput_newIssuerIndex
+    def supersede_opc_cdbv_set_index(self):
+        return self.state_var_issuer + self.supersede_input_new_issuer_index
 
-    def supersedeOpc(self):
-        return [self.opcCDBVRGet(), self.opcAssertIsSignerOrigin(), self.opcCDBVSet()]
+    def supersede_opc(self):
+        return [self.opc_cdbvr_get(), self.opc_assert_is_signer_origin(), self.opc_cdbv_set()]
 
-    def supersedeOpcIndex(self):
-        return [self.supersedeOpcCDBVRGetIndex(), self.superAssertIsSignerOriginIndex(), self.supersedeOpcCDBVSetIndex()]
+    def supersede_opc_index(self):
+        return [self.supersede_opc_cdbvr_get_index(), self.supersede_assert_is_signer_origin_index(), self.supersede_opc_cdbv_set_index()]
 
-    def issueOpcCDBVRGetIndex(self):
-        return self.statevar_issuer
+    def issue_opc_cdbvr_get_index(self):
+        return self.state_var_issuer + bytes([2])
 
-    def issueOpcAssertIsCallerOriginIndex(self):
-        return self.issueInput_issuerGetIndex
+    def issue_opc_assert_is_caller_origin_index(self):
+        return self.issue_input_issuer_get_index
 
-    def issueOpcTDBADepositIndex(self):
-        return self.statevar_max + self.statevar_total + self.issueInput_issuerGetIndex + self.issueInput_amountIndex + self.issueInput_tokenIndex
+    def issue_opc_tdba_deposit_index(self):
+        return self.issue_input_issuer_get_index + self.issue_input_amount_index + self.issue_input_token_index
 
-    def issueOpc(self):
-        return [self.opcCDBVRGet(), self.opcAssertIsCallerOrigin(), self.opcTDBADeposit()]
+    def issue_opc(self):
+        return [self.opc_cdbvr_get(), self.opc_assert_is_caller_origin(), self.opc_tdba_deposit()]
 
-    def issueOpcIndex(self):
-        return [self.issueOpcCDBVRGetIndex(), self.issueOpcAssertIsCallerOriginIndex(), self.issueOpcTDBADepositIndex()]
+    def issue_opc_index(self):
+        return [self.issue_opc_cdbvr_get_index(), self.issue_opc_assert_is_caller_origin_index(), self.issue_opc_tdba_deposit_index()]
 
-    def destroyOpcCDBVRGetIndex(self):
-        return self.statevar_issuer
+    def destroy_opc_cdbvr_get_index(self):
+        return self.state_var_issuer + bytes([2])
 
-    def destroyOpcAssertIsCallerOriginIndex(self):
-        return self.destroyInput_issuerGetIndex
+    def destroy_opc_assert_is_caller_origin_index(self):
+        return self.destroy_input_issuer_get_index
 
-    def destroyOpcTDBAWithdrawIndex(self):
-        return self.statevar_total + self.destroyInput_issuerGetIndex + self.destroyInput_destroyAmountIndex + self.destroyInput_tokenIndex
+    def destroy_opc_tdba_withdraw_index(self):
+        return self.destroy_input_issuer_get_index + self.destroy_input_destroy_amount_index + self.destroy_input_token_index
 
-    def destroyOpc(self):
-        return [self.opcCDBVRGet(), self.opcAssertIsCallerOrigin(), self.opcTDBAWithdraw()]
+    def destroy_opc(self):
+        return [self.opc_cdbvr_get(), self.opc_assert_is_caller_origin(), self.opc_tdba_withdraw()]
 
-    def destroyOpcIndex(self):
-        return [self.destroyOpcCDBVRGetIndex(), self.destroyOpcAssertIsCallerOriginIndex(), self.destroyOpcTDBAWithdrawIndex()]
+    def destroy_opc_index(self):
+        return [self.destroy_opc_cdbvr_get_index(), self.destroy_opc_assert_is_caller_origin_index(), self.destroy_opc_tdba_withdraw_index()]
 
-    def splitOpcCDBVRGetIndex(self):
-        return self.statevar_issuer
+    def split_opc_cdbvr_get_index(self):
+        return self.state_var_issuer + bytes([2])
 
-    def splitOpcAssertIsCallerOriginIndex(self):
-        return self.splitInput_issuerGetIndex
+    def split_opc_assert_is_caller_origin_index(self):
+        return self.split_input_issuer_get_index
 
-    def splitOpcTDBSplitIndex(self):
-        return self.statevar_unity + self.splitInput_newUnityIndex + self.splitInput_tokenIndex
+    def split_opc_tdb_split_index(self):
+        return self.split_input_new_unity_index + self.split_input_token_index
 
-    def splitOpc(self):
-        return [self.opcCDBVRGet(), self.opcAssertIsCallerOrigin(), self.opcTDBSplit()]
+    def split_opc(self):
+        return [self.opc_cdbvr_get(), self.opc_assert_is_caller_origin(), self.opc_tdb_split()]
 
-    def splitOpcIndex(self):
-        return [self.splitOpcCDBVRGetIndex(), self.splitOpcAssertIsCallerOriginIndex(), self.splitOpcTDBSplitIndex()]
+    def split_opc_index(self):
+        return [self.split_opc_cdbvr_get_index(), self.split_opc_assert_is_caller_origin_index(), self.split_opc_tdb_split_index()]
 
-    def sendOpcTDBATransferIndex(self):
-        return self.sendInput_senderIndex + self.sendInput_recipientIndex + self.sendInput_amountIndex + self.sendInput_tokenIndex
+    def send_opc_tdba_transfer_index(self):
+        return self.send_input_sender_index + self.send_input_recipient_index + self.send_input_amount_index + self.send_input_token_index
 
-    def sendOpc(self):
-        return [self.opcLoadCaller(), self.opcTDBATransfer()]
+    def send_opc(self):
+        return [self.opc_load_caller(), self.opc_tdba_transfer()]
 
-    def sendOpcIndex(self):
-        return [self.opcLoadCallerIndex(), self.sendOpcTDBATransferIndex()]
+    def send_opc_index(self):
+        return [self.opc_load_caller_index(), self.send_opc_tdba_transfer_index()]
 
-    def transferOpcAssertIsCallerOriginIndex(self):
-        return self.transferInput_senderIndex
+    def transfer_opc_assert_is_caller_origin_index(self):
+        return self.transfer_input_sender_index
 
-    def transferOpcTDBATransferIndex(self):
-        return self.transferInput_senderIndex + self.transferInput_recipientIndex + self.transferInput_amountIndex + self.transferInput_tokenIndex
+    def transfer_opc_tdba_transfer_index(self):
+        return self.transfer_input_sender_index + self.transfer_input_recipient_index + self.transfer_input_amount_index + self.transfer_input_token_index
 
-    def transferOpc(self):
-        return [self.opcAssertIsCallerOrigin(), self.opcTDBATransfer()]
+    def transfer_opc(self):
+        return [self.opc_assert_is_caller_origin(), self.opc_tdba_transfer()]
 
-    def transferOpcIndex(self):
-        return [self.transferOpcAssertIsCallerOriginIndex(), self.transferOpcTDBATransferIndex()]
+    def transfer_opc_index(self):
+        return [self.transfer_opc_assert_is_caller_origin_index(), self.transfer_opc_tdba_transfer_index()]
 
-    def depositOpcAssertIsCallerOriginIndex(self):
-        return self.depositInput_senderIndex
+    def deposit_opc_assert_is_caller_origin_index(self):
+        return self.deposit_input_sender_index
 
-    def depositOpcTDBATransferIndex(self):
-        return self.depositInput_senderIndex + self.depositInput_smartContractIndex + self.depositInput_amountIndex + self.depositInput_tokenIndex
+    def deposit_opc_tdba_transfer_index(self):
+        return self.deposit_input_sender_index + self.deposit_input_smart_contract_index + self.deposit_input_amount_index + self.deposit_input_token_index
 
-    def depositOpc(self):
-        return [self.opcAssertIsCallerOrigin(), self.opcTDBATransfer()]
+    def deposit_opc(self):
+        return [self.opc_assert_is_caller_origin(), self.opc_tdba_transfer()]
 
-    def depositOpcIndex(self):
-        return [self.depositOpcAssertIsCallerOriginIndex(), self.depositOpcTDBATransferIndex()]
+    def deposit_opc_index(self):
+        return [self.deposit_opc_assert_is_caller_origin_index(), self.deposit_opc_tdba_transfer_index()]
 
-    def withdrawOpcAssertIsCallerOriginIndex(self):
-        return self.withdrawInput_recipientIndex
+    def withdraw_opc_assert_is_caller_origin_index(self):
+        return self.withdraw_input_recipient_index
 
-    def withdrawOpcTDBATransferIndex(self):
-        return self.withdrawInput_smartContractIndex + self.withdrawInput_recipientIndex + self.withdrawInput_amountIndex + self.withdrawInput_tokenIndex
+    def withdraw_opc_tdba_transfer_index(self):
+        return self.withdraw_input_smart_contract_index + self.withdraw_input_recipient_index + self.withdraw_input_amount_index + self.withdraw_input_token_index
 
-    def withdrawOpc(self):
-        return [self.opcAssertIsCallerOrigin(), self.opcTDBATransfer()]
+    def withdraw_opc(self):
+        return [self.opc_assert_is_caller_origin(), self.opc_tdba_transfer()]
 
-    def withdrawOpcIndex(self):
-        return [self.withdrawOpcAssertIsCallerOriginIndex(), self.withdrawOpcTDBATransferIndex()]
+    def withdraw_opc_index(self):
+        return [self.withdraw_opc_assert_is_caller_origin_index(), self.withdraw_opc_tdba_transfer_index()]
 
-    def totalSupplyOpcTDBRTotalIndex(self):
-        return self.statevar_total + self.totalSupplyInput_tokenIndex
+    def total_supply_opc_tdbr_total_index(self):
+        return self.total_supply_input_token_index + bytes([1])
 
-    def totalSupplyOpc(self):
-        return [self.opcTDBROpcTotal(), self.opcReturnValue()]
+    def total_supply_opc(self):
+        return [self.opc_tdbr_opc_total(), self.opc_return_value()]
 
-    def totalSupplyOpcIndex(self):
-        return [self.totalSupplyOpcTDBRTotalIndex(), bytes('',encoding ='utf-8')]
+    def total_supply_opc_index(self):
+        return [self.total_supply_opc_tdbr_total_index(), bytes([1])]
 
-    def maxSupplyOpcTDBRMaxIndex(self):
-        return self.statevar_max + self.maxSupplyInput_tokenIndex
+    def max_supply_opc_tdbr_max_index(self):
+        return self.max_supply_input_token_index + bytes([1])
 
-    def maxSupplyOpc(self):
-        return [self.opcTDBROpcGet(), self.opcReturnValue()]
+    def max_supply_opc(self):
+        return [self.opc_tdbr_opc_max(), self.opc_return_value()]
 
-    def maxSupplyOpcIndex(self):
-        return [self.maxSupplyOpcTDBRMaxIndex(), bytes('',encoding ='utf-8')]
+    def max_supply_opc_index(self):
+        return [self.max_supply_opc_tdbr_max_index(), bytes([1])]
 
-    def balanceOfOpcTDBARBalanceIndex(self):
-        return self.balanceOfInput_accountIndex + self.balanceOfInput_tokenIndex
+    def balance_of_opc_tdbar_balance_index(self):
+        return self.balance_of_input_account_index + self.balance_of_input_token_index  + bytes([2])
 
-    def balanceOfOpc(self):
-        return [self.opcTDBARBalance(), self.opcReturnValue()]
+    def balance_of_opc(self):
+        return [self.opc_tdbar_balance(), self.opc_return_value()]
 
-    def balanceOfOpcIndex(self):
-        return [self.balanceOfOpcTDBARBalanceIndex(), bytes('',encoding ='utf-8')]
+    def balance_of_opc_index(self):
+        return [self.balance_of_opc_tdbar_balance_index(), bytes([2])]
 
-    def getIssuerOpcCDBVRGetIndex(self):
-        return self.statevar_issuer
+    def get_issuer_opc_cdbvr_get_index(self):
+        return self.state_var_issuer + bytes([0])
 
-    def getIssuerOpc(self):
-        return [self.opcCDBVRGet(), self.opcReturnValue()]
+    def get_issuer_opc(self):
+        return [self.opc_cdbvr_get(), self.opc_return_value()]
 
-    def getIssuerOpcIndex(self):
-        return [self.getIssuerOpcCDBVRGetIndex(), bytes('',encoding ='utf-8')]
+    def get_issuer_opc_index(self):
+        return [self.get_issuer_opc_cdbvr_get_index(), bytes([0])]
 
     # datastack
-    def initDataStackGen(self, amount, unity, desc):
+    def trigger_data_stack_gen(self, amount, unity, desc):
 
-        max = DataEntry(bytes([amount]), self.Amount)
-        unit = DataEntry(bytes([unity]), self.Amount)
-        shortText = DataEntry.create(desc.getBytes(), self.ShortText)
-        return [max, unit, shortText]
+        max = DataEntry(bytes([amount]), self.amount)
+        unit = DataEntry(bytes([unity]), self.amount)
+        short_text = DataEntry.create(desc.getBytes(), self.short_text)
+        return [max, unit, short_text]
 
-    def supersedeDataStackGen(self, newIssuer):
-        iss = DataEntry(newIssuer.bytes.arr, self.Address)
+    def supersede_data_stack_gen(self, new_issuer):
+        iss = DataEntry(new_issuer.bytes.arr, self.address)
         return iss
 
-    def splitDataStackGen(self, newUnity, tokenIndex):
-        unit = DataEntry(bytes([newUnity]), self.Amount)
-        index =   DataEntry(bytes([tokenIndex]), self.Int32)
+    def split_data_stack_gen(self, new_unity, token_index):
+        unit = DataEntry(bytes([new_unity]), self.amount)
+        index =   DataEntry(bytes([token_index]), self.int32)
         return [unit, index]
 
-    def destroyDataStackGen(self, amount, tokenIndex):
-        am = DataEntry(bytes([amount]), self.Amount)
-        index = DataEntry(bytes([tokenIndex]), self.Int32)
+    def destroy_data_stack_gen(self, amount, token_index):
+        am = DataEntry(bytes([amount]), self.amount)
+        index = DataEntry(bytes([token_index]), self.int32)
         return [am, index]
 
-    def issueDataStackGen(self, amount, tokenIndex):
-        max = DataEntry(bytes([amount]), self.Amount)
-        index = DataEntry(bytes([tokenIndex]), self.Int32)
+    def issue_data_stack_gen(self, amount, token_index):
+        max = DataEntry(bytes([amount]), self.amount)
+        index = DataEntry(bytes([token_index]), self.int32)
         return [max, index]
 
-    def sendDataStackGen(self, recipient, amount, tokenIndex):
-        reci = DataEntry(recipient.bytes.arr, self.Address)
-        am = DataEntry(bytes([amount]), self.Amount)
-        index = DataEntry(bytes([tokenIndex]), self.Int32)
+    def send_data_stack_gen(self, recipient, amount, token_index):
+        reci = DataEntry(recipient.bytes.arr, self.address)
+        am = DataEntry(bytes([amount]), self.amount)
+        index = DataEntry(bytes([token_index]), self.int32)
         return [reci, am, index]
 
-    def transferDataStackGen(self, sender, recipient, amount, tokenIndex):
-        se = DataEntry(sender.bytes.arr, self.Address)
-        reci = DataEntry(recipient.bytes.arr, self.Address)
-        am = DataEntry(bytes([amount]), self.Amount)
-        index = DataEntry(bytes([tokenIndex]), self.Int32)
+    def transfer_data_stack_gen(self, sender, recipient, amount, token_index):
+        se = DataEntry(sender.bytes.arr, self.address)
+        reci = DataEntry(recipient.bytes.arr, self.address)
+        am = DataEntry(bytes([amount]), self.amount)
+        index = DataEntry(bytes([token_index]), self.int32)
         return [se, reci, am, index]
 
-    def depositDataStackGen(self, sender, smartContract, amount, tokenIndex):
-        se = DataEntry(sender.bytes.arr, self.Address)
-        sc = DataEntry(smartContract.bytes.arr, self.Address)
-        am = DataEntry(bytes([amount]), self.Amount)
-        index = DataEntry(bytes([tokenIndex]), self.Int32)
+    def depositDataStackGen(self, sender, smart_contract, amount, token_index):
+        se = DataEntry(sender.bytes.arr, self.address)
+        sc = DataEntry(smart_contract.bytes.arr, self.address)
+        am = DataEntry(bytes([amount]), self.amount)
+        index = DataEntry(bytes([token_index]), self.int32)
         return [se, sc, am, index]
 
-    def withdrawDataStackGen(self, smartContract, recipient, amount, tokenIndex):
-        sc = DataEntry(smartContract.bytes.arr, self.Address)
-        reci = DataEntry(recipient.bytes.arr, self.Address)
-        am = DataEntry(bytes([amount]), self.Amount)
-        index = DataEntry(bytes([tokenIndex]), self.Int32)
+    def withdrawDataStackGen(self, smartContract, recipient, amount, token_index):
+        sc = DataEntry(smartContract.bytes.arr, self.address)
+        reci = DataEntry(recipient.bytes.arr, self.address)
+        am = DataEntry(bytes([amount]), self.amount)
+        index = DataEntry(bytes([token_index]), self.int32)
         return [sc, reci, am, index]
 
-    def totalSupplyDataStackGen(self, tokenIndex):
-        index = DataEntry(bytes([tokenIndex]), self.Int32)
+    def totalSupplyDataStackGen(self, token_index):
+        index = DataEntry(bytes([token_index]), self.int32)
         return [index]
 
-    def maxSupplyDataStackGen(self, tokenIndex):
-        index = DataEntry(bytes([tokenIndex]), self.Int32)
+    def maxSupplyDataStackGen(self, token_index):
+        index = DataEntry(bytes([token_index]), self.int32)
         return [index]
 
-    def balanceOfDataStackGen(self, account, tokenIndex):
-        acc =  DataEntry(account.bytes.arr, self.Address)
-        index = DataEntry(bytes([tokenIndex]), self.Int32)
+    def balanceOfDataStackGen(self, account, token_index):
+        acc =  DataEntry(account.bytes.arr, self.address)
+        index = DataEntry(bytes([token_index]), self.int32)
         return [acc, index]
