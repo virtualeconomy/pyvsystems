@@ -1,17 +1,48 @@
 import struct
+import logging
 
 
-def serializeString(string):
+def convert_bytes_to_hex(bytes_object):
+    return [bytes([byte]).hex() for byte in bytes_object]
+
+
+def shorts_from_byte_array(byte_array):
+    if len(byte_array) != 2:
+        logging.exception("Error: Input is not shorts!")
+    return int(''.join(byte_array), 16)
+
+
+def serialize_string(string):
     string = string.encode()
     ss = bytes(string)
     return ss
 
-def serializeArrays(bs):
-    sa = bytes('',encoding ='utf-8')
+
+def serialize_arrays(bs):
+    sa = bytes('', encoding='utf-8')
     for b in bs:
-        b = serializeArray(b)
+        b = serialize_array(b)
         sa += b
     return struct.pack(">H", len(bs)) + sa
 
-def serializeArray(b):
+
+def serialize_array(b):
     return struct.pack(">H", len(b)) + b
+
+
+def parse_array_size(bytes_object, start_position):
+    length_byte_array = convert_bytes_to_hex(bytes_object[start_position:(start_position + 2)])
+    length = shorts_from_byte_array(length_byte_array)
+
+    return [bytes_object[(start_position + 2):(start_position + 2 + length)], start_position + 2 + length]
+
+
+def parse_arrays(bytes_object):
+    length_byte_array = convert_bytes_to_hex(bytes_object[0:2])
+    length = shorts_from_byte_array(length_byte_array)
+    all_info = []
+    pos_drift = 2
+    for pos in range(length):
+        [array_info, pos_drift] = parse_array_size(bytes_object, pos_drift)
+        all_info.append(array_info)
+    return [all_info, pos_drift - 2 - 2*length]
