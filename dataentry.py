@@ -1,6 +1,7 @@
 # from .crypto import *
 from .error import *
 from .contractbuild import *
+import base58
 import pyvsystems
 
 
@@ -128,8 +129,5 @@ class Type:
     ShortText = bytes([5])
     ContractAccount = bytes([6])
     Account = bytes([7])
-
-
-
 
 
