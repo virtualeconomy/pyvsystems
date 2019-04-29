@@ -21,28 +21,28 @@ class Contract(object):
         # self.test = 'JC9U69xcoTWJ71v82TojKETj3SAsxyh3nYACiheZMDBgE6XKshzgupsRmSk3y1aijZJxWu4DSX96nMpStH2ESv3P4VC4MogHcN8UcCiaLiCt2af1b7zkhZtGq6ckrvHjijJ7ZHZugp8bzyUTs55SnZ5o2tockgM8jhtnfVNRPEPq8My9QNDDyZRJyxyJnE6p8kB3PDEPk1WsBxe68APAaLqjN4ACRCv5kyhKTjaEixRz6yn62W8PRi5PpzD4KEtg1DrxwhwqsFWCLrNPsw8vTuSB3DrNgCq72FEQJAAtdDS29kPmaQYeQG2YQzUrtKyteAdMzQw2B17wUsQj4tnkFkec5VbbV4mFZ5zhVsCv5UErZiKKPiBgefjQjfnuYNV6PA4r5T6XrtW2zi5MvzEym3vt3PpzodHd9xY5UftGRmkWjZ1atRfRsheDw6CKcsjdEGNS5J7bfvLj3KAckRPjp1wAP5CTKASSLvGVBCyieNyJLmdfguhEEg5xpKXiJdzTAnQDrBYdhCpRq9xTcBK5ueQZ5vqEZt1vbBBLVzkdmmt54tZXvpvW3TPwKqLtz26zdtAPntmjLyqqNKbmzb8MrgiyjyC8YmYgnLUkeU8q2ksmZKZ8aoHEW5zF3ztQ7qNvaxY86NY3AHkpcuUjbdaMxEMKAQ3Qc2fVcwHVoJoEz7pSSUHvnUcZcnYMMmGR52gwNasUxVAm2LmbNbuyQvnxpJXd2yQryWQjgHcgDoRSroRuV6rftvGz6d9FbhytyrUEc9Ae6uZu7W6cAtB75jBtaBUk9K9cootsqEu2Y1PUE7B832X3j4UWveC73XnkRsz5U8EStNWvJXYZ2QitmZBSpCYMP8bnEfnqtxmGk7B1iT3tqWaJ5QX5DgkQ189UXimGCjAs31LtFSCuGWzkJnoR3H5Yno465v7WHLkbewKqrDpaAbgj82pja8uuSj8uZGBrEDXu2KdP4R4UbfDUXYmGtiNTwDDfwdyAv4BrvyQFuWKVWnMDhkSjsjSVJmLx5qwNq3EBZzN7tZd9UBQ3552rSfu48Y7fvTh54x9FjYMDCmtUFmsxrnWFgbGe8Gypfwpk9qKHe4Pe7Qjx5ppzAW48FDtdtjznh6wk4wF33y46cfrTEogULvkifb8WjqoXaRytdxUzcm6M23XiKUfQAVygFJXBJfCU3VbxFZgLib2Lgp2dAeB5myJzRayKi9tJQVzLrYr4NEFWpzJbxiZxyY14XyHXWTyvGgQHW5DGkgRiWDm7mbybtb9BvKrEtkKCZ'
         #self.test = 'kpUFTV4BMU2mLarm7iTmJMxw7RLSx2SBZvA22e26pEAp9CfxxppnPCaM4YMZYptdewVirdTdLPboQs9bn18VgeSSz3zRXSN8xAmgUs3JVr4v6Xw2YKHP8zKbngErdvr3YKZCu8hjjZv1MfRbPyWbaDCoXo4q3ngJrZ2hmDok1PxxaN8dwXT4M4PkfnQyaCqVhbNpwmYaSQoHVMfLAMnJXBtxfbrfTj6M8Gg6gjmnHcvXJy59oZtWhqK6H83fYuK8cydNj7cZWn43L5S9pZEjHFZZA37pxbdiwKRvbFNkocNuU9kpVySTPyLLUd5pSYMtUfNkMhQwkDASLrzdyfbQ8G9WxKNucbSbDzoA1F5tTP1a7LzeQZ14ABbztaJKaqStxXhX2hBEmxHGwdhiwNM2UbVLgjiomzw1s1EupH7zseoBpTPKZRsVso8j3SoSsfGpwf2YeCAds47SQqVsjGFMsp3WHeuRQd2U5DV2AQyYshHoTkad3akT7QYcrZ39ypMPj2KGizg2wdJSw3Z6LknyyKviu12vkpaMxsR74jGUAA54PkNRNEYyP62BWM35eDDkxS62tcRP5R1Xp9acsgJq2J9uqrrEseeTC8icMJUQY4E7bpQwdwgsnzeLHnfADEoaNBh45DEdB4mRoGCWoqiZeX341VDmBjQW44uTjXvQ46zHiR34g2KzDJ178cbmTaYzcBZHsqu8MZFDimsGALk81C1U5wKCN63x3FqcNS436M3f23op7hUm8Rf4FDsCvCu5NaytUvFKMmLfBtg6D3MqBVEzV6nuhSPHsnU5JiiAfUx93ZivtjmDAYGCcANrTzdDB1PeKj9BbE2SoyJ9TxkAXgUBZoZneZJnuqLAoEookS9zT7LKxyU4T7DwWVWDuX9j2XYB8Pi2DDYkydfbssics6XJjDkeG8cMPKi3p3jeZN8Qaf7KraE4SHZEatvCZb5fJdSPaDWQiJ6XhUpNCGYqb8htPou9bPqQL6hTj6yX44WSedMqw2bArrXAwh4MXvgxGJBt89CXG6qGm4wHYM6bjpQ8bNuQvUDNQ5HueHLSTJNtiCHTDgfH7MvmVm1xfJF7dFeKmeRwbFiRK7E3dBKr6wANmkUzM7ezdFMsPDr8PQkbipHJAM6j1uDujNci9TcQYgpviUg6uaUvqPKsZa3q3Hw4NsCxDNRGKFtwPUyTFXJAEeAqoiFmUQDfjeTFCFpHr4DfuqHdpwwVQebsEKUdcnQdoEgP1Dmav2JKbffTcL8wJgtGjoVpUzMb55DBe31uqf7Ri2UZFbAq3APw9yqCbLM1jNN9dBizQ48fdmgHxhHGAM1kiDdtFVJwPt974GPGQ7cnbTqdePbHFcEkkxXmrVjymmf'
 
-        self.test = '3cH33Y6c6AM23HqLCBhtyUnFbkUsVKM8qwqSMZvgxWfU3RKmdMUNQBtupFFznBb75PX5gKBNE5mRxLJrP353QQ8RUuwu7X4jLbb7YpxqSHEhLdcwkg1gGcD3iLxaQA79ycGVaipnYSNjcSc6vdsLYhH8eCY4f7cJk4jVtnA686aw8CnrpwK1bGi5pLBz2bVDYhFeuAbHZpEsvx7mAAdY7xQu7LyHaRoHhSdeZc7AbbF6ZcGY3DTFi6Me2KkG8rJb22pAv3Cg6cDcQw2eiFLivZJHzsdAwqZKCvUuprs2va2J16RckD27o1wpwQtUHBFkG7jszMo7A47RGcSseQPSKWTCtMQc9y98A9zKg2mzRyo2rMqLL3AXbFjgPAXPuhvFvKPrWUcpgde2DeLiXfSYD2nguHLGKsYdSHtaDjzmbnzo1xBibjzHUEKmnkEoMZWZYJXzoA4yvx9FNreGv8DzqEQFwyxppvvYz39umJmwt6kh2D1XEu88EvnEtm45pdXmt8caua72ABLAP9QCgcbQzjf5SVUKPoeg4PrQg3CsfNsZNEs8zpngHfVgVk7opckJUNEESAGXpBFy4JX6wptq5RhqGT8TEbk5JVYtw2xfDuFpNy7p3FT1nN2jWB3K3ZeTR6xvEW3caaPsgRf7PSb2MLsLjC1tZhccD1ZQttQEcRJCaprEkvbmeaQgLEsTibeg31wGUktMy6pM3AY7ggYcW4eK8bNfFzdubCSTnw8pYoscbTb2f5rAvRzMvr3xaSpaY2SnUGZJNixNFuPZtyYw4N5JMykfUmXLep6wm8vXX3pb9LN4A6y3DUE2Gq8an7XzGvjmRd5b7kNeoKDpTTJ4Mea6zfEopL7Gfwgfq77pwiQq9PHdRXEC8vr1ec67c6Bue1T67aWDMcNM3XUSZ69nti6Q9ZnSAFbJPAjBvH2RMQpe235vDWDt4Ppj9DFmXjYy64UbhBEbLK9kDHbe6WsGZujf6xwmG4k3zBTsqQyoKaj6zDyUDxSU3rU3C3tcuYifFXqRxUHotn4ftRQFH2Xmv1emDbs7MxWRcWrShXg4Qvkmnk9fCZXYFXS6x7SGDCCCP79RhxCgZaKww3WctCtx2Q5gYFkmwUkWxtovm1RspDczxPADxdW85bUuMKPactPSHKJRsCFE8eM7a6J77y5FGK8ZpHFKzuYKp1cMzXnvqzQRd2qZ5jcxhF8T5HADVLXR3UMUkptcx44hS9KS3z4VjvWMTtsejNQvn79MAfrtj7UU9kYNbV32YmEQorTcJV4BCYTkh9NjN7zcFzqMZqR9XXxiY3zYUiPiVcgSrg1VBGJqgLYHGd6sGVLBRj6CVY9xGCnufU7fWQjbXBfwjd4ERFAzLhdP4boVeYu5qP5mQ4ZZ6CwwkDszXQSPUkvb9rBJV6vZQi4hryV3Wh1hDK25Qf3gy6gVWSckgb3oxPhoiuFX6LZ'
-
-        self.assert_opc = {'01': 'GteqZeroAssert', '02': 'LteqAssert', '03': 'LtInt64Assert', '04': 'GtZeroAssert',
-                           '05': 'EqAssert', '06': 'IsCallerOriginAssert', '07': 'IsSignerOriginAssert'}
-        self.load_opc = {'01': 'SignerLoad', '02': 'CallerLoad'}
-        self.CDBV_opc = {'01': 'SetCDBV'}
-        self.CDBVR_opc = {'01': 'GetCDBVR'}
-        self.TDB_opc = {'01': 'NewTokenTDB', '02': 'SplitTDB'}
-        self.TDBR_opc = {'01': 'GetTDBR', '02': 'TotalTDBR'}
-        self.TDBA_opc = {'01': 'DepositTDBA', '02': 'WithdrawTDBA', '03': 'TransferTDBA'}
-        self.TDBAR_opc = {'01': 'BalanceTBDAR'}
-        self.opc_type = {'01': ['AssertOpc', self.assert_opc], '02': ['LoadOpc', self.load_opc], '03': ['CDBVOpc', self.CDBV_opc],
-                         '04': ['CDBVROpc', self.CDBVR_opc], '05': ['TDBOpc', self.TDB_opc], '06': ['TDBROpc', self.TDBR_opc],
-                         '07': ['TDBAOpc', self.TDBA_opc], '08': ['TDBAROpc', self.TDBAR_opc], '09': ['ReturnOpc', {}]}
-        self.function_type_map = {'000': 'OnInit', '100': 'Public'}
+        #self.test = '3cH33Y6c6AM23HqLCBhtyUnFbkUsVKM8qwqSMZvgxWfU3RKmdMUNQBtupFFznBb75PX5gKBNE5mRxLJrP353QQ8RUuwu7X4jLbb7YpxqSHEhLdcwkg1gGcD3iLxaQA79ycGVaipnYSNjcSc6vdsLYhH8eCY4f7cJk4jVtnA686aw8CnrpwK1bGi5pLBz2bVDYhFeuAbHZpEsvx7mAAdY7xQu7LyHaRoHhSdeZc7AbbF6ZcGY3DTFi6Me2KkG8rJb22pAv3Cg6cDcQw2eiFLivZJHzsdAwqZKCvUuprs2va2J16RckD27o1wpwQtUHBFkG7jszMo7A47RGcSseQPSKWTCtMQc9y98A9zKg2mzRyo2rMqLL3AXbFjgPAXPuhvFvKPrWUcpgde2DeLiXfSYD2nguHLGKsYdSHtaDjzmbnzo1xBibjzHUEKmnkEoMZWZYJXzoA4yvx9FNreGv8DzqEQFwyxppvvYz39umJmwt6kh2D1XEu88EvnEtm45pdXmt8caua72ABLAP9QCgcbQzjf5SVUKPoeg4PrQg3CsfNsZNEs8zpngHfVgVk7opckJUNEESAGXpBFy4JX6wptq5RhqGT8TEbk5JVYtw2xfDuFpNy7p3FT1nN2jWB3K3ZeTR6xvEW3caaPsgRf7PSb2MLsLjC1tZhccD1ZQttQEcRJCaprEkvbmeaQgLEsTibeg31wGUktMy6pM3AY7ggYcW4eK8bNfFzdubCSTnw8pYoscbTb2f5rAvRzMvr3xaSpaY2SnUGZJNixNFuPZtyYw4N5JMykfUmXLep6wm8vXX3pb9LN4A6y3DUE2Gq8an7XzGvjmRd5b7kNeoKDpTTJ4Mea6zfEopL7Gfwgfq77pwiQq9PHdRXEC8vr1ec67c6Bue1T67aWDMcNM3XUSZ69nti6Q9ZnSAFbJPAjBvH2RMQpe235vDWDt4Ppj9DFmXjYy64UbhBEbLK9kDHbe6WsGZujf6xwmG4k3zBTsqQyoKaj6zDyUDxSU3rU3C3tcuYifFXqRxUHotn4ftRQFH2Xmv1emDbs7MxWRcWrShXg4Qvkmnk9fCZXYFXS6x7SGDCCCP79RhxCgZaKww3WctCtx2Q5gYFkmwUkWxtovm1RspDczxPADxdW85bUuMKPactPSHKJRsCFE8eM7a6J77y5FGK8ZpHFKzuYKp1cMzXnvqzQRd2qZ5jcxhF8T5HADVLXR3UMUkptcx44hS9KS3z4VjvWMTtsejNQvn79MAfrtj7UU9kYNbV32YmEQorTcJV4BCYTkh9NjN7zcFzqMZqR9XXxiY3zYUiPiVcgSrg1VBGJqgLYHGd6sGVLBRj6CVY9xGCnufU7fWQjbXBfwjd4ERFAzLhdP4boVeYu5qP5mQ4ZZ6CwwkDszXQSPUkvb9rBJV6vZQi4hryV3Wh1hDK25Qf3gy6gVWSckgb3oxPhoiuFX6LZ'
+        self.test = '3dPGAWbTw4srh5hmMiRUhHtcxmXXLUooKGAfnmz11j5NruyJpBzZpgvADMdZS7Mevy5MAHqFbfHYdfqaAe1JEpLWt1pJWLHZBV62zUhLGmVLXUP5UDvSs24jsBRHqZMC71ciE1uYtgydKxCoFJ3rAgsYqp7GDeTU2PXS5ygDmL6WXmbAYPS8jE4sfNUbJVwpvL1cTw4nnjnJvmLET8VmQybxFt415RemV3MFPeYZay5i5gMmyZa63bjzK1uMZAVWA9TpF5YQ1NTZjPaRPvQGYVY4kY9L4LFJvUG2bib1QaNh7wUAQnTzJfRYJoy1aegFGFZFnBGp9GugH4fHAY69vGmZQnhDw3jU45G9odFyXo3T5Ww4R5szegbjCUKdUGpXf9vY2cKEMJ7i8eCkFVG1dDFZeVov1KMjkVNV8rDBDYfcp3oSGNWQQvGSUT5iGUvDRN8phy1UpR3A9uMVebvjLnVzPx9RyqQ8HaXLM8vPhLuWLoh5hk1Zi1n9nwz55XvKDYjP6eeB55yK5vpg8xjaYDnw9bjYV7ZmS7LAsHvXfnwi8y2W6vk2hGvs4rtR1vNRZSQMPGRRSuwCRJL1yngH6uHWwm2ajWxc684jApuoLdyjZomfCtdpabSyU3kp9Lrn8zT8BVY332sJPQU6gTQi8ke9s9dBxCae4cfSQM6HhuBmFc5KKWHCVG4bm4KZRYbMtidw8ZZnjaAMtcGq7k3Se6GXaTxdS3GcuttB3VB7njypyzuqAcfCdYb9ht8Y1WuTCZ1aLsXsL6eydfk2WLJVrqYpbTk6AchV5gMAEopvc3qXvzrDCedjtNsDmA56Lh6PxrrKr8aV8Wzz8aMaQ88YsVBpE8J4cDkxzo31AojhzEGVBKLmpb3bjmsaw9VkpB6yL8ngYs8eJMSPdM289TSMaEmG4eHt1jezpHTKxkuB9cwqcvhGNLWuv8KXQkik5pRMXV67Qs2FvjpzeJ81z2hnVh1wCtsa6M6qAG1gsqLHa1AVMRzsowafC99uDexwWMBS2RqsZWZBXJcUiNVULjApSnoBREYfHYEpjJ152hnTYZCAwpZMWEkVdBQpZ3zk8gbfLxB4fWMfKgJJucbKPGp1K56u7P8MHQu9aNb9dEof2mwX8rTHjk8jSQ7kXVX4Mf1JqMRWWftkV3GmU1nqYhxRGu4FjDNAomwTr5epHpcMF6P5oiXcLWh5BFQVmGYKz129oizAyUJBsZdxr2WZEGDieLxUg8cve25g28oTuCVENST4z1ZsFAN9wTa1'
+        # self.assert_opc = {'01': 'GteqZeroAssert', '02': 'LteqAssert', '03': 'LtInt64Assert', '04': 'GtZeroAssert',
+        #                    '05': 'EqAssert', '06': 'IsCallerOriginAssert', '07': 'IsSignerOriginAssert'}
+        # self.load_opc = {'01': 'SignerLoad', '02': 'CallerLoad'}
+        # self.cdbv_opc = {'01': 'SetCDBV'}
+        # self.cdbvr_opc = {'01': 'GetCDBVR'}
+        # self.tdb_opc = {'01': 'NewTokenTDB', '02': 'SplitTDB'}
+        # self.tdbr_opc = {'01': 'GetTDBR', '02': 'TotalTDBR'}
+        # self.tdba_opc = {'01': 'DepositTDBA', '02': 'WithdrawTDBA', '03': 'TransferTDBA'}
+        # self.tdbar_opc = {'01': 'BalanceTBDAR'}
+        # self.opc_type = {'01': ['AssertOpc', self.assert_opc], '02': ['LoadOpc', self.load_opc], '03': ['CDBVOpc', self.cdbv_opc],
+        #                  '04': ['CDBVROpc', self.cdbvr_opc], '05': ['TDBOpc', self.tdb_opc], '06': ['TDBROpc', self.tdbr_opc],
+        #                  '07': ['TDBAOpc', self.tdba_opc], '08': ['TDBAROpc', self.tdbar_opc], '09': ['ReturnOpc', {}]}
+        self.function_type_map = {'000': 'onInit', '100': 'public'}
         self.opcode_info = Opcode()
 
     def show_contract_function(self, byte_string = '', contract_json = ''):
         byte_string = self.test
         bytes_object = base58.b58decode(byte_string)
-        print("All Bytes: ")
-        print(bytes_object)
+        # print("All Bytes: ")
+        # print(bytes_object)
         start_position = 0
         print("Total Length of Contract: ", str(len(bytes_object)) + ' Bytes')
 
@@ -131,11 +131,11 @@ class Contract(object):
             logging.exception("Error: list of parameter is not right!")
         else:
             if function_type == 'OnInit':
-                prefix = "Trigger"
+                prefix = "trigger"
                 if shorts_from_byte_array(function_hex[0:2]) == 0:
                     print("Triggers: ")
             else:
-                prefix = "Function"
+                prefix = "function"
                 if shorts_from_byte_array(function_hex[0:2]) == 0:
                     print("Descriptor Functions: ")
             print(function_type + ' ' + prefix + ' ' + function_name + "(", end='')
@@ -174,10 +174,10 @@ class Contract(object):
             name_list = copy.deepcopy(para_name)
             for i in range(len(list_opc_name)):
                 data = copy.deepcopy([int(index) for index in list_opc[i]])
-                print(' ' * 15, end='')
+                print(' ' * 13, end='')
                 self.opcode_info.get_opc(list_opc_name[i], [data, name_list, state_var])
-                print(' ' * 15, end='')
-                print(list_opc[i][0] + ' ' + list_opc[i][1] + ' | ' + ' '.join(list_opc[i][2:]))
+                print(' ' * 13, end='')
+                print('| ' + list_opc[i][0] + ' ' + list_opc[i][1] + ' | ' + ' '.join(list_opc[i][2:]) + ' |')
             print(" ")
 
     def print_texture_from_bytes(self, bytes_arrays):
