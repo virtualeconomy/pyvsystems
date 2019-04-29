@@ -9,7 +9,7 @@ from pyvsystems.deser import serialize_string
 
 class ContractBuild:
     # texture
-    trigger_para = ["max", "unity", "tokenDescription", "signer"]
+    init_para = ["max", "unity", "tokenDescription", "signer"]
     supersede_para = ["newIssuer", "maker"]
     issue_para = ["amount", "tokenIndex", "issuer"]
     destroy_para = ["amount", "tokenIndex", "issuer"]
@@ -83,7 +83,7 @@ class ContractBuild:
     total_tdbr = bytes([2])
 
     # funid
-    trigger = 0
+    init = 0
     supersede = 0
     issue = 1
     destroy = 2
@@ -116,10 +116,10 @@ class ContractBuild:
     public_func_type = 0
 
     # datastack
-    trigger_input_max_index = bytes([0])
-    trigger_input_unity_index = bytes([1])
-    trigger_input_short_text_index = bytes([2])
-    trigger_input_issuer_load_index = bytes([3])
+    init_input_max_index = bytes([0])
+    init_input_unity_index = bytes([1])
+    init_input_short_text_index = bytes([2])
+    init_input_issuer_load_index = bytes([3])
 
     supersede_input_new_issuer_index = bytes([0])
     supersede_input_maker = bytes([1])
@@ -170,6 +170,7 @@ class ContractBuild:
         descriptor = self.descriptor_builder(split)
         state_var = self.state_var_builder()
         texture = self.texture_builder(split)
+
         return lang_code + lang_ver + trigger + descriptor + state_var + texture
 
     # OpcId
@@ -283,7 +284,7 @@ class ContractBuild:
 
     # trigger
     def trigger_builder(self):
-        return deser.serialize_array(self.trigger_fun_gen())
+        return deser.serialize_array(deser.serialize_arrays([self.init_fun_gen()]))
 
     # descriptor
     def descriptor_builder(self, split):
@@ -297,6 +298,18 @@ class ContractBuild:
                                                 self.transfer_fun_gen(), self.deposit_fun_gen(), self.withdraw_fun_gen(), self.total_supply_fun_gen(),
                                                 self.max_supply_fun_gen(), self.balance_of_fun_gen(), self.get_issuer_fun_gen()])
 
+        print("supersede_fun_gen", self.supersede_fun_gen(), len(self.supersede_fun_gen()))
+        print("issue_fun_gen", self.issue_fun_gen(), len(self.issue_fun_gen()))
+        print("destroy_fun_gen", self.destroy_fun_gen(), len(self.destroy_fun_gen()))
+        print("split_fun_gen", self.split_fun_gen(), len(self.split_fun_gen()))
+        print("send_fun_gen", self.send_fun_gen(), len(self.send_fun_gen()))
+        print("transfer_fun_gen", self.transfer_fun_gen(), len(self.transfer_fun_gen()))
+        print("deposit_fun_gen", self.deposit_fun_gen(), len(self.deposit_fun_gen()))
+        print("withdraw_fun_gen", self.withdraw_fun_gen(), len(self.withdraw_fun_gen()))
+        print("total_supply_fun_gen", self.total_supply_fun_gen(), len(self.total_supply_fun_gen()))
+        print("max_supply_fun_gen", self.max_supply_fun_gen(), len(self.max_supply_fun_gen()))
+        print("balance_of_fun_gen", self.balance_of_fun_gen(), len(self.balance_of_fun_gen()))
+        print("get_issuer_fun_gen", self.get_issuer_fun_gen(), len(self.get_issuer_fun_gen()))
         return deser.serialize_array(descriptor)
 
 
@@ -310,7 +323,7 @@ class ContractBuild:
         self._fixed_size = 4
         self.state_var_name = ["issuer", "maker"]
         self.state_var_texture = deser.serialize_arrays([deser.serialize_string(name) for name in self.state_var_name])
-        self.trigger_texture = deser.serialize_arrays([self.trigger_func_bytes()])
+        self.initializer_texture = deser.serialize_arrays([self.init_func_bytes()])
         if(split is False):
             self.descriptor_texture = deser.serialize_arrays([self.supersede_func_bytes(),
                                                             self.issue_func_bytes(),
@@ -337,15 +350,16 @@ class ContractBuild:
                                                             self.balance_of_func_bytes(),
                                                             self.get_issuer_func_bytes()])
 
-        self.texture_right_gen = self.texture_gen(self.trigger_texture, self.descriptor_texture, self.state_var_texture)
+        self.texture_right_gen = self.texture_gen(self.initializer_texture, self.descriptor_texture, self.state_var_texture)
+
         return self.texture_right_gen
 
     def texture_random_gen(self):
         texture = bytearray(os.urandom(self._fixed_size))
         return texture
 
-    def texture_gen(self, trigger, description, state_var):
-        return deser.serialize_arrays([trigger, description, state_var])
+    def texture_gen(self, initialization, description, state_var):
+        return deser.serialize_arrays([initialization, description, state_var])
 
     def texture_fun_gen(self, name, ret, para):
         func_byte = deser.serialize_array(deser.serialize_string(name))
@@ -355,8 +369,8 @@ class ContractBuild:
         return texture
 
 
-    def trigger_func_bytes(self):
-        return self.texture_fun_gen("trigger", [], self.trigger_para)
+    def init_func_bytes(self):
+        return self.texture_fun_gen("init", [], self.init_para)
 
     def supersede_func_bytes(self):
         return self.texture_fun_gen("supersede", [], self.supersede_para)
@@ -409,8 +423,8 @@ class ContractBuild:
         fun = fun_idx + fun_type + proto_type + list_opc
         return fun
 
-    def trigger_fun_gen(self):
-        fun = self.a_function_gen(self.trigger_fun_id_gen(), self.trigger_fun_type_gen(), self.proto_type_trigger_gen(), self.trigger_opc_line_gen())
+    def init_fun_gen(self):
+        fun = self.a_function_gen(self.init_fun_id_gen(), self.init_fun_type_gen(), self.proto_type_init_gen(), self.init_opc_line_gen())
         return fun
 
     def supersede_fun_gen(self):
@@ -418,6 +432,11 @@ class ContractBuild:
         return fun
 
     def issue_fun_gen(self):
+        print("issue_fun_id_gen", self.issue_fun_id_gen())
+        print("issue_fun_type_gen", self.issue_fun_type_gen())
+        print("proto_type_issue_gen", self.proto_type_issue_gen())
+        print("supersede_opc_line_gen()", self.supersede_opc_line_gen())
+
         fun = self.a_function_gen(self.issue_fun_id_gen(), self.issue_fun_type_gen(), self.proto_type_issue_gen(), self.issue_opc_line_gen())
         return fun
 
@@ -462,8 +481,8 @@ class ContractBuild:
         return fun
 
     # funid
-    def trigger_fun_id_gen(self):
-        return struct.pack(">H", self.trigger)
+    def init_fun_id_gen(self):
+        return struct.pack(">H", self.init)
     def supersede_fun_id_gen(self):
         return struct.pack(">H", self.supersede)
     def issue_fun_id_gen(self):
@@ -490,7 +509,7 @@ class ContractBuild:
         return struct.pack(">H", self.get_issuer)
 
     # funtype
-    def trigger_fun_type_gen(self):
+    def init_fun_type_gen(self):
         return bytes([self.on_init_trigger_type])
     def supersede_fun_type_gen(self):
         return bytes([self.public_func_type])
@@ -522,53 +541,53 @@ class ContractBuild:
         proto_type = deser.serialize_array(return_type) + deser.serialize_array(list_para_types)
         return proto_type
 
-    def trigger_para_type_wrong(self):
+    def init_para_type_wrong(self):
         return [self.amount, self.amount]
 
-    def trigger_para_type(self):
+    def init_para_type(self):
         return [self.amount, self.amount, self.short_text]
 
     def supersede_para_type(self):
         return [self.account]
 
     def issue_para_type(self):
-        return [self.amount, self.int32]
+        return [self.amount]
 
     def destroy_para_type(self):
-        return [self.amount + self.int32]
+        return [self.amount]
 
     def split_para_type(self):
-        return [self.amount + self.int32]
+        return [self.amount]
 
     def send_para_type(self):
-        return [self.account + self.amount + self.int32]
+        return [self.account, self.amount]
 
     def transfer_para_type(self):
-        return [self.account + self.account + self.amount + self.int32]
+        return [self.account, self.account, self.amount]
 
     def deposit_para_type(self):
-        return [self.account + self.contract_account + self.amount + self.int32]
+        return [self.account, self.contract_account, self.amount]
 
     def withdraw_para_type(self):
-        return [self.contract_account + self.account + self.amount + self.int32]
+        return [self.contract_account, self.account, self.amount]
 
     def total_supply_para_type(self):
-        return [self.int32]
+        return bytes('', encoding='utf-8')
 
     def max_supply_para_type(self):
-        return [self.int32]
+        return bytes('', encoding='utf-8')
 
     def balance_of_para_type(self):
-        return [self.account + self.int32]
+        return [self.account]
 
     def get_issuer_para_type(self):
-        return [bytes('',encoding ='utf-8')]
+        return bytes('', encoding='utf-8')
 
-    def proto_type_trigger_wrong_gen(self):
-        return self.proto_type_gen(self.non_return_type, self.trigger_para_type_wrong())
+    def proto_type_init_wrong_gen(self):
+        return self.proto_type_gen(self.non_return_type, self.init_para_type_wrong())
 
-    def proto_type_trigger_gen(self):
-        return self.proto_type_gen(self.non_return_type, self.trigger_para_type())
+    def proto_type_init_gen(self):
+        return self.proto_type_gen(self.non_return_type, self.init_para_type())
 
     def proto_type_supersede_gen(self):
         return self.proto_type_gen(self.non_return_type, self.supersede_para_type())
@@ -616,11 +635,11 @@ class ContractBuild:
         return len_list_opc
 
 
-    def trigger_opc_line_wrong_tdb_gen(self):
-        return self.list_opc_gen(self.trigger_wrong_tdb_opc(), self.trigger_opc_index())
+    def init_opc_line_wrong_tdb_gen(self):
+        return self.list_opc_gen(self.init_wrong_tdb_opc(), self.init_opc_index())
 
-    def trigger_opc_line_gen(self):
-        return self.list_opc_gen(self.trigger_opc(), self.trigger_opc_index())
+    def init_opc_line_gen(self):
+        return self.list_opc_gen(self.init_opc(), self.init_opc_index())
 
     def supersede_opc_line_gen(self):
         return self.list_opc_gen(self.supersede_opc(), self.supersede_opc_index())
@@ -664,23 +683,23 @@ class ContractBuild:
     def opc_load_caller_index(self):
         return bytes([3])
 
-    def trigger_opc_cdbv_set_signer_index(self):
-        return self.state_var_issuer + self.trigger_input_issuer_load_index
+    def init_opc_cdbv_set_signer_index(self):
+        return self.state_var_issuer + self.init_input_issuer_load_index
 
-    def trigger_opc_cdbv_set_maker_index(self):
-        return self.state_var_maker + self.trigger_input_issuer_load_index
+    def init_opc_cdbv_set_maker_index(self):
+        return self.state_var_maker + self.init_input_issuer_load_index
 
-    def trigger_opc_tdb_new_token_index(self):
-        return self.trigger_input_max_index + self.trigger_input_unity_index + self.trigger_input_short_text_index
+    def init_opc_tdb_new_token_index(self):
+        return self.init_input_max_index + self.init_input_unity_index + self.init_input_short_text_index
 
-    def trigger_wrong_tdb_opc(self):
+    def init_wrong_tdb_opc(self):
         return [self.opc_load_signer(), self.opc_cdbv_set(), self.opc_cdbv_set(), bytes([5]), bytes([3])]
 
-    def trigger_opc(self):
+    def init_opc(self):
         return [self.opc_load_signer(), self.opc_cdbv_set(), self.opc_cdbv_set(), self.opc_tdb_new_token()]
 
-    def trigger_opc_index(self):
-        return [self.opc_load_signer_index(), self.trigger_opc_cdbv_set_signer_index(), self.trigger_opc_cdbv_set_maker_index(), self.trigger_opc_tdb_new_token_index()]
+    def init_opc_index(self):
+        return [self.opc_load_signer_index(), self.init_opc_cdbv_set_signer_index(), self.init_opc_cdbv_set_maker_index(), self.init_opc_tdb_new_token_index()]
 
     def supersede_opc_cdbvr_get_index(self):
         return self.state_var_maker + bytes([1])
@@ -824,7 +843,7 @@ class ContractBuild:
         return [self.get_issuer_opc_cdbvr_get_index(), bytes([0])]
 
     # datastack
-    def trigger_data_stack_gen(self, amount, unity, desc):
+    def init_data_stack_gen(self, amount, unity, desc):
 
         max = DataEntry(bytes([amount]), self.amount)
         unit = DataEntry(bytes([unity]), self.amount)

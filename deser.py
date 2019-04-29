@@ -27,7 +27,13 @@ def serialize_arrays(bs):
 
 
 def serialize_array(b):
-    return struct.pack(">H", len(b)) + b
+    if(type(b) is list):
+        b_bytes = bytes('', encoding='utf-8')
+        for b_element in b:
+            b_bytes += b_element
+        return struct.pack(">H", len(b)) + b_bytes
+    else:
+        return struct.pack(">H", len(b)) + b
 
 
 def parse_array_size(bytes_object, start_position):

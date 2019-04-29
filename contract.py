@@ -83,7 +83,7 @@ class Contract(object):
         functions_bytes = copy.deepcopy(trigger + descriptor)
         print("All Functions with Opcode:")
         self.print_functions(functions_bytes, all_info)
-
+        return [bytes_object, trigger_end, descriptor_end]
     def print_functions(self, functions_opcode, all_info):
         trigger = all_info[0][0]
         execute_fun = all_info[1][0]
