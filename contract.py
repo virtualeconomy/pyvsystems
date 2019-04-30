@@ -207,5 +207,5 @@ class Contract(object):
                 "timestamp": timestamp,
                 "signature": signature
                 })
-            # print(data)
+
             return account.wrapper.request('/contract/broadcast/execute', data)
