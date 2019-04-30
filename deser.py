@@ -27,7 +27,7 @@ def serialize_arrays(bs):
 
 
 def serialize_array(b):
-    if(type(b) is list):
+    if type(b) is list:
         b_bytes = bytes('', encoding='utf-8')
         for b_element in b:
             b_bytes += b_element

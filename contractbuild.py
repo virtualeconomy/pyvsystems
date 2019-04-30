@@ -853,29 +853,29 @@ class ContractBuild:
         index = DataEntry(bytes([token_index]), self.int32)
         return [se, reci, am, index]
 
-    def depositDataStackGen(self, sender, smart_contract, amount, token_index):
+    def deposit_data_stack_gen(self, sender, smart_contract, amount, token_index):
         se = DataEntry(sender.bytes.arr, self.address)
         sc = DataEntry(smart_contract.bytes.arr, self.address)
         am = DataEntry(bytes([amount]), self.amount)
         index = DataEntry(bytes([token_index]), self.int32)
         return [se, sc, am, index]
 
-    def withdrawDataStackGen(self, smartContract, recipient, amount, token_index):
-        sc = DataEntry(smartContract.bytes.arr, self.address)
+    def withdraw_data_stack_gen(self, smart_contract, recipient, amount, token_index):
+        sc = DataEntry(smart_contract.bytes.arr, self.address)
         reci = DataEntry(recipient.bytes.arr, self.address)
         am = DataEntry(bytes([amount]), self.amount)
         index = DataEntry(bytes([token_index]), self.int32)
         return [sc, reci, am, index]
 
-    def totalSupplyDataStackGen(self, token_index):
+    def total_supply_data_stack_gen(self, token_index):
         index = DataEntry(bytes([token_index]), self.int32)
         return [index]
 
-    def maxSupplyDataStackGen(self, token_index):
+    def max_supply_data_stack_gen(self, token_index):
         index = DataEntry(bytes([token_index]), self.int32)
         return [index]
 
-    def balanceOfDataStackGen(self, account, token_index):
+    def balance_of_data_stack_gen(self, account, token_index):
         acc =  DataEntry(account.bytes.arr, self.address)
         index = DataEntry(bytes([token_index]), self.int32)
         return [acc, index]
