@@ -542,8 +542,6 @@ class ContractBuild(object):
         return struct.pack(">H", self.destroy_without_split)
     def split_fun_id_gen(self):
         return struct.pack(">H", self.split)
-    def split_fun_id_without_split_gen(self):
-        return struct.pack(">H", self.split_without_split)
     def send_fun_id_gen(self):
         return struct.pack(">H", self.send)
     def send_fun_id_without_split_gen(self):
