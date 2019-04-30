@@ -9,8 +9,8 @@ from .contracttranslator import *
 
 class Contract(object):
     def __init__(self):
-        self.contract_without_split_default = ContractBuild('vdds', 1, split=False).contract_byte_str
-        self.contract_with_split_default = ContractBuild('vdds', 1, split=True).contract_byte_str
+        self.contract_without_split_default = ContractBuild().create('vdds', 1, split=False)
+        self.contract_with_split_default = ContractBuild().create('vdds', 1, split=True)
 
     def show_contract_function(self, bytes_string='', contract_id=''):
         contract_translator = ContractTranslator()
