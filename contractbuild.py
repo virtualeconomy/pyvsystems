@@ -2,12 +2,14 @@ import itertools
 import os
 import struct
 
+import base58
+
 from pyvsystems import deser
 from pyvsystems.dataentry import DataEntry
 from pyvsystems.deser import serialize_string
 
 
-class ContractBuild:
+class ContractBuild(object):
     # texture
     init_para = ["max", "unity", "tokenDescription", "signer"]
     supersede_para = ["newIssuer", "maker"]
@@ -158,7 +160,8 @@ class ContractBuild:
         self.descriptor = self.descriptor_builder(split)
         self.state_var = self.state_var_builder()
         self.texture = self.texture_builder(split)
-        self.contract = self.lang_code + self.lang_ver + self.trigger + self.descriptor + self.state_var + self.texture
+        self.contract_bytes = self.lang_code + self.lang_ver + self.trigger + self.descriptor + self.state_var + self.texture
+        self.contract_byte_str = base58.b58encode(self.contract_bytes)
 
     # OpcId
     def assert_gteq_zero_gen(self):
