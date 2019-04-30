@@ -51,4 +51,4 @@ def parse_arrays(bytes_object):
     for pos in range(length):
         [array_info, pos_drift] = parse_array_size(bytes_object, pos_drift)
         all_info.append(array_info)
-    return [all_info, pos_drift - 2 - 2*length]
+    return [all_info, pos_drift - 2 - 2 * length]
