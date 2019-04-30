@@ -9,7 +9,7 @@ from pyvsystems.deser import serialize_string
 
 class ContractBuild:
     # texture
-    trigger_para = ["max", "unity", "tokenDescription", "signer"]
+    init_para = ["max", "unity", "tokenDescription", "signer"]
     supersede_para = ["newIssuer", "maker"]
     issue_para = ["amount", "tokenIndex", "issuer"]
     destroy_para = ["amount", "tokenIndex", "issuer"]
@@ -83,7 +83,7 @@ class ContractBuild:
     total_tdbr = bytes([2])
 
     # funid
-    trigger = 0
+    init = 0
     supersede = 0
     issue = 1
     destroy = 2
@@ -116,52 +116,40 @@ class ContractBuild:
     public_func_type = 0
 
     # datastack
-    trigger_input_max_index = bytes([0])
-    trigger_input_unity_index = bytes([1])
-    trigger_input_short_text_index = bytes([2])
-    trigger_input_issuer_load_index = bytes([3])
+    init_input_max_index = bytes([0])
+    init_input_unity_index = bytes([1])
+    init_input_short_text_index = bytes([2])
+    init_input_issuer_load_index = bytes([3])
 
     supersede_input_new_issuer_index = bytes([0])
     supersede_input_maker = bytes([1])
 
     split_input_new_unity_index = bytes([0])
-    split_input_token_index = bytes([1])
-    split_input_issuer_get_index = bytes([2])
+    split_input_issuer_get_index = bytes([1])
 
     destroy_input_destroy_amount_index = bytes([0])
-    destroy_input_token_index = bytes([1])
-    destroy_input_issuer_get_index = bytes([2])
+    destroy_input_issuer_get_index = bytes([1])
 
     issue_input_amount_index = bytes([0])
-    issue_input_token_index = bytes([1])
-    issue_input_issuer_get_index = bytes([2])
+    issue_input_issuer_get_index = bytes([1])
 
     send_input_recipient_index = bytes([0])
     send_input_amount_index = bytes([1])
-    send_input_token_index = bytes([2])
-    send_input_sender_index = bytes([3])
+    send_input_sender_index = bytes([2])
 
     transfer_input_sender_index = bytes([0])
     transfer_input_recipient_index = bytes([1])
     transfer_input_amount_index = bytes([2])
-    transfer_input_token_index = bytes([3])
 
     deposit_input_sender_index = bytes([0])
     deposit_input_smart_contract_index = bytes([1])
     deposit_input_amount_index = bytes([2])
-    deposit_input_token_index = bytes([3])
 
     withdraw_input_smart_contract_index = bytes([0])
     withdraw_input_recipient_index = bytes([1])
     withdraw_input_amount_index = bytes([2])
-    withdraw_input_token_index = bytes([3])
-
-    total_supply_input_token_index = bytes([0])
-
-    max_supply_input_token_index = bytes([0])
 
     balance_of_input_account_index = bytes([0])
-    balance_of_input_token_index = bytes([1])
 
     def contract_builder(self, language_code, language_version, split=False):
         lang_code = self.language_code_builder(language_code)
@@ -170,6 +158,7 @@ class ContractBuild:
         descriptor = self.descriptor_builder(split)
         state_var = self.state_var_builder()
         texture = self.texture_builder(split)
+
         return lang_code + lang_ver + trigger + descriptor + state_var + texture
 
     # OpcId
@@ -283,7 +272,7 @@ class ContractBuild:
 
     # trigger
     def trigger_builder(self):
-        return deser.serialize_array(self.trigger_fun_gen())
+        return deser.serialize_array(deser.serialize_arrays([self.init_fun_gen()]))
 
     # descriptor
     def descriptor_builder(self, split):
@@ -310,7 +299,7 @@ class ContractBuild:
         self._fixed_size = 4
         self.state_var_name = ["issuer", "maker"]
         self.state_var_texture = deser.serialize_arrays([deser.serialize_string(name) for name in self.state_var_name])
-        self.trigger_texture = deser.serialize_arrays([self.trigger_func_bytes()])
+        self.initializer_texture = deser.serialize_arrays([self.init_func_bytes()])
         if(split is False):
             self.descriptor_texture = deser.serialize_arrays([self.supersede_func_bytes(),
                                                             self.issue_func_bytes(),
@@ -337,15 +326,16 @@ class ContractBuild:
                                                             self.balance_of_func_bytes(),
                                                             self.get_issuer_func_bytes()])
 
-        self.texture_right_gen = self.texture_gen(self.trigger_texture, self.descriptor_texture, self.state_var_texture)
+        self.texture_right_gen = self.texture_gen(self.initializer_texture, self.descriptor_texture, self.state_var_texture)
+
         return self.texture_right_gen
 
     def texture_random_gen(self):
         texture = bytearray(os.urandom(self._fixed_size))
         return texture
 
-    def texture_gen(self, trigger, description, state_var):
-        return deser.serialize_arrays([trigger, description, state_var])
+    def texture_gen(self, initialization, description, state_var):
+        return deser.serialize_arrays([initialization, description, state_var])
 
     def texture_fun_gen(self, name, ret, para):
         func_byte = deser.serialize_array(deser.serialize_string(name))
@@ -355,8 +345,8 @@ class ContractBuild:
         return texture
 
 
-    def trigger_func_bytes(self):
-        return self.texture_fun_gen("trigger", [], self.trigger_para)
+    def init_func_bytes(self):
+        return self.texture_fun_gen("init", [], self.init_para)
 
     def supersede_func_bytes(self):
         return self.texture_fun_gen("supersede", [], self.supersede_para)
@@ -409,8 +399,8 @@ class ContractBuild:
         fun = fun_idx + fun_type + proto_type + list_opc
         return fun
 
-    def trigger_fun_gen(self):
-        fun = self.a_function_gen(self.trigger_fun_id_gen(), self.trigger_fun_type_gen(), self.proto_type_trigger_gen(), self.trigger_opc_line_gen())
+    def init_fun_gen(self):
+        fun = self.a_function_gen(self.init_fun_id_gen(), self.init_fun_type_gen(), self.proto_type_init_gen(), self.init_opc_line_gen())
         return fun
 
     def supersede_fun_gen(self):
@@ -462,8 +452,8 @@ class ContractBuild:
         return fun
 
     # funid
-    def trigger_fun_id_gen(self):
-        return struct.pack(">H", self.trigger)
+    def init_fun_id_gen(self):
+        return struct.pack(">H", self.init)
     def supersede_fun_id_gen(self):
         return struct.pack(">H", self.supersede)
     def issue_fun_id_gen(self):
@@ -490,7 +480,7 @@ class ContractBuild:
         return struct.pack(">H", self.get_issuer)
 
     # funtype
-    def trigger_fun_type_gen(self):
+    def init_fun_type_gen(self):
         return bytes([self.on_init_trigger_type])
     def supersede_fun_type_gen(self):
         return bytes([self.public_func_type])
@@ -522,53 +512,53 @@ class ContractBuild:
         proto_type = deser.serialize_array(return_type) + deser.serialize_array(list_para_types)
         return proto_type
 
-    def trigger_para_type_wrong(self):
+    def init_para_type_wrong(self):
         return [self.amount, self.amount]
 
-    def trigger_para_type(self):
+    def init_para_type(self):
         return [self.amount, self.amount, self.short_text]
 
     def supersede_para_type(self):
         return [self.account]
 
     def issue_para_type(self):
-        return [self.amount, self.int32]
+        return [self.amount]
 
     def destroy_para_type(self):
-        return [self.amount + self.int32]
+        return [self.amount]
 
     def split_para_type(self):
-        return [self.amount + self.int32]
+        return [self.amount]
 
     def send_para_type(self):
-        return [self.account + self.amount + self.int32]
+        return [self.account, self.amount]
 
     def transfer_para_type(self):
-        return [self.account + self.account + self.amount + self.int32]
+        return [self.account, self.account, self.amount]
 
     def deposit_para_type(self):
-        return [self.account + self.contract_account + self.amount + self.int32]
+        return [self.account, self.contract_account, self.amount]
 
     def withdraw_para_type(self):
-        return [self.contract_account + self.account + self.amount + self.int32]
+        return [self.contract_account, self.account, self.amount]
 
     def total_supply_para_type(self):
-        return [self.int32]
+        return bytes('', encoding='utf-8')
 
     def max_supply_para_type(self):
-        return [self.int32]
+        return bytes('', encoding='utf-8')
 
     def balance_of_para_type(self):
-        return [self.account + self.int32]
+        return [self.account]
 
     def get_issuer_para_type(self):
-        return [bytes('',encoding ='utf-8')]
+        return bytes('', encoding='utf-8')
 
-    def proto_type_trigger_wrong_gen(self):
-        return self.proto_type_gen(self.non_return_type, self.trigger_para_type_wrong())
+    def proto_type_init_wrong_gen(self):
+        return self.proto_type_gen(self.non_return_type, self.init_para_type_wrong())
 
-    def proto_type_trigger_gen(self):
-        return self.proto_type_gen(self.non_return_type, self.trigger_para_type())
+    def proto_type_init_gen(self):
+        return self.proto_type_gen(self.non_return_type, self.init_para_type())
 
     def proto_type_supersede_gen(self):
         return self.proto_type_gen(self.non_return_type, self.supersede_para_type())
@@ -616,11 +606,11 @@ class ContractBuild:
         return len_list_opc
 
 
-    def trigger_opc_line_wrong_tdb_gen(self):
-        return self.list_opc_gen(self.trigger_wrong_tdb_opc(), self.trigger_opc_index())
+    def init_opc_line_wrong_tdb_gen(self):
+        return self.list_opc_gen(self.init_wrong_tdb_opc(), self.init_opc_index())
 
-    def trigger_opc_line_gen(self):
-        return self.list_opc_gen(self.trigger_opc(), self.trigger_opc_index())
+    def init_opc_line_gen(self):
+        return self.list_opc_gen(self.init_opc(), self.init_opc_index())
 
     def supersede_opc_line_gen(self):
         return self.list_opc_gen(self.supersede_opc(), self.supersede_opc_index())
@@ -662,25 +652,25 @@ class ContractBuild:
         return bytes([3])
 
     def opc_load_caller_index(self):
-        return bytes([3])
+        return bytes([2])
 
-    def trigger_opc_cdbv_set_signer_index(self):
-        return self.state_var_issuer + self.trigger_input_issuer_load_index
+    def init_opc_cdbv_set_signer_index(self):
+        return self.state_var_issuer + self.init_input_issuer_load_index
 
-    def trigger_opc_cdbv_set_maker_index(self):
-        return self.state_var_maker + self.trigger_input_issuer_load_index
+    def init_opc_cdbv_set_maker_index(self):
+        return self.state_var_maker + self.init_input_issuer_load_index
 
-    def trigger_opc_tdb_new_token_index(self):
-        return self.trigger_input_max_index + self.trigger_input_unity_index + self.trigger_input_short_text_index
+    def init_opc_tdb_new_token_index(self):
+        return self.init_input_max_index + self.init_input_unity_index + self.init_input_short_text_index
 
-    def trigger_wrong_tdb_opc(self):
+    def init_wrong_tdb_opc(self):
         return [self.opc_load_signer(), self.opc_cdbv_set(), self.opc_cdbv_set(), bytes([5]), bytes([3])]
 
-    def trigger_opc(self):
+    def init_opc(self):
         return [self.opc_load_signer(), self.opc_cdbv_set(), self.opc_cdbv_set(), self.opc_tdb_new_token()]
 
-    def trigger_opc_index(self):
-        return [self.opc_load_signer_index(), self.trigger_opc_cdbv_set_signer_index(), self.trigger_opc_cdbv_set_maker_index(), self.trigger_opc_tdb_new_token_index()]
+    def init_opc_index(self):
+        return [self.opc_load_signer_index(), self.init_opc_cdbv_set_signer_index(), self.init_opc_cdbv_set_maker_index(), self.init_opc_tdb_new_token_index()]
 
     def supersede_opc_cdbvr_get_index(self):
         return self.state_var_maker + bytes([1])
@@ -698,13 +688,13 @@ class ContractBuild:
         return [self.supersede_opc_cdbvr_get_index(), self.supersede_assert_is_signer_origin_index(), self.supersede_opc_cdbv_set_index()]
 
     def issue_opc_cdbvr_get_index(self):
-        return self.state_var_issuer + bytes([2])
+        return self.state_var_issuer + bytes([1])
 
     def issue_opc_assert_is_caller_origin_index(self):
         return self.issue_input_issuer_get_index
 
     def issue_opc_tdba_deposit_index(self):
-        return self.issue_input_issuer_get_index + self.issue_input_amount_index + self.issue_input_token_index
+        return self.issue_input_issuer_get_index + self.issue_input_amount_index
 
     def issue_opc(self):
         return [self.opc_cdbvr_get(), self.opc_assert_is_caller_origin(), self.opc_tdba_deposit()]
@@ -713,13 +703,13 @@ class ContractBuild:
         return [self.issue_opc_cdbvr_get_index(), self.issue_opc_assert_is_caller_origin_index(), self.issue_opc_tdba_deposit_index()]
 
     def destroy_opc_cdbvr_get_index(self):
-        return self.state_var_issuer + bytes([2])
+        return self.state_var_issuer + bytes([1])
 
     def destroy_opc_assert_is_caller_origin_index(self):
         return self.destroy_input_issuer_get_index
 
     def destroy_opc_tdba_withdraw_index(self):
-        return self.destroy_input_issuer_get_index + self.destroy_input_destroy_amount_index + self.destroy_input_token_index
+        return self.destroy_input_issuer_get_index + self.destroy_input_destroy_amount_index
 
     def destroy_opc(self):
         return [self.opc_cdbvr_get(), self.opc_assert_is_caller_origin(), self.opc_tdba_withdraw()]
@@ -728,13 +718,13 @@ class ContractBuild:
         return [self.destroy_opc_cdbvr_get_index(), self.destroy_opc_assert_is_caller_origin_index(), self.destroy_opc_tdba_withdraw_index()]
 
     def split_opc_cdbvr_get_index(self):
-        return self.state_var_issuer + bytes([2])
+        return self.state_var_issuer + bytes([1])
 
     def split_opc_assert_is_caller_origin_index(self):
         return self.split_input_issuer_get_index
 
     def split_opc_tdb_split_index(self):
-        return self.split_input_new_unity_index + self.split_input_token_index
+        return self.split_input_new_unity_index
 
     def split_opc(self):
         return [self.opc_cdbvr_get(), self.opc_assert_is_caller_origin(), self.opc_tdb_split()]
@@ -743,7 +733,7 @@ class ContractBuild:
         return [self.split_opc_cdbvr_get_index(), self.split_opc_assert_is_caller_origin_index(), self.split_opc_tdb_split_index()]
 
     def send_opc_tdba_transfer_index(self):
-        return self.send_input_sender_index + self.send_input_recipient_index + self.send_input_amount_index + self.send_input_token_index
+        return self.send_input_sender_index + self.send_input_recipient_index + self.send_input_amount_index
 
     def send_opc(self):
         return [self.opc_load_caller(), self.opc_tdba_transfer()]
@@ -755,7 +745,7 @@ class ContractBuild:
         return self.transfer_input_sender_index
 
     def transfer_opc_tdba_transfer_index(self):
-        return self.transfer_input_sender_index + self.transfer_input_recipient_index + self.transfer_input_amount_index + self.transfer_input_token_index
+        return self.transfer_input_sender_index + self.transfer_input_recipient_index + self.transfer_input_amount_index
 
     def transfer_opc(self):
         return [self.opc_assert_is_caller_origin(), self.opc_tdba_transfer()]
@@ -767,7 +757,7 @@ class ContractBuild:
         return self.deposit_input_sender_index
 
     def deposit_opc_tdba_transfer_index(self):
-        return self.deposit_input_sender_index + self.deposit_input_smart_contract_index + self.deposit_input_amount_index + self.deposit_input_token_index
+        return self.deposit_input_sender_index + self.deposit_input_smart_contract_index + self.deposit_input_amount_index
 
     def deposit_opc(self):
         return [self.opc_assert_is_caller_origin(), self.opc_tdba_transfer()]
@@ -779,7 +769,7 @@ class ContractBuild:
         return self.withdraw_input_recipient_index
 
     def withdraw_opc_tdba_transfer_index(self):
-        return self.withdraw_input_smart_contract_index + self.withdraw_input_recipient_index + self.withdraw_input_amount_index + self.withdraw_input_token_index
+        return self.withdraw_input_smart_contract_index + self.withdraw_input_recipient_index + self.withdraw_input_amount_index
 
     def withdraw_opc(self):
         return [self.opc_assert_is_caller_origin(), self.opc_tdba_transfer()]
@@ -788,31 +778,31 @@ class ContractBuild:
         return [self.withdraw_opc_assert_is_caller_origin_index(), self.withdraw_opc_tdba_transfer_index()]
 
     def total_supply_opc_tdbr_total_index(self):
-        return self.total_supply_input_token_index + bytes([1])
+        return bytes([0])
 
     def total_supply_opc(self):
         return [self.opc_tdbr_opc_total(), self.opc_return_value()]
 
     def total_supply_opc_index(self):
-        return [self.total_supply_opc_tdbr_total_index(), bytes([1])]
+        return [self.total_supply_opc_tdbr_total_index(), bytes([0])]
 
     def max_supply_opc_tdbr_max_index(self):
-        return self.max_supply_input_token_index + bytes([1])
+        return bytes([0])
 
     def max_supply_opc(self):
         return [self.opc_tdbr_opc_max(), self.opc_return_value()]
 
     def max_supply_opc_index(self):
-        return [self.max_supply_opc_tdbr_max_index(), bytes([1])]
+        return [self.max_supply_opc_tdbr_max_index(), bytes([0])]
 
     def balance_of_opc_tdbar_balance_index(self):
-        return self.balance_of_input_account_index + self.balance_of_input_token_index  + bytes([2])
+        return self.balance_of_input_account_index + bytes([1])
 
     def balance_of_opc(self):
         return [self.opc_tdbar_balance(), self.opc_return_value()]
 
     def balance_of_opc_index(self):
-        return [self.balance_of_opc_tdbar_balance_index(), bytes([2])]
+        return [self.balance_of_opc_tdbar_balance_index(), bytes([1])]
 
     def get_issuer_opc_cdbvr_get_index(self):
         return self.state_var_issuer + bytes([0])
@@ -824,7 +814,7 @@ class ContractBuild:
         return [self.get_issuer_opc_cdbvr_get_index(), bytes([0])]
 
     # datastack
-    def trigger_data_stack_gen(self, amount, unity, desc):
+    def init_data_stack_gen(self, amount, unity, desc):
 
         max = DataEntry(bytes([amount]), self.amount)
         unit = DataEntry(bytes([unity]), self.amount)
@@ -863,29 +853,29 @@ class ContractBuild:
         index = DataEntry(bytes([token_index]), self.int32)
         return [se, reci, am, index]
 
-    def depositDataStackGen(self, sender, smart_contract, amount, token_index):
+    def deposit_data_stack_gen(self, sender, smart_contract, amount, token_index):
         se = DataEntry(sender.bytes.arr, self.address)
         sc = DataEntry(smart_contract.bytes.arr, self.address)
         am = DataEntry(bytes([amount]), self.amount)
         index = DataEntry(bytes([token_index]), self.int32)
         return [se, sc, am, index]
 
-    def withdrawDataStackGen(self, smartContract, recipient, amount, token_index):
-        sc = DataEntry(smartContract.bytes.arr, self.address)
+    def withdraw_data_stack_gen(self, smart_contract, recipient, amount, token_index):
+        sc = DataEntry(smart_contract.bytes.arr, self.address)
         reci = DataEntry(recipient.bytes.arr, self.address)
         am = DataEntry(bytes([amount]), self.amount)
         index = DataEntry(bytes([token_index]), self.int32)
         return [sc, reci, am, index]
 
-    def totalSupplyDataStackGen(self, token_index):
+    def total_supply_data_stack_gen(self, token_index):
         index = DataEntry(bytes([token_index]), self.int32)
         return [index]
 
-    def maxSupplyDataStackGen(self, token_index):
+    def max_supply_data_stack_gen(self, token_index):
         index = DataEntry(bytes([token_index]), self.int32)
         return [index]
 
-    def balanceOfDataStackGen(self, account, token_index):
+    def balance_of_data_stack_gen(self, account, token_index):
         acc =  DataEntry(account.bytes.arr, self.address)
         index = DataEntry(bytes([token_index]), self.int32)
         return [acc, index]
