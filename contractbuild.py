@@ -151,15 +151,14 @@ class ContractBuild:
 
     balance_of_input_account_index = bytes([0])
 
-    def contract_builder(self, language_code, language_version, split=False):
-        lang_code = self.language_code_builder(language_code)
-        lang_ver = self.language_version_builder(language_version)
-        trigger = self.trigger_builder()
-        descriptor = self.descriptor_builder(split)
-        state_var = self.state_var_builder()
-        texture = self.texture_builder(split)
-
-        return lang_code + lang_ver + trigger + descriptor + state_var + texture
+    def __init__(self, language_code, language_version, split=False):
+        self.lang_code = self.language_code_builder(language_code)
+        self.lang_ver = self.language_version_builder(language_version)
+        self.trigger = self.trigger_builder()
+        self.descriptor = self.descriptor_builder(split)
+        self.state_var = self.state_var_builder()
+        self.texture = self.texture_builder(split)
+        self.contract = self.lang_code + self.lang_ver + self.trigger + self.descriptor + self.state_var + self.texture
 
     # OpcId
     def assert_gteq_zero_gen(self):
