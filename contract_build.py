@@ -737,6 +737,7 @@ class ContractBuild(object):
     def get_issuer_opc_index(self):
         return [self.get_issuer_opc_cdbvr_get_index(), bytes([0])]
 
+
     # datastack
     @staticmethod
     def init_data_stack_gen(max, unity, desc):
