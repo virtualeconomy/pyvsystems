@@ -1,4 +1,3 @@
-#from .setting import *
 from .crypto import *
 from .error import *
 import pyvsystems
@@ -10,6 +9,7 @@ import logging
 import copy
 from .opcode import *
 from .deser import *
+from .contractbuild import *
 
 
 class Contract(object):
@@ -24,9 +24,12 @@ class Contract(object):
 
         self.function_type_map = {'000': 'onInit', '100': 'public'}
         self.opcode_info = Opcode()
+        self.contract_without_split = ContractBuild('vdds', 1, split=False).contract
+        self.contract_with_split = ContractBuild('vdds', 1, split=True).contract
+
 
     def show_contract_function(self, byte_string = '', contract_json = ''):
-        byte_string = self.test
+        byte_string = self.contract_without_split
         bytes_object = base58.b58decode(byte_string)
         # print("All Bytes: ")
         # print(bytes_object)
