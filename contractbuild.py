@@ -171,7 +171,6 @@ class ContractBuild(object):
         self.trigger = self.trigger_builder()
         self.descriptor = self.descriptor_builder(split)
         self.state_var = self.state_var_builder()
-        print(self.state_var)
         self.texture = self.texture_builder(split)
         self.contract_bytes = self.lang_code + self.lang_ver + self.trigger + self.descriptor + self.state_var + self.texture
         self.contract_byte_str = base58.b58encode(self.contract_bytes)
@@ -301,17 +300,6 @@ class ContractBuild(object):
                                                 self.transfer_fun_gen(), self.deposit_fun_gen(), self.withdraw_fun_gen(), self.total_supply_fun_gen(),
                                                 self.max_supply_fun_gen(), self.balance_of_fun_gen(), self.get_issuer_fun_gen()])
 
-        print("self.supersede_fun_gen()", self.supersede_fun_without_split_gen(), len(self.supersede_fun_without_split_gen()))
-        print("self.issue_fun_gen()", self.issue_fun_without_split_gen(), len(self.issue_fun_without_split_gen()))
-        print("self.destroy_fun_gen()", self.destroy_fun_without_split_gen(), len(self.destroy_fun_without_split_gen()))
-        print("self.send_fun_gen()", self.send_fun_without_split_gen(), len(self.send_fun_without_split_gen()))
-        print("self.transfer_fun_gen()", self.transfer_fun_without_split_gen(), len(self.transfer_fun_without_split_gen()))
-        print("self.deposit_fun_gen()", self.deposit_fun_without_split_gen(), len(self.deposit_fun_without_split_gen()))
-        print("self.withdraw_fun_gen()", self.withdraw_fun_without_split_gen(), len(self.withdraw_fun_without_split_gen()))
-        print("self.total_supply_fun_gen()", self.total_supply_fun_without_split_gen(), len(self.total_supply_fun_without_split_gen()))
-        print("self.max_supply_fun_gen()", self.max_supply_fun_without_split_gen(), len(self.max_supply_fun_without_split_gen()))
-        print("self.balance_of_fun_gen()", self.balance_of_fun_without_split_gen(), len(self.balance_of_fun_without_split_gen()))
-        print("self.get_issuer_fun_gen()", self.get_issuer_fun_without_split_gen(), len(self.get_issuer_fun_without_split_gen()))
         return deser.serialize_array(descriptor)
 
 
