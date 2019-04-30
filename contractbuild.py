@@ -293,13 +293,13 @@ class ContractBuild(object):
     def descriptor_builder(self, split):
         if(split is False):
             descriptor = deser.serialize_arrays(
-                [self.supersede_fun_gen(), self.issue_fun_gen(), self.destroy_fun_gen(),
-                 self.send_fun_gen(), self.transfer_fun_gen(), self.deposit_fun_gen(), self.withdraw_fun_gen(), self.total_supply_fun_gen(),
-                 self.max_supply_fun_gen(), self.balance_of_fun_gen(), self.get_issuer_fun_gen()])
+                [self.supersede_fun_without_split_gen(), self.issue_fun_without_split_gen(), self.destroy_fun_without_split_gen(),
+                 self.send_fun_without_split_gen(), self.transfer_fun_without_split_gen(), self.deposit_fun_without_split_gen(), self.withdraw_fun_without_split_gen(), self.total_supply_fun_without_split_gen(),
+                 self.max_supply_fun_without_split_gen(), self.balance_of_fun_without_split_gen(), self.get_issuer_fun_without_split_gen()])
         else:
-            descriptor = deser.serialize_arrays([self.supersede_fun_without_split_gen(), self.issue_fun_without_split_gen(), self.destroy_fun_without_split_gen(), self.split_fun_without_split_gen(), self.send_fun_without_split_gen(),
-                                                self.transfer_fun_without_split_gen(), self.deposit_fun_without_split_gen(), self.withdraw_fun_without_split_gen(), self.total_supply_fun_without_split_gen(),
-                                                self.max_supply_fun_without_split_gen(), self.balance_of_fun_without_split_gen(), self.get_issuer_fun_without_split_gen()])
+            descriptor = deser.serialize_arrays([self.supersede_fun_gen(), self.issue_fun_gen(), self.destroy_fun_gen(), self.split_fun_gen(), self.send_fun_gen(),
+                                                self.transfer_fun_gen(), self.deposit_fun_gen(), self.withdraw_fun_gen(), self.total_supply_fun_gen(),
+                                                self.max_supply_fun_gen(), self.balance_of_fun_gen(), self.get_issuer_fun_gen()])
 
         print("self.supersede_fun_gen()", self.supersede_fun_without_split_gen(), len(self.supersede_fun_without_split_gen()))
         print("self.issue_fun_gen()", self.issue_fun_without_split_gen(), len(self.issue_fun_without_split_gen()))
@@ -455,10 +455,6 @@ class ContractBuild(object):
 
     def split_fun_gen(self):
         fun = self.a_function_gen(self.split_fun_id_gen(), self.split_fun_type_gen(), self.proto_type_split_gen(), self.split_opc_line_gen())
-        return fun
-
-    def split_fun_without_split_gen(self):
-        fun = self.a_function_gen(self.split_fun_id_without_split_gen(), self.split_fun_type_gen(), self.proto_type_split_gen(), self.split_opc_line_gen())
         return fun
 
     def send_fun_gen(self):
