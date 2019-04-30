@@ -1,4 +1,4 @@
-#from .setting import *
+from .setting import *
 from .crypto import *
 from .error import *
 from .words import WORDS
@@ -18,8 +18,8 @@ class Contract(object):
         self.language_version_byte_length = 4
         self.data_type_list = {'01': 'PublicKey', '02': 'Address', '03': 'Amount', '04': 'Int32', '05': 'ShortText',
                                '06': 'ContractAccount', '07': 'Account'}
-        # self.test = 'JC9U69xcoTWJ71v82TojKETj3SAsxyh3nYACiheZMDBgE6XKshzgupsRmSk3y1aijZJxWu4DSX96nMpStH2ESv3P4VC4MogHcN8UcCiaLiCt2af1b7zkhZtGq6ckrvHjijJ7ZHZugp8bzyUTs55SnZ5o2tockgM8jhtnfVNRPEPq8My9QNDDyZRJyxyJnE6p8kB3PDEPk1WsBxe68APAaLqjN4ACRCv5kyhKTjaEixRz6yn62W8PRi5PpzD4KEtg1DrxwhwqsFWCLrNPsw8vTuSB3DrNgCq72FEQJAAtdDS29kPmaQYeQG2YQzUrtKyteAdMzQw2B17wUsQj4tnkFkec5VbbV4mFZ5zhVsCv5UErZiKKPiBgefjQjfnuYNV6PA4r5T6XrtW2zi5MvzEym3vt3PpzodHd9xY5UftGRmkWjZ1atRfRsheDw6CKcsjdEGNS5J7bfvLj3KAckRPjp1wAP5CTKASSLvGVBCyieNyJLmdfguhEEg5xpKXiJdzTAnQDrBYdhCpRq9xTcBK5ueQZ5vqEZt1vbBBLVzkdmmt54tZXvpvW3TPwKqLtz26zdtAPntmjLyqqNKbmzb8MrgiyjyC8YmYgnLUkeU8q2ksmZKZ8aoHEW5zF3ztQ7qNvaxY86NY3AHkpcuUjbdaMxEMKAQ3Qc2fVcwHVoJoEz7pSSUHvnUcZcnYMMmGR52gwNasUxVAm2LmbNbuyQvnxpJXd2yQryWQjgHcgDoRSroRuV6rftvGz6d9FbhytyrUEc9Ae6uZu7W6cAtB75jBtaBUk9K9cootsqEu2Y1PUE7B832X3j4UWveC73XnkRsz5U8EStNWvJXYZ2QitmZBSpCYMP8bnEfnqtxmGk7B1iT3tqWaJ5QX5DgkQ189UXimGCjAs31LtFSCuGWzkJnoR3H5Yno465v7WHLkbewKqrDpaAbgj82pja8uuSj8uZGBrEDXu2KdP4R4UbfDUXYmGtiNTwDDfwdyAv4BrvyQFuWKVWnMDhkSjsjSVJmLx5qwNq3EBZzN7tZd9UBQ3552rSfu48Y7fvTh54x9FjYMDCmtUFmsxrnWFgbGe8Gypfwpk9qKHe4Pe7Qjx5ppzAW48FDtdtjznh6wk4wF33y46cfrTEogULvkifb8WjqoXaRytdxUzcm6M23XiKUfQAVygFJXBJfCU3VbxFZgLib2Lgp2dAeB5myJzRayKi9tJQVzLrYr4NEFWpzJbxiZxyY14XyHXWTyvGgQHW5DGkgRiWDm7mbybtb9BvKrEtkKCZ'
-        self.test = 'kpUFTV4BMU2mLarm7iTmJMxw7RLSx2SBZvA22e26pEAp9CfxxppnPCaM4YMZYptdewVirdTdLPboQs9bn18VgeSSz3zRXSN8xAmgUs3JVr4v6Xw2YKHP8zKbngErdvr3YKZCu8hjjZv1MfRbPyWbaDCoXo4q3ngJrZ2hmDok1PxxaN8dwXT4M4PkfnQyaCqVhbNpwmYaSQoHVMfLAMnJXBtxfbrfTj6M8Gg6gjmnHcvXJy59oZtWhqK6H83fYuK8cydNj7cZWn43L5S9pZEjHFZZA37pxbdiwKRvbFNkocNuU9kpVySTPyLLUd5pSYMtUfNkMhQwkDASLrzdyfbQ8G9WxKNucbSbDzoA1F5tTP1a7LzeQZ14ABbztaJKaqStxXhX2hBEmxHGwdhiwNM2UbVLgjiomzw1s1EupH7zseoBpTPKZRsVso8j3SoSsfGpwf2YeCAds47SQqVsjGFMsp3WHeuRQd2U5DV2AQyYshHoTkad3akT7QYcrZ39ypMPj2KGizg2wdJSw3Z6LknyyKviu12vkpaMxsR74jGUAA54PkNRNEYyP62BWM35eDDkxS62tcRP5R1Xp9acsgJq2J9uqrrEseeTC8icMJUQY4E7bpQwdwgsnzeLHnfADEoaNBh45DEdB4mRoGCWoqiZeX341VDmBjQW44uTjXvQ46zHiR34g2KzDJ178cbmTaYzcBZHsqu8MZFDimsGALk81C1U5wKCN63x3FqcNS436M3f23op7hUm8Rf4FDsCvCu5NaytUvFKMmLfBtg6D3MqBVEzV6nuhSPHsnU5JiiAfUx93ZivtjmDAYGCcANrTzdDB1PeKj9BbE2SoyJ9TxkAXgUBZoZneZJnuqLAoEookS9zT7LKxyU4T7DwWVWDuX9j2XYB8Pi2DDYkydfbssics6XJjDkeG8cMPKi3p3jeZN8Qaf7KraE4SHZEatvCZb5fJdSPaDWQiJ6XhUpNCGYqb8htPou9bPqQL6hTj6yX44WSedMqw2bArrXAwh4MXvgxGJBt89CXG6qGm4wHYM6bjpQ8bNuQvUDNQ5HueHLSTJNtiCHTDgfH7MvmVm1xfJF7dFeKmeRwbFiRK7E3dBKr6wANmkUzM7ezdFMsPDr8PQkbipHJAM6j1uDujNci9TcQYgpviUg6uaUvqPKsZa3q3Hw4NsCxDNRGKFtwPUyTFXJAEeAqoiFmUQDfjeTFCFpHr4DfuqHdpwwVQebsEKUdcnQdoEgP1Dmav2JKbffTcL8wJgtGjoVpUzMb55DBe31uqf7Ri2UZFbAq3APw9yqCbLM1jNN9dBizQ48fdmgHxhHGAM1kiDdtFVJwPt974GPGQ7cnbTqdePbHFcEkkxXmrVjymmf'
+        self.test = 'JC9U69xcoTWJ71v82TojKETj3SAsxyh3nYACiheZMDBgE6XKshzgupsRmSk3y1aijZJxWu4DSX96nMpStH2ESv3P4VC4MogHcN8UcCiaLiCt2af1b7zkhZtGq6ckrvHjijJ7ZHZugp8bzyUTs55SnZ5o2tockgM8jhtnfVNRPEPq8My9QNDDyZRJyxyJnE6p8kB3PDEPk1WsBxe68APAaLqjN4ACRCv5kyhKTjaEixRz6yn62W8PRi5PpzD4KEtg1DrxwhwqsFWCLrNPsw8vTuSB3DrNgCq72FEQJAAtdDS29kPmaQYeQG2YQzUrtKyteAdMzQw2B17wUsQj4tnkFkec5VbbV4mFZ5zhVsCv5UErZiKKPiBgefjQjfnuYNV6PA4r5T6XrtW2zi5MvzEym3vt3PpzodHd9xY5UftGRmkWjZ1atRfRsheDw6CKcsjdEGNS5J7bfvLj3KAckRPjp1wAP5CTKASSLvGVBCyieNyJLmdfguhEEg5xpKXiJdzTAnQDrBYdhCpRq9xTcBK5ueQZ5vqEZt1vbBBLVzkdmmt54tZXvpvW3TPwKqLtz26zdtAPntmjLyqqNKbmzb8MrgiyjyC8YmYgnLUkeU8q2ksmZKZ8aoHEW5zF3ztQ7qNvaxY86NY3AHkpcuUjbdaMxEMKAQ3Qc2fVcwHVoJoEz7pSSUHvnUcZcnYMMmGR52gwNasUxVAm2LmbNbuyQvnxpJXd2yQryWQjgHcgDoRSroRuV6rftvGz6d9FbhytyrUEc9Ae6uZu7W6cAtB75jBtaBUk9K9cootsqEu2Y1PUE7B832X3j4UWveC73XnkRsz5U8EStNWvJXYZ2QitmZBSpCYMP8bnEfnqtxmGk7B1iT3tqWaJ5QX5DgkQ189UXimGCjAs31LtFSCuGWzkJnoR3H5Yno465v7WHLkbewKqrDpaAbgj82pja8uuSj8uZGBrEDXu2KdP4R4UbfDUXYmGtiNTwDDfwdyAv4BrvyQFuWKVWnMDhkSjsjSVJmLx5qwNq3EBZzN7tZd9UBQ3552rSfu48Y7fvTh54x9FjYMDCmtUFmsxrnWFgbGe8Gypfwpk9qKHe4Pe7Qjx5ppzAW48FDtdtjznh6wk4wF33y46cfrTEogULvkifb8WjqoXaRytdxUzcm6M23XiKUfQAVygFJXBJfCU3VbxFZgLib2Lgp2dAeB5myJzRayKi9tJQVzLrYr4NEFWpzJbxiZxyY14XyHXWTyvGgQHW5DGkgRiWDm7mbybtb9BvKrEtkKCZ'
+        # self.test = 'kpUFTV4BMU2mLarm7iTmJMxw7RLSx2SBZvA22e26pEAp9CfxxppnPCaM4YMZYptdewVirdTdLPboQs9bn18VgeSSz3zRXSN8xAmgUs3JVr4v6Xw2YKHP8zKbngErdvr3YKZCu8hjjZv1MfRbPyWbaDCoXo4q3ngJrZ2hmDok1PxxaN8dwXT4M4PkfnQyaCqVhbNpwmYaSQoHVMfLAMnJXBtxfbrfTj6M8Gg6gjmnHcvXJy59oZtWhqK6H83fYuK8cydNj7cZWn43L5S9pZEjHFZZA37pxbdiwKRvbFNkocNuU9kpVySTPyLLUd5pSYMtUfNkMhQwkDASLrzdyfbQ8G9WxKNucbSbDzoA1F5tTP1a7LzeQZ14ABbztaJKaqStxXhX2hBEmxHGwdhiwNM2UbVLgjiomzw1s1EupH7zseoBpTPKZRsVso8j3SoSsfGpwf2YeCAds47SQqVsjGFMsp3WHeuRQd2U5DV2AQyYshHoTkad3akT7QYcrZ39ypMPj2KGizg2wdJSw3Z6LknyyKviu12vkpaMxsR74jGUAA54PkNRNEYyP62BWM35eDDkxS62tcRP5R1Xp9acsgJq2J9uqrrEseeTC8icMJUQY4E7bpQwdwgsnzeLHnfADEoaNBh45DEdB4mRoGCWoqiZeX341VDmBjQW44uTjXvQ46zHiR34g2KzDJ178cbmTaYzcBZHsqu8MZFDimsGALk81C1U5wKCN63x3FqcNS436M3f23op7hUm8Rf4FDsCvCu5NaytUvFKMmLfBtg6D3MqBVEzV6nuhSPHsnU5JiiAfUx93ZivtjmDAYGCcANrTzdDB1PeKj9BbE2SoyJ9TxkAXgUBZoZneZJnuqLAoEookS9zT7LKxyU4T7DwWVWDuX9j2XYB8Pi2DDYkydfbssics6XJjDkeG8cMPKi3p3jeZN8Qaf7KraE4SHZEatvCZb5fJdSPaDWQiJ6XhUpNCGYqb8htPou9bPqQL6hTj6yX44WSedMqw2bArrXAwh4MXvgxGJBt89CXG6qGm4wHYM6bjpQ8bNuQvUDNQ5HueHLSTJNtiCHTDgfH7MvmVm1xfJF7dFeKmeRwbFiRK7E3dBKr6wANmkUzM7ezdFMsPDr8PQkbipHJAM6j1uDujNci9TcQYgpviUg6uaUvqPKsZa3q3Hw4NsCxDNRGKFtwPUyTFXJAEeAqoiFmUQDfjeTFCFpHr4DfuqHdpwwVQebsEKUdcnQdoEgP1Dmav2JKbffTcL8wJgtGjoVpUzMb55DBe31uqf7Ri2UZFbAq3APw9yqCbLM1jNN9dBizQ48fdmgHxhHGAM1kiDdtFVJwPt974GPGQ7cnbTqdePbHFcEkkxXmrVjymmf'
 
         self.assert_opc = {'01': 'GteqZeroAssert', '02': 'LteqAssert', '03': 'LtInt64Assert', '04': 'GtZeroAssert',
                            '05': 'EqAssert', '06': 'IsCallerOriginAssert', '07': 'IsSignerOriginAssert'}
@@ -303,3 +303,97 @@ class Contract(object):
 
     def contract_permitted(self, split = True):
         a = 1
+
+    @staticmethod
+    def register_contract(account, contract, data_stack, description='', tx_fee=DEFAULT_REGISTER_CONTRACT_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
+        if not account.privateKey:
+            msg = 'Private key required'
+            pyvsystems.throw_error(msg, MissingPrivateKeyException)
+        elif tx_fee < DEFAULT_REGISTER_CONTRACT_FEE:
+            msg = 'Transaction fee must be >= %d' % DEFAULT_REGISTER_CONTRACT_FEE
+            pyvsystems.throw_error(msg, InvalidParameterException)
+        elif len(description) > MAX_ATTACHMENT_SIZE:
+            msg = 'Attachment length must be <= %d' % MAX_ATTACHMENT_SIZE
+            pyvsystems.throw_error(msg, InvalidParameterException)
+        elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
+            msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
+            pyvsystems.throw_error(msg, InvalidParameterException)
+        elif not is_offline() and account.balance() < tx_fee:
+            msg = 'Insufficient VSYS balance'
+            pyvsystems.throw_error(msg, InsufficientBalanceException)
+        else:
+            if timestamp == 0:
+                timestamp = int(time.time() * 1000000000)
+            sData = struct.pack(">B", REGISTER_CONTRACT_TX_TYPE) + \
+                    struct.pack(">H", len(base58.b58decode(contract))) + \
+                    base58.b58decode(contract) + \
+                    struct.pack(">H", len(data_stack)) + \
+                    data_stack + \
+                    struct.pack(">H", len(description)) + \
+                    str2bytes(description) + \
+                    struct.pack(">Q", tx_fee) + \
+                    struct.pack(">H", fee_scale) + \
+                    struct.pack(">Q", timestamp)
+            signature = bytes2str(sign(account.privateKey, sData))
+            description_str = bytes2str(base58.b58encode(str2bytes(description)))
+            data_stack_str = bytes2str(base58.b58encode(data_stack))
+            data = json.dumps({
+                "senderPublicKey": account.publicKey,
+                "contract": contract,
+                "data": data_stack_str,
+                "description": description_str,
+                "fee": tx_fee,
+                "feeScale": fee_scale,
+                "timestamp": timestamp,
+                "signature": signature
+            })
+
+            return account.wrapper.request('/contract/broadcast/register', data)
+
+    @staticmethod
+    def execute_contract(account, contract_id, func_id, data_stack, description='', tx_fee=DEFAULT_EXECUTE_CONTRACT_FEE,
+                              fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
+        if not account.privateKey:
+            msg = 'Private key required'
+            pyvsystems.throw_error(msg, MissingPrivateKeyException)
+        elif tx_fee < DEFAULT_EXECUTE_CONTRACT_FEE:
+            msg = 'Transaction fee must be >= %d' % DEFAULT_EXECUTE_CONTRACT_FEE
+            pyvsystems.throw_error(msg, InvalidParameterException)
+        elif len(description) > MAX_ATTACHMENT_SIZE:
+            msg = 'Attachment length must be <= %d' % MAX_ATTACHMENT_SIZE
+            pyvsystems.throw_error(msg, InvalidParameterException)
+        elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
+            msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
+            pyvsystems.throw_error(msg, InvalidParameterException)
+        elif not is_offline() and account.balance() < tx_fee:
+            msg = 'Insufficient VSYS balance'
+            pyvsystems.throw_error(msg, InsufficientBalanceException)
+        else:
+            if timestamp == 0:
+                timestamp = int(time.time() * 1000000000)
+            sData = struct.pack(">B", EXECUTE_CONTRACT_FUNCTION_TX_TYPE) + \
+                    base58.b58decode(contract_id) + \
+                    struct.pack(">H", func_id) + \
+                    struct.pack(">H", len(data_stack)) + \
+                    data_stack + \
+                    struct.pack(">H", len(description)) + \
+                    str2bytes(description) + \
+                    struct.pack(">Q", tx_fee) + \
+                    struct.pack(">H", fee_scale) + \
+                    struct.pack(">Q", timestamp)
+            signature = bytes2str(sign(account.privateKey, sData))
+            description_str = bytes2str(base58.b58encode(str2bytes(description)))
+            data_stack_str = bytes2str(base58.b58encode(data_stack))
+            data = json.dumps({
+                "senderPublicKey": account.publicKey,
+                "contractId": contract_id,
+                "funcIdx": func_id,
+                "data": data_stack_str,
+                "description": description_str,
+                "fee": tx_fee,
+                "feeScale": fee_scale,
+                "timestamp": timestamp,
+                "signature": signature
+                })
+            # print(data)
+            return account.wrapper.request('/contract/broadcast/execute', data)
