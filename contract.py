@@ -23,18 +23,6 @@ class Contract(object):
 
         #self.test = '3cH33Y6c6AM23HqLCBhtyUnFbkUsVKM8qwqSMZvgxWfU3RKmdMUNQBtupFFznBb75PX5gKBNE5mRxLJrP353QQ8RUuwu7X4jLbb7YpxqSHEhLdcwkg1gGcD3iLxaQA79ycGVaipnYSNjcSc6vdsLYhH8eCY4f7cJk4jVtnA686aw8CnrpwK1bGi5pLBz2bVDYhFeuAbHZpEsvx7mAAdY7xQu7LyHaRoHhSdeZc7AbbF6ZcGY3DTFi6Me2KkG8rJb22pAv3Cg6cDcQw2eiFLivZJHzsdAwqZKCvUuprs2va2J16RckD27o1wpwQtUHBFkG7jszMo7A47RGcSseQPSKWTCtMQc9y98A9zKg2mzRyo2rMqLL3AXbFjgPAXPuhvFvKPrWUcpgde2DeLiXfSYD2nguHLGKsYdSHtaDjzmbnzo1xBibjzHUEKmnkEoMZWZYJXzoA4yvx9FNreGv8DzqEQFwyxppvvYz39umJmwt6kh2D1XEu88EvnEtm45pdXmt8caua72ABLAP9QCgcbQzjf5SVUKPoeg4PrQg3CsfNsZNEs8zpngHfVgVk7opckJUNEESAGXpBFy4JX6wptq5RhqGT8TEbk5JVYtw2xfDuFpNy7p3FT1nN2jWB3K3ZeTR6xvEW3caaPsgRf7PSb2MLsLjC1tZhccD1ZQttQEcRJCaprEkvbmeaQgLEsTibeg31wGUktMy6pM3AY7ggYcW4eK8bNfFzdubCSTnw8pYoscbTb2f5rAvRzMvr3xaSpaY2SnUGZJNixNFuPZtyYw4N5JMykfUmXLep6wm8vXX3pb9LN4A6y3DUE2Gq8an7XzGvjmRd5b7kNeoKDpTTJ4Mea6zfEopL7Gfwgfq77pwiQq9PHdRXEC8vr1ec67c6Bue1T67aWDMcNM3XUSZ69nti6Q9ZnSAFbJPAjBvH2RMQpe235vDWDt4Ppj9DFmXjYy64UbhBEbLK9kDHbe6WsGZujf6xwmG4k3zBTsqQyoKaj6zDyUDxSU3rU3C3tcuYifFXqRxUHotn4ftRQFH2Xmv1emDbs7MxWRcWrShXg4Qvkmnk9fCZXYFXS6x7SGDCCCP79RhxCgZaKww3WctCtx2Q5gYFkmwUkWxtovm1RspDczxPADxdW85bUuMKPactPSHKJRsCFE8eM7a6J77y5FGK8ZpHFKzuYKp1cMzXnvqzQRd2qZ5jcxhF8T5HADVLXR3UMUkptcx44hS9KS3z4VjvWMTtsejNQvn79MAfrtj7UU9kYNbV32YmEQorTcJV4BCYTkh9NjN7zcFzqMZqR9XXxiY3zYUiPiVcgSrg1VBGJqgLYHGd6sGVLBRj6CVY9xGCnufU7fWQjbXBfwjd4ERFAzLhdP4boVeYu5qP5mQ4ZZ6CwwkDszXQSPUkvb9rBJV6vZQi4hryV3Wh1hDK25Qf3gy6gVWSckgb3oxPhoiuFX6LZ'
         self.test = '3dPGAWbTw4srh5hmMiRUhHtcxmXXLUooKGAfnmz11j5NruyJpBzZpgvADMdZS7Mevy5MAHqFbfHYdfqaAe1JEpLWt1pJWLHZBV62zUhLGmVLXUP5UDvSs24jsBRHqZMC71ciE1uYtgydKxCoFJ3rAgsYqp7GDeTU2PXS5ygDmL6WXmbAYPS8jE4sfNUbJVwpvL1cTw4nnjnJvmLET8VmQybxFt415RemV3MFPeYZay5i5gMmyZa63bjzK1uMZAVWA9TpF5YQ1NTZjPaRPvQGYVY4kY9L4LFJvUG2bib1QaNh7wUAQnTzJfRYJoy1aegFGFZFnBGp9GugH4fHAY69vGmZQnhDw3jU45G9odFyXo3T5Ww4R5szegbjCUKdUGpXf9vY2cKEMJ7i8eCkFVG1dDFZeVov1KMjkVNV8rDBDYfcp3oSGNWQQvGSUT5iGUvDRN8phy1UpR3A9uMVebvjLnVzPx9RyqQ8HaXLM8vPhLuWLoh5hk1Zi1n9nwz55XvKDYjP6eeB55yK5vpg8xjaYDnw9bjYV7ZmS7LAsHvXfnwi8y2W6vk2hGvs4rtR1vNRZSQMPGRRSuwCRJL1yngH6uHWwm2ajWxc684jApuoLdyjZomfCtdpabSyU3kp9Lrn8zT8BVY332sJPQU6gTQi8ke9s9dBxCae4cfSQM6HhuBmFc5KKWHCVG4bm4KZRYbMtidw8ZZnjaAMtcGq7k3Se6GXaTxdS3GcuttB3VB7njypyzuqAcfCdYb9ht8Y1WuTCZ1aLsXsL6eydfk2WLJVrqYpbTk6AchV5gMAEopvc3qXvzrDCedjtNsDmA56Lh6PxrrKr8aV8Wzz8aMaQ88YsVBpE8J4cDkxzo31AojhzEGVBKLmpb3bjmsaw9VkpB6yL8ngYs8eJMSPdM289TSMaEmG4eHt1jezpHTKxkuB9cwqcvhGNLWuv8KXQkik5pRMXV67Qs2FvjpzeJ81z2hnVh1wCtsa6M6qAG1gsqLHa1AVMRzsowafC99uDexwWMBS2RqsZWZBXJcUiNVULjApSnoBREYfHYEpjJ152hnTYZCAwpZMWEkVdBQpZ3zk8gbfLxB4fWMfKgJJucbKPGp1K56u7P8MHQu9aNb9dEof2mwX8rTHjk8jSQ7kXVX4Mf1JqMRWWftkV3GmU1nqYhxRGu4FjDNAomwTr5epHpcMF6P5oiXcLWh5BFQVmGYKz129oizAyUJBsZdxr2WZEGDieLxUg8cve25g28oTuCVENST4z1ZsFAN9wTa1'
-        # self.assert_opc = {'01': 'GteqZeroAssert', '02': 'LteqAssert', '03': 'LtInt64Assert', '04': 'GtZeroAssert',
-        #                    '05': 'EqAssert', '06': 'IsCallerOriginAssert', '07': 'IsSignerOriginAssert'}
-        # self.load_opc = {'01': 'SignerLoad', '02': 'CallerLoad'}
-        # self.cdbv_opc = {'01': 'SetCDBV'}
-        # self.cdbvr_opc = {'01': 'GetCDBVR'}
-        # self.tdb_opc = {'01': 'NewTokenTDB', '02': 'SplitTDB'}
-        # self.tdbr_opc = {'01': 'GetTDBR', '02': 'TotalTDBR'}
-        # self.tdba_opc = {'01': 'DepositTDBA', '02': 'WithdrawTDBA', '03': 'TransferTDBA'}
-        # self.tdbar_opc = {'01': 'BalanceTBDAR'}
-        # self.opc_type = {'01': ['AssertOpc', self.assert_opc], '02': ['LoadOpc', self.load_opc], '03': ['CDBVOpc', self.cdbv_opc],
-        #                  '04': ['CDBVROpc', self.cdbvr_opc], '05': ['TDBOpc', self.tdb_opc], '06': ['TDBROpc', self.tdbr_opc],
-        #                  '07': ['TDBAOpc', self.tdba_opc], '08': ['TDBAROpc', self.tdbar_opc], '09': ['ReturnOpc', {}]}
         self.function_type_map = {'000': 'onInit', '100': 'public'}
         self.opcode_info = Opcode()
 
@@ -44,7 +32,7 @@ class Contract(object):
         # print("All Bytes: ")
         # print(bytes_object)
         start_position = 0
-        print("Total Length of Contract: ", str(len(bytes_object)) + ' Bytes')
+        print("Total Length of Contract:", str(len(bytes_object)) + ' Bytes')
 
         language_code = bytes_object[start_position:self.language_code_byte_length]
         bytes_to_hex = convert_bytes_to_hex(language_code)
