@@ -6,7 +6,7 @@ import base58
 
 from pyvsystems import deser
 from pyvsystems.contract_meta import ContractMeta as meta
-from pyvsystems.data_entry import DataEntry
+from pyvsystems.data_entry import DataEntry, Type
 
 
 class ContractBuild(object):
@@ -737,68 +737,92 @@ class ContractBuild(object):
     def get_issuer_opc_index(self):
         return [self.get_issuer_opc_cdbvr_get_index(), bytes([0])]
 
-    def init_data_stack_gen(self, amount, unity, desc):
+    # datastack
+    @staticmethod
+    def init_data_stack_gen(max, unity, desc):
+        max = DataEntry(max, Type.amount)
+        unit = DataEntry(unity, Type.amount)
+        short_txt = DataEntry(desc, Type.short_text)
+        init_data_stack = [max.bytes, unit.bytes, short_txt.bytes]
+        return deser.serialize_array(init_data_stack)
 
-        max = DataEntry(bytes([amount]), meta.amount)
-        unit = DataEntry(bytes([unity]), meta.amount)
-        short_text = DataEntry.create(desc.getBytes(), meta.short_text)
-        return [max, unit, short_text]
+    @staticmethod
+    def supersede_data_stack_gen(new_iss):
+        iss = DataEntry(new_iss, Type.address)
+        supersede_data_stack = [iss.bytes]
+        return deser.serialize_array(supersede_data_stack)
 
-    def supersede_data_stack_gen(self, new_issuer):
-        iss = DataEntry(new_issuer.bytes.arr, meta.address)
-        return iss
+    @staticmethod
+    def split_data_stack_gen(new_unity, token_id):
+        unit = DataEntry(new_unity, Type.amount)
+        index = DataEntry(token_id, Type.int32)
+        split_data_stack = [unit.bytes, index.bytes]
+        return deser.serialize_array(split_data_stack)
 
-    def split_data_stack_gen(self, new_unity, token_index):
-        unit = DataEntry(bytes([new_unity]), meta.amount)
-        index =   DataEntry(bytes([token_index]), meta.int32)
-        return [unit, index]
+    @staticmethod
+    def destroy_data_stack_gen(amount, token_id):
+        am = DataEntry(amount, Type.amount)
+        index = DataEntry(token_id, Type.int32)
+        destroy_data_stack = [am.bytes, index.bytes]
+        return deser.serialize_array(destroy_data_stack)
 
-    def destroy_data_stack_gen(self, amount, token_index):
-        am = DataEntry(bytes([amount]), meta.amount)
-        index = DataEntry(bytes([token_index]), meta.int32)
-        return [am, index]
+    @staticmethod
+    def issue_data_stack_gen(amount, token_id):
+        max = DataEntry(amount, Type.amount)
+        index = DataEntry(token_id, Type.int32)
+        issue_data_stack = [max.bytes, index.bytes]
+        return deser.serialize_array(issue_data_stack)
 
-    def issue_data_stack_gen(self, amount, token_index):
-        max = DataEntry(bytes([amount]), meta.amount)
-        index = DataEntry(bytes([token_index]), meta.int32)
-        return [max, index]
+    @staticmethod
+    def send_data_stack_gen(recipient, amount, token_id):
+        reci = DataEntry(recipient, Type.address)
+        am = DataEntry(amount, Type.amount)
+        index = DataEntry(token_id, Type.int32)
+        send_data_stack = [reci.bytes, am.bytes, index.bytes]
+        return deser.serialize_array(send_data_stack)
 
-    def send_data_stack_gen(self, recipient, amount, token_index):
-        reci = DataEntry(recipient.bytes.arr, meta.address)
-        am = DataEntry(bytes([amount]), meta.amount)
-        index = DataEntry(bytes([token_index]), meta.int32)
-        return [reci, am, index]
+    @staticmethod
+    def transfer_data_stack_gen(sender, recipient, amount, token_id):
+        se = DataEntry(sender, Type.address)
+        reci = DataEntry(recipient, Type.address)
+        am = DataEntry(amount, Type.amount)
+        index = DataEntry(token_id, Type.int32)
+        transfer_data_stack = [se.bytes, reci.bytes, am.bytes, index.bytes]
+        return deser.serialize_array(transfer_data_stack)
 
-    def transfer_data_stack_gen(self, sender, recipient, amount, token_index):
-        se = DataEntry(sender.bytes.arr, meta.address)
-        reci = DataEntry(recipient.bytes.arr, meta.address)
-        am = DataEntry(bytes([amount]), meta.amount)
-        index = DataEntry(bytes([token_index]), meta.int32)
-        return [se, reci, am, index]
+    @staticmethod
+    def deposit_data_stack_gen(sender, smart_contract, amount, token_id):
+        se = DataEntry(sender, Type.address)
+        sc = DataEntry(smart_contract, Type.address)
+        am = DataEntry(amount, Type.amount)
+        index = DataEntry(token_id, Type.int32)
+        deposit_data_stack = [se.bytes, sc.bytes, am.bytes, index.bytes]
+        return deser.serialize_array(deposit_data_stack)
 
-    def deposit_data_stack_gen(self, sender, smart_contract, amount, token_index):
-        se = DataEntry(sender.bytes.arr, meta.address)
-        sc = DataEntry(smart_contract.bytes.arr, meta.address)
-        am = DataEntry(bytes([amount]), meta.amount)
-        index = DataEntry(bytes([token_index]), meta.int32)
-        return [se, sc, am, index]
+    @staticmethod
+    def withdraw_data_stack_gen(smart_contract, recipient, amount, token_id):
+        sc = DataEntry(smart_contract.bytes.arr, Type.address)
+        reci = DataEntry(recipient.bytes.arr, Type.address)
+        am = DataEntry(amount, Type.amount)
+        index = DataEntry(token_id, Type.int32)
+        withdraw_data_stack = [sc.bytes, reci.bytes, am.bytes, index.bytes]
+        return deser.serialize_array(withdraw_data_stack)
 
-    def withdraw_data_stack_gen(self, smart_contract, recipient, amount, token_index):
-        sc = DataEntry(smart_contract.bytes.arr, meta.address)
-        reci = DataEntry(recipient.bytes.arr, meta.address)
-        am = DataEntry(bytes([amount]), meta.amount)
-        index = DataEntry(bytes([token_index]), meta.int32)
-        return [sc, reci, am, index]
+    @staticmethod
+    def total_supply_data_stack_gen(token_id):
+        index = DataEntry(token_id, Type.int32)
+        total_supply_data_stack = [index.bytes]
+        return deser.serialize_array(total_supply_data_stack)
 
-    def total_supply_data_stack_gen(self, token_index):
-        index = DataEntry(bytes([token_index]), meta.int32)
-        return [index]
+    @staticmethod
+    def max_supply_data_stack_gen(token_id):
+        index = DataEntry(token_id, Type.int32)
+        max_supply_data_stack = [index.bytes]
+        return deser.serialize_array(max_supply_data_stack)
 
-    def max_supply_data_stack_gen(self, token_index):
-        index = DataEntry(bytes([token_index]), meta.int32)
-        return [index]
-
-    def balance_of_data_stack_gen(self, account, token_index):
-        acc =  DataEntry(account.bytes.arr, meta.address)
-        index = DataEntry(bytes([token_index]), meta.int32)
-        return [acc, index]
+    @staticmethod
+    def balance_of_data_stack_gen(account, token_id):
+        acc =  DataEntry(account.bytes.arr, Type.address)
+        index = DataEntry(token_id, Type.int32)
+        balance_of_data_stack = [acc.bytes, index.bytes]
+        return deser.serialize_array(balance_of_data_stack)

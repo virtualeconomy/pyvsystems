@@ -1,6 +1,14 @@
+from .setting import *
 from .crypto import *
 from .error import *
 import pyvsystems
+from pyvsystems import is_offline
+import time
+import struct
+import json
+import base58
+import logging
+import copy
 from .opcode import *
 from .deser import *
 from .contract_build import *
@@ -105,3 +113,97 @@ class Contract(object):
         else:
             contract = self.contract_without_split_default
         return contract
+
+    @staticmethod
+    def register_contract(account, contract, data_stack, description='', tx_fee=DEFAULT_REGISTER_CONTRACT_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
+        if not account.privateKey:
+            msg = 'Private key required'
+            pyvsystems.throw_error(msg, MissingPrivateKeyException)
+        elif tx_fee < DEFAULT_REGISTER_CONTRACT_FEE:
+            msg = 'Transaction fee must be >= %d' % DEFAULT_REGISTER_CONTRACT_FEE
+            pyvsystems.throw_error(msg, InvalidParameterException)
+        elif len(description) > MAX_ATTACHMENT_SIZE:
+            msg = 'Attachment length must be <= %d' % MAX_ATTACHMENT_SIZE
+            pyvsystems.throw_error(msg, InvalidParameterException)
+        elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
+            msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
+            pyvsystems.throw_error(msg, InvalidParameterException)
+        elif not is_offline() and account.balance() < tx_fee:
+            msg = 'Insufficient VSYS balance'
+            pyvsystems.throw_error(msg, InsufficientBalanceException)
+        else:
+            if timestamp == 0:
+                timestamp = int(time.time() * 1000000000)
+            sData = struct.pack(">B", REGISTER_CONTRACT_TX_TYPE) + \
+                    struct.pack(">H", len(base58.b58decode(contract))) + \
+                    base58.b58decode(contract) + \
+                    struct.pack(">H", len(data_stack)) + \
+                    data_stack + \
+                    struct.pack(">H", len(description)) + \
+                    str2bytes(description) + \
+                    struct.pack(">Q", tx_fee) + \
+                    struct.pack(">H", fee_scale) + \
+                    struct.pack(">Q", timestamp)
+            signature = bytes2str(sign(account.privateKey, sData))
+            description_str = bytes2str(base58.b58encode(str2bytes(description)))
+            data_stack_str = bytes2str(base58.b58encode(data_stack))
+            data = json.dumps({
+                "senderPublicKey": account.publicKey,
+                "contract": contract,
+                "data": data_stack_str,
+                "description": description_str,
+                "fee": tx_fee,
+                "feeScale": fee_scale,
+                "timestamp": timestamp,
+                "signature": signature
+            })
+
+            return account.wrapper.request('/contract/broadcast/register', data)
+
+    @staticmethod
+    def execute_contract(account, contract_id, func_id, data_stack, description='', tx_fee=DEFAULT_EXECUTE_CONTRACT_FEE,
+                              fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
+        if not account.privateKey:
+            msg = 'Private key required'
+            pyvsystems.throw_error(msg, MissingPrivateKeyException)
+        elif tx_fee < DEFAULT_EXECUTE_CONTRACT_FEE:
+            msg = 'Transaction fee must be >= %d' % DEFAULT_EXECUTE_CONTRACT_FEE
+            pyvsystems.throw_error(msg, InvalidParameterException)
+        elif len(description) > MAX_ATTACHMENT_SIZE:
+            msg = 'Attachment length must be <= %d' % MAX_ATTACHMENT_SIZE
+            pyvsystems.throw_error(msg, InvalidParameterException)
+        elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
+            msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
+            pyvsystems.throw_error(msg, InvalidParameterException)
+        elif not is_offline() and account.balance() < tx_fee:
+            msg = 'Insufficient VSYS balance'
+            pyvsystems.throw_error(msg, InsufficientBalanceException)
+        else:
+            if timestamp == 0:
+                timestamp = int(time.time() * 1000000000)
+            sData = struct.pack(">B", EXECUTE_CONTRACT_FUNCTION_TX_TYPE) + \
+                    base58.b58decode(contract_id) + \
+                    struct.pack(">H", func_id) + \
+                    struct.pack(">H", len(data_stack)) + \
+                    data_stack + \
+                    struct.pack(">H", len(description)) + \
+                    str2bytes(description) + \
+                    struct.pack(">Q", tx_fee) + \
+                    struct.pack(">H", fee_scale) + \
+                    struct.pack(">Q", timestamp)
+            signature = bytes2str(sign(account.privateKey, sData))
+            description_str = bytes2str(base58.b58encode(str2bytes(description)))
+            data_stack_str = bytes2str(base58.b58encode(data_stack))
+            data = json.dumps({
+                "senderPublicKey": account.publicKey,
+                "contractId": contract_id,
+                "funcIdx": func_id,
+                "data": data_stack_str,
+                "description": description_str,
+                "fee": tx_fee,
+                "feeScale": fee_scale,
+                "timestamp": timestamp,
+                "signature": signature
+                })
+
+            return account.wrapper.request('/contract/broadcast/execute', data)
