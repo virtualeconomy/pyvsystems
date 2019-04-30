@@ -16,10 +16,10 @@ class ContractBuild(object):
     issue_para = ["amount", "issuer"]
     destroy_para = ["amount", "issuer"]
     split_para = ["newUnity", "issuer"]
-    send_para = ["receipt", "amount", "caller"]
-    transfer_para = ["sender", "receipt", "amount"]
+    send_para = ["recipient", "amount", "caller"]
+    transfer_para = ["sender", "recipient", "amount"]
     deposit_para = ["sender", "smart", "amount"]
-    withdraw_para = ["smart", "receipt", "amount"]
+    withdraw_para = ["smart", "recipient", "amount"]
     total_supply_para = ["total"]
     max_supply_para = ["max"]
     balance_of_para = ["address", "balance"]
@@ -99,6 +99,18 @@ class ContractBuild(object):
     balance_of = 10
     get_issuer = 11
 
+    supersede_without_split = 0
+    issue_without_split = 1
+    destroy_without_split = 2
+    send_without_split = 3
+    transfer_without_split = 4
+    deposit_without_split = 5
+    withdraw_without_split = 6
+    total_supply_without_split = 7
+    max_supply_without_split = 8
+    balance_of_without_split = 9
+    get_issuer_without_split = 10
+
     supersede_index = bytes([0])
     issue_index = bytes([1])
     destroy_index = bytes([2])
@@ -159,6 +171,7 @@ class ContractBuild(object):
         self.trigger = self.trigger_builder()
         self.descriptor = self.descriptor_builder(split)
         self.state_var = self.state_var_builder()
+        print(self.state_var)
         self.texture = self.texture_builder(split)
         self.contract_bytes = self.lang_code + self.lang_ver + self.trigger + self.descriptor + self.state_var + self.texture
         self.contract_byte_str = base58.b58encode(self.contract_bytes)
@@ -284,10 +297,21 @@ class ContractBuild(object):
                  self.send_fun_gen(), self.transfer_fun_gen(), self.deposit_fun_gen(), self.withdraw_fun_gen(), self.total_supply_fun_gen(),
                  self.max_supply_fun_gen(), self.balance_of_fun_gen(), self.get_issuer_fun_gen()])
         else:
-            descriptor = deser.serialize_arrays([self.supersede_fun_gen(), self.issue_fun_gen(), self.destroy_fun_gen(), self.split_fun_gen(), self.send_fun_gen(),
-                                                self.transfer_fun_gen(), self.deposit_fun_gen(), self.withdraw_fun_gen(), self.total_supply_fun_gen(),
-                                                self.max_supply_fun_gen(), self.balance_of_fun_gen(), self.get_issuer_fun_gen()])
+            descriptor = deser.serialize_arrays([self.supersede_fun_without_split_gen(), self.issue_fun_without_split_gen(), self.destroy_fun_without_split_gen(), self.split_fun_without_split_gen(), self.send_fun_without_split_gen(),
+                                                self.transfer_fun_without_split_gen(), self.deposit_fun_without_split_gen(), self.withdraw_fun_without_split_gen(), self.total_supply_fun_without_split_gen(),
+                                                self.max_supply_fun_without_split_gen(), self.balance_of_fun_without_split_gen(), self.get_issuer_fun_without_split_gen()])
 
+        print("self.supersede_fun_gen()", self.supersede_fun_without_split_gen(), len(self.supersede_fun_without_split_gen()))
+        print("self.issue_fun_gen()", self.issue_fun_without_split_gen(), len(self.issue_fun_without_split_gen()))
+        print("self.destroy_fun_gen()", self.destroy_fun_without_split_gen(), len(self.destroy_fun_without_split_gen()))
+        print("self.send_fun_gen()", self.send_fun_without_split_gen(), len(self.send_fun_without_split_gen()))
+        print("self.transfer_fun_gen()", self.transfer_fun_without_split_gen(), len(self.transfer_fun_without_split_gen()))
+        print("self.deposit_fun_gen()", self.deposit_fun_without_split_gen(), len(self.deposit_fun_without_split_gen()))
+        print("self.withdraw_fun_gen()", self.withdraw_fun_without_split_gen(), len(self.withdraw_fun_without_split_gen()))
+        print("self.total_supply_fun_gen()", self.total_supply_fun_without_split_gen(), len(self.total_supply_fun_without_split_gen()))
+        print("self.max_supply_fun_gen()", self.max_supply_fun_without_split_gen(), len(self.max_supply_fun_without_split_gen()))
+        print("self.balance_of_fun_gen()", self.balance_of_fun_without_split_gen(), len(self.balance_of_fun_without_split_gen()))
+        print("self.get_issuer_fun_gen()", self.get_issuer_fun_without_split_gen(), len(self.get_issuer_fun_without_split_gen()))
         return deser.serialize_array(descriptor)
 
 
@@ -409,48 +433,96 @@ class ContractBuild(object):
         fun = self.a_function_gen(self.supersede_fun_id_gen(), self.supersede_fun_type_gen(), self.proto_type_supersede_gen(), self.supersede_opc_line_gen())
         return fun
 
+    def supersede_fun_without_split_gen(self):
+        fun = self.a_function_gen(self.supersede_fun_id_without_split_gen(), self.supersede_fun_type_gen(), self.proto_type_supersede_gen(), self.supersede_opc_line_gen())
+        return fun
+
     def issue_fun_gen(self):
         fun = self.a_function_gen(self.issue_fun_id_gen(), self.issue_fun_type_gen(), self.proto_type_issue_gen(), self.issue_opc_line_gen())
+        return fun
+
+    def issue_fun_without_split_gen(self):
+        fun = self.a_function_gen(self.issue_fun_id_without_split_gen(), self.issue_fun_type_gen(), self.proto_type_issue_gen(), self.issue_opc_line_gen())
         return fun
 
     def destroy_fun_gen(self):
         fun = self.a_function_gen(self.destroy_fun_id_gen(), self.destroy_fun_type_gen(), self.proto_type_destroy_gen(), self.destroy_opc_line_gen())
         return fun
 
+    def destroy_fun_without_split_gen(self):
+        fun = self.a_function_gen(self.destroy_fun_id_without_split_gen(), self.destroy_fun_type_gen(), self.proto_type_destroy_gen(), self.destroy_opc_line_gen())
+        return fun
+
     def split_fun_gen(self):
         fun = self.a_function_gen(self.split_fun_id_gen(), self.split_fun_type_gen(), self.proto_type_split_gen(), self.split_opc_line_gen())
+        return fun
+
+    def split_fun_without_split_gen(self):
+        fun = self.a_function_gen(self.split_fun_id_without_split_gen(), self.split_fun_type_gen(), self.proto_type_split_gen(), self.split_opc_line_gen())
         return fun
 
     def send_fun_gen(self):
         fun = self.a_function_gen(self.send_fun_id_gen(), self.send_fun_type_gen(), self.proto_type_send_gen(), self.send_opc_line_gen())
         return fun
 
+    def send_fun_without_split_gen(self):
+        fun = self.a_function_gen(self.send_fun_id_without_split_gen(), self.send_fun_type_gen(), self.proto_type_send_gen(), self.send_opc_line_gen())
+        return fun
+
     def transfer_fun_gen(self):
         fun = self.a_function_gen(self.transfer_fun_id_gen(), self.transfer_fun_type_gen(), self.proto_type_transfer_gen(), self.transfer_opc_line_gen())
+        return fun
+
+    def transfer_fun_without_split_gen(self):
+        fun = self.a_function_gen(self.transfer_fun_id_without_split_gen(), self.transfer_fun_type_gen(), self.proto_type_transfer_gen(), self.transfer_opc_line_gen())
         return fun
 
     def deposit_fun_gen(self):
         fun = self.a_function_gen(self.deposit_fun_id_gen(), self.deposit_fun_type_gen(), self.proto_type_deposit_gen(), self.deposit_opc_line_gen())
         return fun
 
+    def deposit_fun_without_split_gen(self):
+        fun = self.a_function_gen(self.deposit_fun_id_without_split_gen(), self.deposit_fun_type_gen(), self.proto_type_deposit_gen(), self.deposit_opc_line_gen())
+        return fun
+
     def withdraw_fun_gen(self):
         fun = self.a_function_gen(self.withdraw_fun_id_gen(), self.withdraw_fun_type_gen(), self.proto_type_withdraw_gen(), self.withdraw_opc_line_gen())
+        return fun
+
+    def withdraw_fun_without_split_gen(self):
+        fun = self.a_function_gen(self.withdraw_fun_id_without_split_gen(), self.withdraw_fun_type_gen(), self.proto_type_withdraw_gen(), self.withdraw_opc_line_gen())
         return fun
 
     def total_supply_fun_gen(self):
         fun = self.a_function_gen(self.total_supply_fun_id_gen(), self.total_supply_fun_type_gen(), self.proto_type_total_supply_gen(), self.total_supply_opc_line_gen())
         return fun
 
+    def total_supply_fun_without_split_gen(self):
+        fun = self.a_function_gen(self.total_supply_fun_id_without_split_gen(), self.total_supply_fun_type_gen(), self.proto_type_total_supply_gen(), self.total_supply_opc_line_gen())
+        return fun
+
     def max_supply_fun_gen(self):
         fun = self.a_function_gen(self.max_supply_fun_id_gen(), self.max_supply_fun_type_gen(), self.proto_type_max_supply_gen(), self.max_supply_opc_line_gen())
+        return fun
+
+    def max_supply_fun_without_split_gen(self):
+        fun = self.a_function_gen(self.max_supply_fun_id_without_split_gen(), self.max_supply_fun_type_gen(), self.proto_type_max_supply_gen(), self.max_supply_opc_line_gen())
         return fun
 
     def balance_of_fun_gen(self):
         fun = self.a_function_gen(self.balance_of_fun_id_gen(), self.balance_of_fun_type_gen(), self.proto_type_balance_of_gen(), self.balance_of_opc_line_gen())
         return fun
 
+    def balance_of_fun_without_split_gen(self):
+        fun = self.a_function_gen(self.balance_of_fun_id_without_split_gen(), self.balance_of_fun_type_gen(), self.proto_type_balance_of_gen(), self.balance_of_opc_line_gen())
+        return fun
+
     def get_issuer_fun_gen(self):
         fun = self.a_function_gen(self.get_issuer_fun_id_gen(), self.get_issuer_fun_type_gen(), self.proto_type_get_issuer_gen(), self.get_issuer_opc_line_gen())
+        return fun
+
+    def get_issuer_fun_without_split_gen(self):
+        fun = self.a_function_gen(self.get_issuer_fun_id_without_split_gen(), self.get_issuer_fun_type_gen(), self.proto_type_get_issuer_gen(), self.get_issuer_opc_line_gen())
         return fun
 
     # funid
@@ -458,28 +530,52 @@ class ContractBuild(object):
         return struct.pack(">H", self.init)
     def supersede_fun_id_gen(self):
         return struct.pack(">H", self.supersede)
+    def supersede_fun_id_without_split_gen(self):
+        return struct.pack(">H", self.supersede_without_split)
     def issue_fun_id_gen(self):
         return struct.pack(">H", self.issue)
+    def issue_fun_id_without_split_gen(self):
+        return struct.pack(">H", self.issue_without_split)
     def destroy_fun_id_gen(self):
         return struct.pack(">H", self.destroy)
+    def destroy_fun_id_without_split_gen(self):
+        return struct.pack(">H", self.destroy_without_split)
     def split_fun_id_gen(self):
         return struct.pack(">H", self.split)
+    def split_fun_id_without_split_gen(self):
+        return struct.pack(">H", self.split_without_split)
     def send_fun_id_gen(self):
         return struct.pack(">H", self.send)
+    def send_fun_id_without_split_gen(self):
+        return struct.pack(">H", self.send_without_split)
     def transfer_fun_id_gen(self):
         return struct.pack(">H", self.transfer)
+    def transfer_fun_id_without_split_gen(self):
+        return struct.pack(">H", self.transfer_without_split)
     def deposit_fun_id_gen(self):
         return struct.pack(">H", self.deposit)
+    def deposit_fun_id_without_split_gen(self):
+        return struct.pack(">H", self.deposit_without_split)
     def withdraw_fun_id_gen(self):
         return struct.pack(">H", self.withdraw)
+    def withdraw_fun_id_without_split_gen(self):
+        return struct.pack(">H", self.withdraw_without_split)
     def total_supply_fun_id_gen(self):
         return struct.pack(">H", self.total_supply)
+    def total_supply_fun_id_without_split_gen(self):
+        return struct.pack(">H", self.total_supply_without_split)
     def max_supply_fun_id_gen(self):
         return struct.pack(">H", self.max_supply)
+    def max_supply_fun_id_without_split_gen(self):
+        return struct.pack(">H", self.max_supply_without_split)
     def balance_of_fun_id_gen(self):
         return struct.pack(">H", self.balance_of)
+    def balance_of_fun_id_without_split_gen(self):
+        return struct.pack(">H", self.balance_of_without_split)
     def get_issuer_fun_id_gen(self):
         return struct.pack(">H", self.get_issuer)
+    def get_issuer_fun_id_without_split_gen(self):
+        return struct.pack(">H", self.get_issuer_without_split)
 
     # funtype
     def init_fun_type_gen(self):
