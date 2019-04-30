@@ -1,5 +1,9 @@
 
 class ContractMeta:
+
+    language_code_byte_length = 4
+    language_version_byte_length = 4
+
     init_para = ["max", "unity", "tokenDescription", "signer"]
     supersede_para = ["newIssuer", "maker"]
     issue_para = ["amount", "issuer"]

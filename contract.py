@@ -3,8 +3,8 @@ from .error import *
 import pyvsystems
 from .opcode import *
 from .deser import *
-from .contractbuild import *
-from .contracttranslator import *
+from .contract_build import *
+from .contract_translator import *
 
 
 class Contract(object):

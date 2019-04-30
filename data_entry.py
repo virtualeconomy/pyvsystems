@@ -1,6 +1,6 @@
 # from .crypto import *
 from .error import *
-from .contractbuild import *
+from .contract_build import *
 import base58
 import pyvsystems
 

@@ -67,4 +67,4 @@ def set_throw_on_error(throw=True):
 
 from .account import *
 from .contract import *
-from .contractbuild import *
+from .contract_build import *

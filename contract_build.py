@@ -1,12 +1,12 @@
 import itertools
+import logging
 import os
 import struct
-
 import base58
 
 from pyvsystems import deser
-from pyvsystems.contractmeta import ContractMeta as meta
-from pyvsystems.dataentry import DataEntry
+from pyvsystems.contract_meta import ContractMeta as meta
+from pyvsystems.data_entry import DataEntry
 
 
 class ContractBuild(object):
@@ -22,7 +22,6 @@ class ContractBuild(object):
         contract_byte_str = base58.b58encode(contract_bytes)
         return contract_byte_str
 
-    # OpcId
     def assert_gteq_zero_gen(self):
         return self.opc_assert_gteq_zero()
     def assert_lteq_gen(self):
@@ -122,20 +121,25 @@ class ContractBuild(object):
     def opc_return_value(self):
         return meta.return_opc + bytes([1])
 
-    # languageCode
     def language_code_builder(self, code):
-        language_code = deser.serialize_string(code)
-        return language_code
+        if len(code) == meta.language_code_byte_length:
+            language_code = deser.serialize_string(code)
+            return language_code
+        else:
+            logging.error("Wrong language code length")
 
-    # languageVersion
     def language_version_builder(self, version):
-        return struct.pack(">I", version)
+        try:
+            if len(struct.pack(">I", version)) == meta.language_version_byte_length:
+                return struct.pack(">I", version)
+            else:
+                logging.error("Wrong language version length")
+        except:
+            print("Wrong language version length")
 
-    # trigger
     def trigger_builder(self):
         return deser.serialize_array(deser.serialize_arrays([self.init_fun_gen()]))
 
-    # descriptor
     def descriptor_builder(self, split):
         if(split is False):
             descriptor = deser.serialize_arrays(
@@ -150,12 +154,10 @@ class ContractBuild(object):
         return deser.serialize_array(descriptor)
 
 
-    # stateVar
     def state_var_builder(self):
         state_var = self.state_var_gen([meta.state_var_issuer + meta.address, meta.state_var_maker + meta.address])
         return deser.serialize_array(state_var)
 
-    # texture
     def texture_builder(self, split):
         self._fixed_size = 4
         self.state_var_name = ["issuer", "maker"]
@@ -246,7 +248,6 @@ class ContractBuild(object):
         return self.texture_fun_gen("getIssuer", ["issuer"], meta.get_issuer_para)
 
 
-    # statevar
     def state_var_random_gen(self):
         self.fixed_size = 2
         state_var = bytearray(os.urandom(self.fixed_size))
@@ -356,7 +357,6 @@ class ContractBuild(object):
         fun = self.a_function_gen(self.get_issuer_fun_id_without_split_gen(), self.get_issuer_fun_type_gen(), self.proto_type_get_issuer_gen(), self.get_issuer_opc_line_gen())
         return fun
 
-    # funid
     def init_fun_id_gen(self):
         return struct.pack(">H", meta.init)
     def supersede_fun_id_gen(self):
@@ -373,8 +373,6 @@ class ContractBuild(object):
         return struct.pack(">H", meta.destroy_without_split)
     def split_fun_id_gen(self):
         return struct.pack(">H", meta.split)
-    def split_fun_id_without_split_gen(self):
-        return struct.pack(">H", meta.split_without_split)
     def send_fun_id_gen(self):
         return struct.pack(">H", meta.send)
     def send_fun_id_without_split_gen(self):
@@ -408,7 +406,6 @@ class ContractBuild(object):
     def get_issuer_fun_id_without_split_gen(self):
         return struct.pack(">H", meta.get_issuer_without_split)
 
-    # funtype
     def init_fun_type_gen(self):
         return bytes([meta.on_init_trigger_type])
     def supersede_fun_type_gen(self):
@@ -436,7 +433,6 @@ class ContractBuild(object):
     def get_issuer_fun_type_gen(self):
         return bytes([meta.public_func_type])
 
-    # prototype
     def proto_type_gen(self, return_type, list_para_types):
         proto_type = deser.serialize_array(return_type) + deser.serialize_array(list_para_types)
         return proto_type
@@ -526,7 +522,6 @@ class ContractBuild(object):
         return self.proto_type_gen([meta.account], self.get_issuer_para_type())
 
 
-    # listopc
     def list_opc_gen(self, ids, index_input):
         length = struct.pack(">H", sum(list(map(lambda x: len(x[0]+x[1])+2, list(zip(ids, index_input))))) + 2)
         num_opc = struct.pack(">H", len(ids))
@@ -742,7 +737,6 @@ class ContractBuild(object):
     def get_issuer_opc_index(self):
         return [self.get_issuer_opc_cdbvr_get_index(), bytes([0])]
 
-    # datastack
     def init_data_stack_gen(self, amount, unity, desc):
 
         max = DataEntry(bytes([amount]), meta.amount)
