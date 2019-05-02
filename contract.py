@@ -13,11 +13,23 @@ class Contract(object):
         self.contract_without_split_default = ContractBuild().create('vdds', 1, split=False)
         self.contract_with_split_default = ContractBuild().create('vdds', 1, split=True)
 
-    def show_contract_function(self, bytes_string='', contract_id=''):
-        contract_translator = ContractTranslator()
+    def show_contract_function(self, bytes_string='', contract_id='', wrapper=''):
+        if bytes_string and contract_id:
+            msg = 'Multiple input in contract!'
+            pyvsystems.throw_error(msg, InvalidParameterException)
+
+        if contract_id:
+            if not wrapper:
+                msg = 'No wrapper information!'
+                pyvsystems.throw_error(msg, InvalidParameterException)
+            contract_content = self.get_contract_content(wrapper, contract_id)
+
         if not bytes_string and not contract_id:
             msg = 'Input contract is empty!'
             pyvsystems.throw_error(msg, InvalidParameterException)
+
+        contract_translator = ContractTranslator()
+        bytes_string = contract_translator.contract_from_json(contract_content)
 
         bytes_object = base58.b58decode(bytes_string)
         start_position = 0
@@ -73,7 +85,7 @@ class Contract(object):
 
     def get_contract_content(self, wrapper, contract_id):
         try:
-            resp = wrapper.request('/content/%s' % (contract_id))
+            resp = wrapper.request('contract/content/%s' % (contract_id))
             logging.debug(resp)
             return resp
         except Exception as ex:

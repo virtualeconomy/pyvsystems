@@ -11,13 +11,27 @@ from pyvsystems.data_entry import DataEntry
 
 class ContractBuild(object):
 
-    def create(self, language_code, language_version, split=False):
+    def __init__(self):
+        self.trigger = self.bytes_builder_from_list(self.init_fun_gen())
+        # self.trigger = self.trigger_builder(self.init_fun_gen())
+        self.descriptor = self.descriptor_builder(False)
+        self.state_var = self.state_var_builder()
+        self.texture = self.texture_builder(split)
+
+
+
+    def create(self, language_code, language_version, trigger, descriptor, state_var, texture, split=False):
+
         lang_code = self.language_code_builder(language_code)
         lang_ver = self.language_version_builder(language_version)
-        trigger = self.trigger_builder()
-        descriptor = self.descriptor_builder(split)
-        state_var = self.state_var_builder()
-        texture = self.texture_builder(split)
+        triggers = self.bytes_builder_from_list(trigger)
+        descriptor = self.bytes_builder_from_list(descriptor)
+        text = self.bytes_builder
+        triggers = self.trigger_builder(trigger)
+        descriptors = self.descriptor_builder(descriptor, split)
+        state_vars = self.state_var_builder(state_var)
+        textures = self.texture_builder(texture, split)
+
         contract_bytes = lang_code + lang_ver + trigger + descriptor + state_var + texture
         contract_byte_str = base58.b58encode(contract_bytes)
         return contract_byte_str
@@ -137,8 +151,13 @@ class ContractBuild(object):
         except:
             print("Wrong language version length")
 
-    def trigger_builder(self):
-        return deser.serialize_array(deser.serialize_arrays([self.init_fun_gen()]))
+    @staticmethod
+    def bytes_builder_from_list(input):
+        return deser.serialize_array(deser.serialize_arrays([input]))
+
+    @staticmethod
+    def trigger_builder(trigger):
+        return deser.serialize_array(deser.serialize_arrays([trigger]))
 
     def descriptor_builder(self, split):
         if(split is False):
