@@ -267,3 +267,28 @@ class ContractTranslator(object):
                 id_count += 1
         string_list.insert(0, max_length_string)
         return string_list
+
+    def contract_from_json(self, contract):
+        contract_build = ContractBuild()
+        language_code = contract_build.language_code_builder(contract['languageCode'])
+        language_version = contract_build.language_version_builder(contract['languageVersion'])
+        contract_bytes_string = language_code + language_version
+
+        triggers = [base58.b58decode(item) for item in contract['triggers']]
+        for item in triggers:
+            contract_bytes_string += item
+
+        descriptors = [base58.b58decode(item) for item in contract['descriptors']]
+        for item in descriptors:
+            contract_bytes_string += item
+
+        state_variables = [base58.b58decode(item) for item in contract['stateVariables']]
+        for item in state_variables:
+            contract_bytes_string += item
+
+        textuals = base58.b58decode(contract['textual']['triggers']) + \
+                   base58.b58decode(contract['textual']['descriptors']) + \
+                   base58.b58decode(contract['textual']['stateVariables'])
+
+        contract_bytes_string += textuals
+        return contract_bytes_string
