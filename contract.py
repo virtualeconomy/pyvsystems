@@ -12,7 +12,7 @@ from .setting import *
 
 class Contract(object):
     def __init__(self):
-        self.default_contract = ContractBuild(True)
+        self.default_contract_builder = ContractBuild(True)
 
     def show_contract_function(self, bytes_string='', contract_id='', wrapper=None):
         if not bytes_string and not contract_id:
@@ -110,9 +110,9 @@ class Contract(object):
 
     def contract_permitted(self, split=True):
         if split:
-            contract = self.default_contract.create('vdds', 1, split=True)
+            contract = self.default_contract_builder.create('vdds', 1, split=True)
         else:
-            contract = self.default_contract.create('vdds', 1, split=False)
+            contract = self.default_contract_builder.create('vdds', 1, split=False)
         return contract
 
     @staticmethod
