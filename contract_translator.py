@@ -58,7 +58,8 @@ class ContractTranslator(object):
         else:
             list_para = []
         if len(list_para_type) != len(list_para):
-            logging.exception("Error: list of parameter is not right!")
+            msg = 'List of parameter is not right!'
+            pyvsystems.throw_error(msg, InvalidParameterException)
         else:
             if function_type == self.function_type_map['000']:
                 prefix = "trigger"
@@ -97,7 +98,7 @@ class ContractTranslator(object):
         print("| ")
         list_opc_name = [self.opcode_info.function_name[opc[0] + opc[1]]
                          if len(opc) >= 2 else
-                         pyvsystems.throw_error('opc function is not right!', InvalidParameterException)
+                         pyvsystems.throw_error('Opc function is not right!', InvalidParameterException)
                          for opc in list_opc]
         if len(list_opc_name) != len(list_opc):
             msg = 'Opc function is not right!'
