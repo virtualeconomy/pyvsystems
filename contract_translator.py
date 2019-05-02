@@ -9,9 +9,6 @@ from pyvsystems.contract_meta import ContractMeta as meta
 
 class ContractTranslator(object):
     def __init__(self):
-        self.data_type_list = {'01': 'PublicKey', '02': 'Address', '03': 'Amount', '04': 'Int32', '05': 'ShortText',
-                               '06': 'ContractAccount', '07': 'Account'}
-        self.function_type_map = {'000': 'onInit', '100': 'public'}
         self.opcode_info = Opcode()
 
     def print_functions(self, functions_opcode, all_info):
@@ -31,10 +28,10 @@ class ContractTranslator(object):
                 else:
                     prefix = "1"
                 function_type_key = prefix + "{:02d}".format(int(function_type_byte.hex(), 16))
-                function_type = self.function_type_map[function_type_key]
+                function_type = meta.function_type_map[function_type_key]
                 function_hex.append(function_type_byte.hex())
                 if len(list_para_type_bytes) > 0:
-                    list_para_type = [self.data_type_list[para]
+                    list_para_type = [meta.data_type_list[para]
                                       for para in convert_bytes_to_hex(list_para_type_bytes)]
                     function_hex.append([para for para in convert_bytes_to_hex(list_para_type_bytes)])
                 else:
@@ -61,7 +58,7 @@ class ContractTranslator(object):
             msg = 'List of parameter is not right!'
             pyvsystems.throw_error(msg, InvalidParameterException)
         else:
-            if function_type == self.function_type_map['000']:
+            if function_type == meta.function_type_map['000']:
                 prefix = "trigger"
                 if shorts_from_byte_array(function_hex[0:2]) == 0:
                     print("Triggers: ")
@@ -82,7 +79,7 @@ class ContractTranslator(object):
 
         if function_hex[4]:
             for i in range(len(return_type)):
-                print('return ' + self.data_type_list[function_hex[4][i]] + ' ' + return_type[0])
+                print('return ' + meta.data_type_list[function_hex[4][i]] + ' ' + return_type[0])
         else:
             print(' ')
 

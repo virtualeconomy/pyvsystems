@@ -4,6 +4,16 @@ class ContractMeta:
     language_code_byte_length = 4
     language_version_byte_length = 4
 
+    data_type_list = {'01': 'PublicKey', '02': 'Address', '03': 'Amount', '04': 'Int32', '05': 'ShortText',
+                           '06': 'ContractAccount', '07': 'Account'}
+
+    function_type_map = {'000': 'onInit', '100': 'public'}
+
+
+    non_return_type = bytes('', encoding='utf-8')
+
+    state_var_name = ["issuer", "maker"]
+
     init_para = ["max", "unity", "tokenDescription", "signer"]
     supersede_para = ["newIssuer", "maker"]
     issue_para = ["amount", "issuer"]
@@ -20,14 +30,6 @@ class ContractMeta:
 
     state_var_issuer = bytes([0])
     state_var_maker = bytes([1])
-
-    public_key = bytes([1])
-    address = bytes([2])
-    amount = bytes([3])
-    int32 = bytes([4])
-    short_text = bytes([5])
-    contract_account = bytes([6])
-    account = bytes([7])
 
     gteq_zero_assert = bytes([1])
     lteq_assert = bytes([2])
@@ -104,10 +106,6 @@ class ContractMeta:
     max_supply_index = bytes([9])
     balance_of_index = bytes([10])
     get_issuer_index = bytes([11])
-
-    non_return_type = bytes('',encoding ='utf-8')
-    on_init_trigger_type = 0
-    public_func_type = 0
 
     init_input_max_index = bytes([0])
     init_input_unity_index = bytes([1])
