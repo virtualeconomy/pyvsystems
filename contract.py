@@ -228,6 +228,7 @@ class Contract(object):
         try:
             status = resp["status"]
             if status == "Success":
+                print("height: " + resp["height"])
                 return True
             else:
                 return False
@@ -242,7 +243,7 @@ class Contract(object):
             if status is True:
                 return True
             else:
-                time.sleep(5.0)
+                time.sleep(10.0)
                 status = self.get_contract_status(wrapper, tx_id)
                 if status is True:
                     return True
