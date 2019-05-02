@@ -16,7 +16,7 @@ class ContractBuild(object):
         # self.trigger = self.trigger_builder(self.init_fun_gen())
         self.descriptor = self.descriptor_builder(False)
         self.state_var = self.state_var_builder()
-        self.texture = self.texture_builder(split)
+        self.texture = self.texture_builder(False)
 
 
 
@@ -26,7 +26,6 @@ class ContractBuild(object):
         lang_ver = self.language_version_builder(language_version)
         triggers = self.bytes_builder_from_list(trigger)
         descriptor = self.bytes_builder_from_list(descriptor)
-        text = self.bytes_builder
         triggers = self.trigger_builder(trigger)
         descriptors = self.descriptor_builder(descriptor, split)
         state_vars = self.state_var_builder(state_var)

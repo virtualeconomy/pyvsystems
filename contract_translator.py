@@ -268,7 +268,8 @@ class ContractTranslator(object):
         string_list.insert(0, max_length_string)
         return string_list
 
-    def contract_from_json(self, contract):
+    @staticmethod
+    def contract_from_json(contract):
         contract_build = ContractBuild()
         language_code = contract_build.language_code_builder(contract['languageCode'])
         language_version = contract_build.language_version_builder(contract['languageVersion'])
