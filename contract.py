@@ -1,6 +1,16 @@
+from .setting import *
 from .crypto import *
 from .error import *
+from .words import WORDS
+from pyvsystems import is_offline
 import pyvsystems
+import time
+import struct
+import json
+import math
+import base58
+import logging
+import copy
 from .opcode import *
 from .deser import *
 from .contract_build import *
@@ -118,3 +128,138 @@ class Contract(object):
         else:
             contract = self.contract_without_split_default
         return contract
+
+    @staticmethod
+    def register_contract(account, contract, data_stack, description='', tx_fee=DEFAULT_REGISTER_CONTRACT_FEE,
+                          fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
+        MIN_CONTRACT_STRING_SIZE = int(math.ceil(math.log(256) / math.log(58) * MIN_CONTRACT_BYTE_SIZE))
+        if not account.privateKey:
+            msg = 'Private key required'
+            pyvsystems.throw_error(msg, MissingPrivateKeyException)
+        elif len(contract) < MIN_CONTRACT_STRING_SIZE:
+            msg = 'Contract String must be at least %d long' % MIN_CONTRACT_STRING_SIZE
+            pyvsystems.throw_error(msg, InvalidParameterException)
+        elif tx_fee < DEFAULT_REGISTER_CONTRACT_FEE:
+            msg = 'Transaction fee must be >= %d' % DEFAULT_REGISTER_CONTRACT_FEE
+            pyvsystems.throw_error(msg, InvalidParameterException)
+        elif len(description) > MAX_ATTACHMENT_SIZE:
+            msg = 'Attachment length must be <= %d' % MAX_ATTACHMENT_SIZE
+            pyvsystems.throw_error(msg, InvalidParameterException)
+        elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
+            msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
+            pyvsystems.throw_error(msg, InvalidParameterException)
+        elif not is_offline() and account.balance() < tx_fee:
+            msg = 'Insufficient VSYS balance'
+            pyvsystems.throw_error(msg, InsufficientBalanceException)
+        else:
+            if timestamp == 0:
+                timestamp = int(time.time() * 1000000000)
+            sData = struct.pack(">B", REGISTER_CONTRACT_TX_TYPE) + \
+                    struct.pack(">H", len(base58.b58decode(contract))) + \
+                    base58.b58decode(contract) + \
+                    struct.pack(">H", len(data_stack)) + \
+                    data_stack + \
+                    struct.pack(">H", len(description)) + \
+                    str2bytes(description) + \
+                    struct.pack(">Q", tx_fee) + \
+                    struct.pack(">H", fee_scale) + \
+                    struct.pack(">Q", timestamp)
+            signature = bytes2str(sign(account.privateKey, sData))
+            description_str = bytes2str(base58.b58encode(str2bytes(description)))
+            data_stack_str = bytes2str(base58.b58encode(data_stack))
+            data = json.dumps({
+                "senderPublicKey": account.publicKey,
+                "contract": contract,
+                "initData": data_stack_str,
+                "description": description_str,
+                "fee": tx_fee,
+                "feeScale": fee_scale,
+                "timestamp": timestamp,
+                "signature": signature
+            })
+
+            return account.wrapper.request('/contract/broadcast/register', data)
+
+
+    @staticmethod
+    def execute_contract(account, contract_id, func_id, data_stack, attachment='', tx_fee=DEFAULT_EXECUTE_CONTRACT_FEE,
+                         fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
+        if not account.privateKey:
+            msg = 'Private key required'
+            pyvsystems.throw_error(msg, MissingPrivateKeyException)
+        elif tx_fee < DEFAULT_EXECUTE_CONTRACT_FEE:
+            msg = 'Transaction fee must be >= %d' % DEFAULT_EXECUTE_CONTRACT_FEE
+            pyvsystems.throw_error(msg, InvalidParameterException)
+        elif len(attachment) > MAX_ATTACHMENT_SIZE:
+            msg = 'Attachment length must be <= %d' % MAX_ATTACHMENT_SIZE
+            pyvsystems.throw_error(msg, InvalidParameterException)
+        elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
+            msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
+            pyvsystems.throw_error(msg, InvalidParameterException)
+        elif not is_offline() and account.balance() < tx_fee:
+            msg = 'Insufficient VSYS balance'
+            pyvsystems.throw_error(msg, InsufficientBalanceException)
+        else:
+            if timestamp == 0:
+                timestamp = int(time.time() * 1000000000)
+            sData = struct.pack(">B", EXECUTE_CONTRACT_FUNCTION_TX_TYPE) + \
+                    base58.b58decode(contract_id) + \
+                    struct.pack(">H", func_id) + \
+                    struct.pack(">H", len(data_stack)) + \
+                    data_stack + \
+                    struct.pack(">H", len(attachment)) + \
+                    str2bytes(attachment) + \
+                    struct.pack(">Q", tx_fee) + \
+                    struct.pack(">H", fee_scale) + \
+                    struct.pack(">Q", timestamp)
+            signature = bytes2str(sign(account.privateKey, sData))
+            description_str = bytes2str(base58.b58encode(str2bytes(attachment)))
+            data_stack_str = bytes2str(base58.b58encode(data_stack))
+            data = json.dumps({
+                "senderPublicKey": account.publicKey,
+                "contractId": contract_id,
+                "functionIndex": func_id,
+                "functionData": data_stack_str,
+                "attachment": description_str,
+                "fee": tx_fee,
+                "feeScale": fee_scale,
+                "timestamp": timestamp,
+                "signature": signature
+            })
+
+            return account.wrapper.request('/contract/broadcast/execute', data)
+
+
+    def get_contract_status(self, wrapper, tx_id):
+        try:
+            resp = wrapper.request('/transactions/info/%s' % (tx_id))
+            logging.debug(resp)
+        except:
+            resp = 0
+            pass
+        try:
+            status = resp["status"]
+            if status == "Success":
+                return True
+            else:
+                return False
+        except KeyError:
+            pass
+            return False
+
+    def timed_get_contract_status(self, wrapper, tx_id):
+        retries = 1
+        while retries > 0:
+            status = self.get_contract_status(wrapper, tx_id)
+            if status is True:
+                return True
+            else:
+                time.sleep(5.0)
+                status = self.get_contract_status(wrapper, tx_id)
+                if status is True:
+                    return True
+                else:
+                    return False
+
+
+
