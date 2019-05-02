@@ -100,7 +100,7 @@ class Contract(object):
             pyvsystems.throw_error(msg, MissingAddressException)
             return None
         try:
-            resp = wrapper.request('/balance/%s/%s' % (address, token_id))
+            resp = wrapper.request('/contract/balance/%s/%s' % (address, token_id))
             logging.debug(resp)
             return resp
         except Exception as ex:
