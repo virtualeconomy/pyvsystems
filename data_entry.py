@@ -1,133 +1,107 @@
-# from .crypto import *
+from .crypto import *
 from .error import *
 from .contract_build import *
 import base58
 import pyvsystems
 
 
+def init_data_stack_gen(max, unity, desc):
+    max = DataEntry(max, Type.amount)
+    unit = DataEntry(unity, Type.amount)
+    short_txt = DataEntry(desc, Type.short_text)
+    init_data_stack = [max.bytes, unit.bytes, short_txt.bytes]
+    return deser.serialize_array(init_data_stack)
+
+def supersede_data_stack_gen(new_iss):
+    iss = DataEntry(new_iss, Type.address)
+    supersede_data_stack = [iss.bytes]
+    return deser.serialize_array(supersede_data_stack)
+
+def split_data_stack_gen(new_unity):
+    unit = DataEntry(new_unity, Type.amount)
+    split_data_stack = [unit.bytes]
+    return deser.serialize_array(split_data_stack)
+
+def destroy_data_stack_gen(amount):
+    am = DataEntry(amount, Type.amount)
+    destroy_data_stack = [am.bytes]
+    return deser.serialize_array(destroy_data_stack)
+
+def issue_data_stack_gen(amount):
+    max = DataEntry(amount, Type.amount)
+    issue_data_stack = [max.bytes]
+    return deser.serialize_array(issue_data_stack)
+
+def send_data_stack_gen(recipient, amount):
+    reci = DataEntry(recipient, Type.address)
+    am = DataEntry(amount, Type.amount)
+    send_data_stack = [reci.bytes, am.bytes]
+    return deser.serialize_array(send_data_stack)
+
+def transfer_data_stack_gen(sender, recipient, amount):
+    se = DataEntry(sender, Type.address)
+    reci = DataEntry(recipient, Type.address)
+    am = DataEntry(amount, Type.amount)
+    transfer_data_stack = [se.bytes, reci.bytes, am.bytes]
+    return deser.serialize_array(transfer_data_stack)
+
+def deposit_data_stack_gen(sender, smart_contract, amount):
+    se = DataEntry(sender, Type.address)
+    sc = DataEntry(smart_contract, Type.address)
+    am = DataEntry(amount, Type.amount)
+    deposit_data_stack = [se.bytes, sc.bytes, am.bytes]
+    return deser.serialize_array(deposit_data_stack)
+
+def withdraw_data_stack_gen(smart_contract, recipient, amount):
+    sc = DataEntry(smart_contract.bytes.arr, Type.address)
+    reci = DataEntry(recipient.bytes.arr, Type.address)
+    am = DataEntry(amount, Type.amount)
+    withdraw_data_stack = [sc.bytes, reci.bytes, am.bytes]
+    return deser.serialize_array(withdraw_data_stack)
+
+def total_supply_data_stack_gen():
+    total_supply_data_stack = []
+    return deser.serialize_array(total_supply_data_stack)
+
+def max_supply_data_stack_gen():
+    max_supply_data_stack = []
+    return deser.serialize_array(max_supply_data_stack)
+
+def balance_of_data_stack_gen(account, ):
+    acc = DataEntry(account.bytes.arr, Type.address)
+    balance_of_data_stack = [acc.bytes]
+    return deser.serialize_array(balance_of_data_stack)
+
 class DataEntry:
     def __init__(self, data, dataType):
         if not type(dataType) is bytes:
             msg = 'Data Type must be bytes'
             pyvsystems.throw_error(msg, InvalidParameterException)
-        if dataType == Type.PublicKey:
+        if dataType == Type.public_key:
             self.bytes = dataType + base58.b58decode(data)
-        elif dataType == Type.Address:
+        elif dataType == Type.address:
             self.bytes = dataType + base58.b58decode(data)
-        elif dataType == Type.Amount:
+        elif dataType == Type.amount:
             self.bytes = dataType + struct.pack(">Q", data)
-        elif dataType == Type.Int32:
+        elif dataType == Type.int32:
             self.bytes = dataType + struct.pack(">I", data)
-        elif dataType == Type.ShortText:
-            self.bytes = dataType + deser.serializeDataString(data)
-        elif dataType == Type.ContractAccount:
+        elif dataType == Type.short_text:
+            self.bytes = dataType + deser.serialize_array(str2bytes(data))
+        elif dataType == Type.contract_account:
             self.bytes = dataType + base58.b58decode(data)
-        elif dataType == Type.Account:
+        elif dataType == Type.account:
             self.bytes = dataType + base58.b58decode(data)
         else:
             msg = 'Invalid Data Entry'
             pyvsystems.throw_error(msg, InvalidParameterException)
 
-
-class DataStackGen:
-   # datastack
-    @staticmethod
-    def initDataStackGen(max, unity, desc):
-        max = DataEntry(max, Type.Amount)
-        unit = DataEntry(unity, Type.Amount)
-        shortText = DataEntry(desc, Type.ShortText)
-        init_data_stack = [max.bytes, unit.bytes, shortText.bytes]
-        return deser.serializeDataStack(init_data_stack)
-
-    @staticmethod
-    def supersedeDataStackGen(newIssuer):
-        iss = DataEntry(newIssuer, Type.Address)
-        supersede_data_stack = [iss.bytes]
-        return deser.serializeDataStack(supersede_data_stack)
-
-    @staticmethod
-    def splitDataStackGen(newUnity, tokenIndex):
-        unit = DataEntry(newUnity, Type.Amount)
-        index = DataEntry(tokenIndex, Type.Int32)
-        split_data_stack = [unit.bytes, index.bytes]
-        return deser.serializeDataStack(split_data_stack)
-
-    @staticmethod
-    def destroyDataStackGen(amount, tokenIndex):
-        am = DataEntry(amount, Type.Amount)
-        index = DataEntry(tokenIndex, Type.Int32)
-        destroy_data_stack = [am.bytes, index.bytes]
-        return deser.serializeDataStack(destroy_data_stack)
-
-    @staticmethod
-    def issueDataStackGen(amount, tokenIndex):
-        max = DataEntry(amount, Type.Amount)
-        index = DataEntry(tokenIndex, Type.Int32)
-        issue_data_stack = [max.bytes, index.bytes]
-        return deser.serializeDataStack(issue_data_stack)
-
-    @staticmethod
-    def sendDataStackGen(recipient, amount, tokenIndex):
-        reci = DataEntry(recipient, Type.Address)
-        am = DataEntry(amount, Type.Amount)
-        index = DataEntry(tokenIndex, Type.Int32)
-        send_data_stack = [reci.bytes, am.bytes, index.bytes]
-        return deser.serializeDataStack(send_data_stack)
-
-    @staticmethod
-    def transferDataStackGen(sender, recipient, amount, tokenIndex):
-        se = DataEntry(sender, Type.Address)
-        reci = DataEntry(recipient, Type.Address)
-        am = DataEntry(amount, Type.Amount)
-        index = DataEntry(tokenIndex, Type.Int32)
-        transfer_data_stack = [se.bytes, reci.bytes, am.bytes, index.bytes]
-        return deser.serializeDataStack(transfer_data_stack)
-
-    @staticmethod
-    def depositDataStackGen(sender, smartContract, amount, tokenIndex):
-        se = DataEntry(sender, Type.Address)
-        sc = DataEntry(smartContract, Type.Address)
-        am = DataEntry(amount, Type.Amount)
-        index = DataEntry(tokenIndex, Type.Int32)
-        deposit_data_stack = [se.bytes, sc.bytes, am.bytes, index.bytes]
-        return deser.serializeDataStack(deposit_data_stack)
-
-    @staticmethod
-    def withdrawDataStackGen(smartContract, recipient, amount, tokenIndex):
-        sc = DataEntry(smartContract.bytes.arr, Type.Address)
-        reci = DataEntry(recipient.bytes.arr, Type.Address)
-        am = DataEntry(amount, Type.Amount)
-        index = DataEntry(tokenIndex, Type.Int32)
-        withdraw_data_stack = [sc.bytes, reci.bytes, am.bytes, index.bytes]
-        return deser.serializeDataStack(withdraw_data_stack)
-
-    @staticmethod
-    def totalSupplyDataStackGen(tokenIndex):
-        index = DataEntry(tokenIndex, Type.Int32)
-        total_supply_data_stack = [index.bytes]
-        return deser.serializeDataStack(total_supply_data_stack)
-
-    @staticmethod
-    def maxSupplyDataStackGen(tokenIndex):
-        index = DataEntry(tokenIndex, Type.Int32)
-        max_supply_data_stack = [index.bytes]
-        return deser.serializeDataStack(max_supply_data_stack)
-
-    @staticmethod
-    def balanceOfDataStackGen(account, tokenIndex):
-        acc =  DataEntry(account.bytes.arr, Type.Address)
-        index = DataEntry(tokenIndex, Type.Int32)
-        balance_of_data_stack = [acc.bytes, index.bytes]
-        return deser.serializeDataStack(balance_of_data_stack)
-
-
 class Type:
-    PublicKey = bytes([1])
-    Address = bytes([2])
-    Amount = bytes([3])
-    Int32 = bytes([4])
-    ShortText = bytes([5])
-    ContractAccount = bytes([6])
-    Account = bytes([7])
+    public_key = bytes([1])
+    address = bytes([2])
+    amount = bytes([3])
+    int32 = bytes([4])
+    short_text = bytes([5])
+    contract_account = bytes([6])
+    account = bytes([7])
 
 

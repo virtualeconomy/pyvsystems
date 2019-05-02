@@ -6,7 +6,6 @@ import base58
 
 from pyvsystems import deser
 from pyvsystems.contract_meta import ContractMeta as meta
-from pyvsystems.data_entry import DataEntry
 
 
 class ContractBuild(object):
@@ -32,8 +31,7 @@ class ContractBuild(object):
              self.transfer_fun_gen(), self.deposit_fun_gen(), self.withdraw_fun_gen(), self.total_supply_fun_gen(),
              self.max_supply_fun_gen(), self.balance_of_fun_gen(), self.get_issuer_fun_gen()])
 
-        self.state_var = self.bytes_builder_from_list([meta.state_var_issuer + self.data_type_list.get('Address'),
-                                        meta.state_var_maker + self.data_type_list.get('Address')])
+        self.state_var = self.bytes_builder_from_list([meta.state_var_issuer + self.data_type_list.get('Address'), meta.state_var_maker + self.data_type_list.get('Address')])
 
         self.state_var_texture = deser.serialize_arrays([deser.serialize_string(name) for name in meta.state_var_name])
         self.initializer_texture = deser.serialize_arrays([self.init_func_bytes()])
@@ -595,68 +593,3 @@ class ContractBuild(object):
     def get_issuer_opc_index(self):
         return [self.get_issuer_opc_cdbvr_get_index(), bytes([0])]
 
-    def init_data_stack_gen(self, amount, unity, desc):
-
-        max = DataEntry(bytes([amount]), self.data_type_list.get('Amount'))
-        unit = DataEntry(bytes([unity]), self.data_type_list.get('Amount'))
-        short_text = DataEntry.create(desc.getBytes(), self.data_type_list.get('ShortText'))
-        return [max, unit, short_text]
-
-    def supersede_data_stack_gen(self, new_issuer):
-        iss = DataEntry(new_issuer.bytes.arr, self.data_type_list.get('Address'))
-        return iss
-
-    def split_data_stack_gen(self, new_unity, token_index):
-        unit = DataEntry(bytes([new_unity]), self.data_type_list.get('Amount'))
-        index =   DataEntry(bytes([token_index]), self.data_type_list.get('Int32'))
-        return [unit, index]
-
-    def destroy_data_stack_gen(self, amount, token_index):
-        am = DataEntry(bytes([amount]), self.data_type_list.get('Amount'))
-        index = DataEntry(bytes([token_index]), self.data_type_list.get('Int32'))
-        return [am, index]
-
-    def issue_data_stack_gen(self, amount, token_index):
-        max = DataEntry(bytes([amount]), self.data_type_list.get('Amount'))
-        index = DataEntry(bytes([token_index]), self.data_type_list.get('Int32'))
-        return [max, index]
-
-    def send_data_stack_gen(self, recipient, amount, token_index):
-        reci = DataEntry(recipient.bytes.arr, self.data_type_list.get('Address'))
-        am = DataEntry(bytes([amount]), self.data_type_list.get('Amount'))
-        index = DataEntry(bytes([token_index]), self.data_type_list.get('Int32'))
-        return [reci, am, index]
-
-    def transfer_data_stack_gen(self, sender, recipient, amount, token_index):
-        se = DataEntry(sender.bytes.arr, self.data_type_list.get('Address'))
-        reci = DataEntry(recipient.bytes.arr, self.data_type_list.get('Address'))
-        am = DataEntry(bytes([amount]), self.data_type_list.get('Amount'))
-        index = DataEntry(bytes([token_index]), self.data_type_list.get('Int32'))
-        return [se, reci, am, index]
-
-    def deposit_data_stack_gen(self, sender, smart_contract, amount, token_index):
-        se = DataEntry(sender.bytes.arr, self.data_type_list.get('Address'))
-        sc = DataEntry(smart_contract.bytes.arr, self.data_type_list.get('Address'))
-        am = DataEntry(bytes([amount]), self.data_type_list.get('Amount'))
-        index = DataEntry(bytes([token_index]), self.data_type_list.get('Int32'))
-        return [se, sc, am, index]
-
-    def withdraw_data_stack_gen(self, smart_contract, recipient, amount, token_index):
-        sc = DataEntry(smart_contract.bytes.arr, self.data_type_list.get('Address'))
-        reci = DataEntry(recipient.bytes.arr, self.data_type_list.get('Address'))
-        am = DataEntry(bytes([amount]), self.data_type_list.get('Amount'))
-        index = DataEntry(bytes([token_index]), self.data_type_list.get('Int32'))
-        return [sc, reci, am, index]
-
-    def total_supply_data_stack_gen(self, token_index):
-        index = DataEntry(bytes([token_index]), self.data_type_list.get('Int32'))
-        return [index]
-
-    def max_supply_data_stack_gen(self, token_index):
-        index = DataEntry(bytes([token_index]), self.data_type_list.get('Int32'))
-        return [index]
-
-    def balance_of_data_stack_gen(self, account, token_index):
-        acc =  DataEntry(account.bytes.arr, self.data_type_list.get('Address'))
-        index = DataEntry(bytes([token_index]), self.data_type_list.get('Int32'))
-        return [acc, index]
