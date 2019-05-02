@@ -1,8 +1,8 @@
-from .crypto import *
-from .error import *
-from .contract_build import *
 import base58
 import pyvsystems
+
+from .contract_build import *
+from .error import *
 
 
 def init_data_stack_gen(max, unity, desc):
@@ -47,14 +47,14 @@ def transfer_data_stack_gen(sender, recipient, amount):
 
 def deposit_data_stack_gen(sender, smart_contract, amount):
     se = DataEntry(sender, Type.address)
-    sc = DataEntry(smart_contract, Type.address)
+    sc = DataEntry(smart_contract, Type.contract_account)
     am = DataEntry(amount, Type.amount)
     deposit_data_stack = [se.bytes, sc.bytes, am.bytes]
     return deser.serialize_array(deposit_data_stack)
 
 def withdraw_data_stack_gen(smart_contract, recipient, amount):
-    sc = DataEntry(smart_contract.bytes.arr, Type.address)
-    reci = DataEntry(recipient.bytes.arr, Type.address)
+    sc = DataEntry(smart_contract, Type.contract_account)
+    reci = DataEntry(recipient, Type.address)
     am = DataEntry(amount, Type.amount)
     withdraw_data_stack = [sc.bytes, reci.bytes, am.bytes]
     return deser.serialize_array(withdraw_data_stack)
@@ -67,10 +67,14 @@ def max_supply_data_stack_gen():
     max_supply_data_stack = []
     return deser.serialize_array(max_supply_data_stack)
 
-def balance_of_data_stack_gen(account, ):
-    acc = DataEntry(account.bytes.arr, Type.address)
+def balance_of_data_stack_gen(account):
+    acc = DataEntry(account, Type.address)
     balance_of_data_stack = [acc.bytes]
     return deser.serialize_array(balance_of_data_stack)
+
+def get_issuer_data_stack_gen():
+    get_issuer_data_stack = []
+    return deser.serialize_array(get_issuer_data_stack)
 
 class DataEntry:
     def __init__(self, data, dataType):
@@ -103,5 +107,3 @@ class Type:
     short_text = bytes([5])
     contract_account = bytes([6])
     account = bytes([7])
-
-

@@ -1,11 +1,11 @@
 import itertools
 import logging
-import os
 import struct
-import base58
 
 from pyvsystems import deser
 from pyvsystems.contract_meta import ContractMeta as meta
+
+from .crypto import *
 
 
 class ContractBuild(object):
@@ -97,7 +97,7 @@ class ContractBuild(object):
 
         contract_bytes = contract_lang_code + contract_lang_ver + contract_trigger + contract_descriptor + contract_state_var + contract_texture
         contract_byte_str = base58.b58encode(contract_bytes)
-        return contract_byte_str
+        return bytes2str(contract_byte_str)
 
 
     def opc_assert_is_caller_origin(self):

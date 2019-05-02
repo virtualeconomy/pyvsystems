@@ -1,21 +1,13 @@
-from .setting import *
-from .crypto import *
-from .error import *
-from .words import WORDS
-from pyvsystems import is_offline
-import pyvsystems
-import time
-import struct
 import json
 import math
-import base58
-import logging
-import copy
-from .opcode import *
-from .deser import *
-from .contract_build import *
-from .contract_translator import *
+import time
+
+import pyvsystems
+from pyvsystems import is_offline
+
 from .contract_meta import ContractMeta as meta
+from .contract_translator import *
+from .setting import *
 
 
 class Contract(object):
@@ -38,7 +30,7 @@ class Contract(object):
                 msg = 'No wrapper information!'
                 pyvsystems.throw_error(msg, InvalidParameterException)
             contract_content = self.get_contract_content(wrapper, contract_id)
-            bytes_string = contract_translator.contract_from_json(contract_content)
+            bytes_string = str2bytes(contract_translator.contract_from_json(contract_content))
 
         bytes_object = base58.b58decode(bytes_string)
         start_position = 0
@@ -84,7 +76,7 @@ class Contract(object):
 
     def get_contract_info(self, wrapper, contract_id):
         try:
-            resp = wrapper.request('contract/info/%s' % (contract_id))
+            resp = wrapper.request('/contract/info/%s' % (contract_id))
             logging.debug(resp)
             return resp['info']
         except Exception as ex:
@@ -94,7 +86,7 @@ class Contract(object):
 
     def get_contract_content(self, wrapper, contract_id):
         try:
-            resp = wrapper.request('contract/content/%s' % (contract_id))
+            resp = wrapper.request('/contract/content/%s' % (contract_id))
             logging.debug(resp)
             return resp
         except Exception as ex:
@@ -174,7 +166,6 @@ class Contract(object):
 
             return account.wrapper.request('/contract/broadcast/register', data)
 
-
     @staticmethod
     def execute_contract(account, contract_id, func_id, data_stack, attachment='', tx_fee=DEFAULT_EXECUTE_CONTRACT_FEE,
                          fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
@@ -223,18 +214,13 @@ class Contract(object):
 
             return account.wrapper.request('/contract/broadcast/execute', data)
 
-
     def get_contract_status(self, wrapper, tx_id):
         try:
             resp = wrapper.request('/transactions/info/%s' % (tx_id))
             logging.debug(resp)
-        except:
-            resp = 0
-            pass
-        try:
             status = resp["status"]
             if status == "Success":
-                print("height: " + resp["height"])
+                print("height: " + '%s' % (resp["height"]))
                 return True
             else:
                 return False
@@ -243,18 +229,19 @@ class Contract(object):
             return False
 
     def timed_get_contract_status(self, wrapper, tx_id):
-        retries = 1
+        retries = 5
         while retries > 0:
             status = self.get_contract_status(wrapper, tx_id)
             if status is True:
                 return True
             else:
-                time.sleep(10.0)
+                time.sleep(4.0)
                 status = self.get_contract_status(wrapper, tx_id)
                 if status is True:
                     return True
                 else:
-                    return False
+                    retries -= 1
+        return False
 
 
 
