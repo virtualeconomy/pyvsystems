@@ -5,6 +5,73 @@ import base58
 import pyvsystems
 
 
+def init_data_stack_gen(max, unity, desc):
+    max = DataEntry(max, Type.amount)
+    unit = DataEntry(unity, Type.amount)
+    short_txt = DataEntry(desc, Type.short_text)
+    init_data_stack = [max.bytes, unit.bytes, short_txt.bytes]
+    return deser.serialize_array(init_data_stack)
+
+def supersede_data_stack_gen(new_iss):
+    iss = DataEntry(new_iss, Type.address)
+    supersede_data_stack = [iss.bytes]
+    return deser.serialize_array(supersede_data_stack)
+
+def split_data_stack_gen(new_unity):
+    unit = DataEntry(new_unity, Type.amount)
+    split_data_stack = [unit.bytes]
+    return deser.serialize_array(split_data_stack)
+
+def destroy_data_stack_gen(amount):
+    am = DataEntry(amount, Type.amount)
+    destroy_data_stack = [am.bytes]
+    return deser.serialize_array(destroy_data_stack)
+
+def issue_data_stack_gen(amount):
+    max = DataEntry(amount, Type.amount)
+    issue_data_stack = [max.bytes]
+    return deser.serialize_array(issue_data_stack)
+
+def send_data_stack_gen(recipient, amount):
+    reci = DataEntry(recipient, Type.address)
+    am = DataEntry(amount, Type.amount)
+    send_data_stack = [reci.bytes, am.bytes]
+    return deser.serialize_array(send_data_stack)
+
+def transfer_data_stack_gen(sender, recipient, amount):
+    se = DataEntry(sender, Type.address)
+    reci = DataEntry(recipient, Type.address)
+    am = DataEntry(amount, Type.amount)
+    transfer_data_stack = [se.bytes, reci.bytes, am.bytes]
+    return deser.serialize_array(transfer_data_stack)
+
+def deposit_data_stack_gen(sender, smart_contract, amount):
+    se = DataEntry(sender, Type.address)
+    sc = DataEntry(smart_contract, Type.address)
+    am = DataEntry(amount, Type.amount)
+    deposit_data_stack = [se.bytes, sc.bytes, am.bytes]
+    return deser.serialize_array(deposit_data_stack)
+
+def withdraw_data_stack_gen(smart_contract, recipient, amount):
+    sc = DataEntry(smart_contract.bytes.arr, Type.address)
+    reci = DataEntry(recipient.bytes.arr, Type.address)
+    am = DataEntry(amount, Type.amount)
+    withdraw_data_stack = [sc.bytes, reci.bytes, am.bytes]
+    return deser.serialize_array(withdraw_data_stack)
+
+def total_supply_data_stack_gen():
+    total_supply_data_stack = []
+    return deser.serialize_array(total_supply_data_stack)
+
+def max_supply_data_stack_gen():
+    max_supply_data_stack = []
+    return deser.serialize_array(max_supply_data_stack)
+
+def balance_of_data_stack_gen(account, ):
+    acc = DataEntry(account.bytes.arr, Type.address)
+    balance_of_data_stack = [acc.bytes]
+    return deser.serialize_array(balance_of_data_stack)
+
 class DataEntry:
     def __init__(self, data, dataType):
         if not type(dataType) is bytes:

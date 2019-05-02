@@ -6,49 +6,99 @@ import base58
 
 from pyvsystems import deser
 from pyvsystems.contract_meta import ContractMeta as meta
-from pyvsystems.data_entry import DataEntry, Type
 
 
 class ContractBuild(object):
 
-    def __init__(self):
-        self.trigger = self.bytes_builder_from_list(self.init_fun_gen())
-        # self.trigger = self.trigger_builder(self.init_fun_gen())
-        self.descriptor = self.descriptor_builder(False)
-        self.state_var = self.state_var_builder()
-        self.texture = self.texture_builder(False)
+    def __init__(self, default_contract=False):
+        self.data_type_list = {value: bytes([int(key)]) for key, value in meta.data_type_list.items()}
+        self.function_type_map = {value: bytes([int(key[1:])]) for key, value in meta.function_type_map.items()}
 
+        if default_contract:
+            self.trigger = self.bytes_builder_from_list([self.init_fun_gen()])
 
+            self.descriptor_without_split = self.bytes_builder_from_list(
+                [self.supersede_fun_without_split_gen(), self.issue_fun_without_split_gen(),
+                 self.destroy_fun_without_split_gen(),
+                 self.send_fun_without_split_gen(), self.transfer_fun_without_split_gen(),
+                 self.deposit_fun_without_split_gen(), self.withdraw_fun_without_split_gen(),
+                 self.total_supply_fun_without_split_gen(),
+                 self.max_supply_fun_without_split_gen(), self.balance_of_fun_without_split_gen(),
+                 self.get_issuer_fun_without_split_gen()])
 
-    def create(self, language_code, language_version, trigger, descriptor, state_var, texture, split=False):
+            self.descriptor_with_split = self.bytes_builder_from_list(
+                [self.supersede_fun_gen(), self.issue_fun_gen(), self.destroy_fun_gen(), self.split_fun_gen(),
+                 self.send_fun_gen(),
+                 self.transfer_fun_gen(), self.deposit_fun_gen(), self.withdraw_fun_gen(), self.total_supply_fun_gen(),
+                 self.max_supply_fun_gen(), self.balance_of_fun_gen(), self.get_issuer_fun_gen()])
 
-        lang_code = self.language_code_builder(language_code)
-        lang_ver = self.language_version_builder(language_version)
-        triggers = self.bytes_builder_from_list(trigger)
-        descriptor = self.bytes_builder_from_list(descriptor)
-        triggers = self.trigger_builder(trigger)
-        descriptors = self.descriptor_builder(descriptor, split)
-        state_vars = self.state_var_builder(state_var)
-        textures = self.texture_builder(texture, split)
+            self.state_var = self.bytes_builder_from_list([meta.state_var_issuer + self.data_type_list.get('Address'), meta.state_var_maker + self.data_type_list.get('Address')])
 
-        contract_bytes = lang_code + lang_ver + trigger + descriptor + state_var + texture
+            self.state_var_texture = deser.serialize_arrays([deser.serialize_string(name) for name in meta.state_var_name])
+            self.initializer_texture = deser.serialize_arrays([self.init_func_bytes()])
+
+            self.descriptor_texture_without_split = deser.serialize_arrays([self.supersede_func_bytes(),
+                                                              self.issue_func_bytes(),
+                                                              self.destroy_func_bytes(),
+                                                              self.send_func_bytes(),
+                                                              self.transfer_func_bytes(),
+                                                              self.deposit_func_bytes(),
+                                                              self.withdraw_func_bytes(),
+                                                              self.total_supply_func_bytes(),
+                                                              self.max_supply_func_bytes(),
+                                                              self.balance_of_func_bytes(),
+                                                              self.get_issuer_func_bytes()])
+
+            self.descriptor_texture_with_split = deser.serialize_arrays([self.supersede_func_bytes(),
+                                                              self.issue_func_bytes(),
+                                                              self.destroy_func_bytes(),
+                                                              self.split_func_bytes(),
+                                                              self.send_func_bytes(),
+                                                              self.transfer_func_bytes(),
+                                                              self.deposit_func_bytes(),
+                                                              self.withdraw_func_bytes(),
+                                                              self.total_supply_func_bytes(),
+                                                              self.max_supply_func_bytes(),
+                                                              self.balance_of_func_bytes(),
+                                                              self.get_issuer_func_bytes()])
+
+            self.texture_without_split = deser.serialize_arrays([self.initializer_texture, self.descriptor_texture_without_split, self.state_var_texture])
+            self.texture_with_split = deser.serialize_arrays(
+                [self.initializer_texture, self.descriptor_texture_with_split, self.state_var_texture])
+
+    def create(self, language_code, language_version, trigger=None, descriptor=None, state_var=None, texture=None, split=False):
+        contract_lang_code = self.language_code_builder(language_code)
+        contract_lang_ver = self.language_version_builder(language_version)
+        if trigger is None:
+            contract_trigger = self.trigger
+        else:
+            contract_trigger = self.bytes_builder_from_list(trigger)
+
+        if descriptor is None:
+            if split is False:
+                contract_descriptor = self.descriptor_without_split
+            else:
+                contract_descriptor = self.descriptor_with_split
+        else:
+            contract_descriptor = self.bytes_builder_from_list(descriptor)
+
+        if state_var is None:
+            contract_state_var = self.state_var
+        else:
+            contract_state_var = self.bytes_builder_from_list(state_var)
+
+        if texture is None:
+            if split is False:
+                contract_texture = self.texture_without_split
+            else:
+                contract_texture = self.texture_with_split
+        else:
+            contract_texture = deser.serialize_arrays(texture)
+
+        contract_bytes = contract_lang_code + contract_lang_ver + contract_trigger + contract_descriptor + contract_state_var + contract_texture
         contract_byte_str = base58.b58encode(contract_bytes)
         return contract_byte_str
 
-    def opc_assert_gteq_zero(self):
-        return meta.assert_opc + meta.gteq_zero_assert
-
-    def opc_assert_lteq(self):
-        return meta.assert_opc + meta.lteq_assert
-
-    def opc_assert_lt_int64(self):
-        return meta.assert_opc + meta.lt_int64_assert
-
-    def opc_assert_gt_zero(self):
-        return meta.assert_opc + meta.gt_zero_assert
-
-    def opc_assert_eq(self):
-        return meta.assert_opc + meta.eq_assert
 
     def opc_assert_is_caller_origin(self):
         return meta.assert_opc + meta.is_caller_origin_assert
@@ -111,73 +161,12 @@ class ContractBuild(object):
         except:
             print("Wrong language version length")
 
-    @staticmethod
-    def bytes_builder_from_list(input):
-        return deser.serialize_array(deser.serialize_arrays([input]))
 
-    @staticmethod
-    def trigger_builder(trigger):
-        return deser.serialize_array(deser.serialize_arrays([trigger]))
-
-    def descriptor_builder(self, split):
-        if(split is False):
-            descriptor = deser.serialize_arrays(
-                [self.supersede_fun_without_split_gen(), self.issue_fun_without_split_gen(), self.destroy_fun_without_split_gen(),
-                 self.send_fun_without_split_gen(), self.transfer_fun_without_split_gen(), self.deposit_fun_without_split_gen(), self.withdraw_fun_without_split_gen(), self.total_supply_fun_without_split_gen(),
-                 self.max_supply_fun_without_split_gen(), self.balance_of_fun_without_split_gen(), self.get_issuer_fun_without_split_gen()])
+    def bytes_builder_from_list(self, input_list):
+        if type(input_list) is list:
+            return deser.serialize_array(deser.serialize_arrays(input_list))
         else:
-            descriptor = deser.serialize_arrays([self.supersede_fun_gen(), self.issue_fun_gen(), self.destroy_fun_gen(), self.split_fun_gen(), self.send_fun_gen(),
-                                                self.transfer_fun_gen(), self.deposit_fun_gen(), self.withdraw_fun_gen(), self.total_supply_fun_gen(),
-                                                self.max_supply_fun_gen(), self.balance_of_fun_gen(), self.get_issuer_fun_gen()])
-
-        return deser.serialize_array(descriptor)
-
-
-    def state_var_builder(self):
-        state_var = self.state_var_gen([meta.state_var_issuer + meta.address, meta.state_var_maker + meta.address])
-        return deser.serialize_array(state_var)
-
-    def texture_builder(self, split):
-        self._fixed_size = 4
-        self.state_var_name = ["issuer", "maker"]
-        self.state_var_texture = deser.serialize_arrays([deser.serialize_string(name) for name in self.state_var_name])
-        self.initializer_texture = deser.serialize_arrays([self.init_func_bytes()])
-        if(split is False):
-            self.descriptor_texture = deser.serialize_arrays([self.supersede_func_bytes(),
-                                                            self.issue_func_bytes(),
-                                                            self.destroy_func_bytes(),
-                                                            self.send_func_bytes(),
-                                                            self.transfer_func_bytes(),
-                                                            self.deposit_func_bytes(),
-                                                            self.withdraw_func_bytes(),
-                                                            self.total_supply_func_bytes(),
-                                                            self.max_supply_func_bytes(),
-                                                            self.balance_of_func_bytes(),
-                                                            self.get_issuer_func_bytes()])
-        else:
-            self.descriptor_texture = deser.serialize_arrays([self.supersede_func_bytes(),
-                                                            self.issue_func_bytes(),
-                                                            self.destroy_func_bytes(),
-                                                            self.split_func_bytes(),
-                                                            self.send_func_bytes(),
-                                                            self.transfer_func_bytes(),
-                                                            self.deposit_func_bytes(),
-                                                            self.withdraw_func_bytes(),
-                                                            self.total_supply_func_bytes(),
-                                                            self.max_supply_func_bytes(),
-                                                            self.balance_of_func_bytes(),
-                                                            self.get_issuer_func_bytes()])
-
-        self.texture_right_gen = self.texture_gen(self.initializer_texture, self.descriptor_texture, self.state_var_texture)
-
-        return self.texture_right_gen
-
-    def texture_random_gen(self):
-        texture = bytearray(os.urandom(self._fixed_size))
-        return texture
-
-    def texture_gen(self, initialization, description, state_var):
-        return deser.serialize_arrays([initialization, description, state_var])
+            logging.error("The input should be a list")
 
     def texture_fun_gen(self, name, ret, para):
         func_byte = deser.serialize_array(deser.serialize_string(name))
@@ -185,7 +174,6 @@ class ContractBuild(object):
         para_byte = deser.serialize_arrays([deser.serialize_string(p) for p in para])
         texture = func_byte + ret_byte + para_byte
         return texture
-
 
     def init_func_bytes(self):
         return self.texture_fun_gen("init", [], meta.init_para)
@@ -241,99 +229,99 @@ class ContractBuild(object):
         return fun
 
     def init_fun_gen(self):
-        fun = self.a_function_gen(self.init_fun_id_gen(), self.init_fun_type_gen(), self.proto_type_init_gen(), self.init_opc_line_gen())
+        fun = self.a_function_gen(self.init_fun_id_gen(), self.function_type_map.get("onInit"), self.proto_type_gen(meta.non_return_type, self.init_para_type()), self.list_opc_gen(self.init_opc(), self.init_opc_index()))
         return fun
 
     def supersede_fun_gen(self):
-        fun = self.a_function_gen(self.supersede_fun_id_gen(), self.supersede_fun_type_gen(), self.proto_type_supersede_gen(), self.supersede_opc_line_gen())
+        fun = self.a_function_gen(self.supersede_fun_id_gen(), self.function_type_map.get("public"), self.proto_type_gen(meta.non_return_type, self.supersede_para_type()), self.list_opc_gen(self.supersede_opc(), self.supersede_opc_index()))
         return fun
 
     def supersede_fun_without_split_gen(self):
-        fun = self.a_function_gen(self.supersede_fun_id_without_split_gen(), self.supersede_fun_type_gen(), self.proto_type_supersede_gen(), self.supersede_opc_line_gen())
+        fun = self.a_function_gen(self.supersede_fun_id_without_split_gen(), self.function_type_map.get("public"), self.proto_type_gen(meta.non_return_type, self.supersede_para_type()), self.list_opc_gen(self.supersede_opc(), self.supersede_opc_index()))
         return fun
 
     def issue_fun_gen(self):
-        fun = self.a_function_gen(self.issue_fun_id_gen(), self.issue_fun_type_gen(), self.proto_type_issue_gen(), self.issue_opc_line_gen())
+        fun = self.a_function_gen(self.issue_fun_id_gen(), self.function_type_map.get("public"), self.proto_type_gen(meta.non_return_type, self.issue_para_type()), self.list_opc_gen(self.issue_opc(), self.issue_opc_index()))
         return fun
 
     def issue_fun_without_split_gen(self):
-        fun = self.a_function_gen(self.issue_fun_id_without_split_gen(), self.issue_fun_type_gen(), self.proto_type_issue_gen(), self.issue_opc_line_gen())
+        fun = self.a_function_gen(self.issue_fun_id_without_split_gen(), self.function_type_map.get("public"), self.proto_type_gen(meta.non_return_type, self.issue_para_type()), self.list_opc_gen(self.issue_opc(), self.issue_opc_index()))
         return fun
 
     def destroy_fun_gen(self):
-        fun = self.a_function_gen(self.destroy_fun_id_gen(), self.destroy_fun_type_gen(), self.proto_type_destroy_gen(), self.destroy_opc_line_gen())
+        fun = self.a_function_gen(self.destroy_fun_id_gen(), self.function_type_map.get("public"), self.proto_type_gen(meta.non_return_type, self.destroy_para_type()), self.list_opc_gen(self.destroy_opc(), self.destroy_opc_index()))
         return fun
 
     def destroy_fun_without_split_gen(self):
-        fun = self.a_function_gen(self.destroy_fun_id_without_split_gen(), self.destroy_fun_type_gen(), self.proto_type_destroy_gen(), self.destroy_opc_line_gen())
+        fun = self.a_function_gen(self.destroy_fun_id_without_split_gen(), self.function_type_map.get("public"), self.proto_type_gen(meta.non_return_type, self.destroy_para_type()), self.list_opc_gen(self.destroy_opc(), self.destroy_opc_index()))
         return fun
 
     def split_fun_gen(self):
-        fun = self.a_function_gen(self.split_fun_id_gen(), self.split_fun_type_gen(), self.proto_type_split_gen(), self.split_opc_line_gen())
+        fun = self.a_function_gen(self.split_fun_id_gen(), self.function_type_map.get("public"), self.proto_type_gen(meta.non_return_type, self.split_para_type()), self.list_opc_gen(self.split_opc(), self.split_opc_index()))
         return fun
 
     def send_fun_gen(self):
-        fun = self.a_function_gen(self.send_fun_id_gen(), self.send_fun_type_gen(), self.proto_type_send_gen(), self.send_opc_line_gen())
+        fun = self.a_function_gen(self.send_fun_id_gen(), self.function_type_map.get("public"), self.proto_type_gen(meta.non_return_type, self.send_para_type()), self.list_opc_gen(self.send_opc(), self.send_opc_index()))
         return fun
 
     def send_fun_without_split_gen(self):
-        fun = self.a_function_gen(self.send_fun_id_without_split_gen(), self.send_fun_type_gen(), self.proto_type_send_gen(), self.send_opc_line_gen())
+        fun = self.a_function_gen(self.send_fun_id_without_split_gen(), self.function_type_map.get("public"), self.proto_type_gen(meta.non_return_type, self.send_para_type()), self.list_opc_gen(self.send_opc(), self.send_opc_index()))
         return fun
 
     def transfer_fun_gen(self):
-        fun = self.a_function_gen(self.transfer_fun_id_gen(), self.transfer_fun_type_gen(), self.proto_type_transfer_gen(), self.transfer_opc_line_gen())
+        fun = self.a_function_gen(self.transfer_fun_id_gen(), self.function_type_map.get("public"), self.proto_type_gen(meta.non_return_type, self.transfer_para_type()), self.list_opc_gen(self.transfer_opc(), self.transfer_opc_index()))
         return fun
 
     def transfer_fun_without_split_gen(self):
-        fun = self.a_function_gen(self.transfer_fun_id_without_split_gen(), self.transfer_fun_type_gen(), self.proto_type_transfer_gen(), self.transfer_opc_line_gen())
+        fun = self.a_function_gen(self.transfer_fun_id_without_split_gen(), self.function_type_map.get("public"), self.proto_type_gen(meta.non_return_type, self.transfer_para_type()), self.list_opc_gen(self.transfer_opc(), self.transfer_opc_index()))
         return fun
 
     def deposit_fun_gen(self):
-        fun = self.a_function_gen(self.deposit_fun_id_gen(), self.deposit_fun_type_gen(), self.proto_type_deposit_gen(), self.deposit_opc_line_gen())
+        fun = self.a_function_gen(self.deposit_fun_id_gen(), self.function_type_map.get("public"), self.proto_type_gen(meta.non_return_type, self.deposit_para_type()), self.list_opc_gen(self.deposit_opc(), self.deposit_opc_index()))
         return fun
 
     def deposit_fun_without_split_gen(self):
-        fun = self.a_function_gen(self.deposit_fun_id_without_split_gen(), self.deposit_fun_type_gen(), self.proto_type_deposit_gen(), self.deposit_opc_line_gen())
+        fun = self.a_function_gen(self.deposit_fun_id_without_split_gen(), self.function_type_map.get("public"), self.proto_type_gen(meta.non_return_type, self.deposit_para_type()), self.list_opc_gen(self.deposit_opc(), self.deposit_opc_index()))
         return fun
 
     def withdraw_fun_gen(self):
-        fun = self.a_function_gen(self.withdraw_fun_id_gen(), self.withdraw_fun_type_gen(), self.proto_type_withdraw_gen(), self.withdraw_opc_line_gen())
+        fun = self.a_function_gen(self.withdraw_fun_id_gen(), self.function_type_map.get("public"), self.proto_type_gen(meta.non_return_type, self.withdraw_para_type()), self.list_opc_gen(self.withdraw_opc(), self.withdraw_opc_index()))
         return fun
 
     def withdraw_fun_without_split_gen(self):
-        fun = self.a_function_gen(self.withdraw_fun_id_without_split_gen(), self.withdraw_fun_type_gen(), self.proto_type_withdraw_gen(), self.withdraw_opc_line_gen())
+        fun = self.a_function_gen(self.withdraw_fun_id_without_split_gen(), self.function_type_map.get("public"), self.proto_type_gen(meta.non_return_type, self.withdraw_para_type()), self.list_opc_gen(self.withdraw_opc(), self.withdraw_opc_index()))
         return fun
 
     def total_supply_fun_gen(self):
-        fun = self.a_function_gen(self.total_supply_fun_id_gen(), self.total_supply_fun_type_gen(), self.proto_type_total_supply_gen(), self.total_supply_opc_line_gen())
+        fun = self.a_function_gen(self.total_supply_fun_id_gen(), self.function_type_map.get("public"), self.proto_type_gen([self.data_type_list.get('Amount')], self.total_supply_para_type()), self.list_opc_gen(self.total_supply_opc(), self.total_supply_opc_index()))
         return fun
 
     def total_supply_fun_without_split_gen(self):
-        fun = self.a_function_gen(self.total_supply_fun_id_without_split_gen(), self.total_supply_fun_type_gen(), self.proto_type_total_supply_gen(), self.total_supply_opc_line_gen())
+        fun = self.a_function_gen(self.total_supply_fun_id_without_split_gen(), self.function_type_map.get("public"), self.proto_type_gen([self.data_type_list.get('Amount')], self.total_supply_para_type()), self.list_opc_gen(self.total_supply_opc(), self.total_supply_opc_index()))
         return fun
 
     def max_supply_fun_gen(self):
-        fun = self.a_function_gen(self.max_supply_fun_id_gen(), self.max_supply_fun_type_gen(), self.proto_type_max_supply_gen(), self.max_supply_opc_line_gen())
+        fun = self.a_function_gen(self.max_supply_fun_id_gen(), self.function_type_map.get("public"), self.proto_type_gen([self.data_type_list.get('Amount')], self.max_supply_para_type()), self.list_opc_gen(self.max_supply_opc(), self.max_supply_opc_index()))
         return fun
 
     def max_supply_fun_without_split_gen(self):
-        fun = self.a_function_gen(self.max_supply_fun_id_without_split_gen(), self.max_supply_fun_type_gen(), self.proto_type_max_supply_gen(), self.max_supply_opc_line_gen())
+        fun = self.a_function_gen(self.max_supply_fun_id_without_split_gen(), self.function_type_map.get("public"), self.proto_type_gen([self.data_type_list.get('Amount')], self.max_supply_para_type()), self.list_opc_gen(self.max_supply_opc(), self.max_supply_opc_index()))
         return fun
 
     def balance_of_fun_gen(self):
-        fun = self.a_function_gen(self.balance_of_fun_id_gen(), self.balance_of_fun_type_gen(), self.proto_type_balance_of_gen(), self.balance_of_opc_line_gen())
+        fun = self.a_function_gen(self.balance_of_fun_id_gen(), self.function_type_map.get("public"), self.proto_type_gen([self.data_type_list.get('Amount')], self.balance_of_para_type()), self.list_opc_gen(self.balance_of_opc(), self.balance_of_opc_index()))
         return fun
 
     def balance_of_fun_without_split_gen(self):
-        fun = self.a_function_gen(self.balance_of_fun_id_without_split_gen(), self.balance_of_fun_type_gen(), self.proto_type_balance_of_gen(), self.balance_of_opc_line_gen())
+        fun = self.a_function_gen(self.balance_of_fun_id_without_split_gen(), self.function_type_map.get("public"), self.proto_type_gen([self.data_type_list.get('Amount')], self.balance_of_para_type()), self.list_opc_gen(self.balance_of_opc(), self.balance_of_opc_index()))
         return fun
 
     def get_issuer_fun_gen(self):
-        fun = self.a_function_gen(self.get_issuer_fun_id_gen(), self.get_issuer_fun_type_gen(), self.proto_type_get_issuer_gen(), self.get_issuer_opc_line_gen())
+        fun = self.a_function_gen(self.get_issuer_fun_id_gen(), self.function_type_map.get("public"), self.proto_type_gen([self.data_type_list.get('Account')], self.get_issuer_para_type()), self.list_opc_gen(self.get_issuer_opc(), self.get_issuer_opc_index()))
         return fun
 
     def get_issuer_fun_without_split_gen(self):
-        fun = self.a_function_gen(self.get_issuer_fun_id_without_split_gen(), self.get_issuer_fun_type_gen(), self.proto_type_get_issuer_gen(), self.get_issuer_opc_line_gen())
+        fun = self.a_function_gen(self.get_issuer_fun_id_without_split_gen(),self.function_type_map.get("public"), self.proto_type_gen([self.data_type_list.get('Account')], self.get_issuer_para_type()), self.list_opc_gen(self.get_issuer_opc(), self.get_issuer_opc_index()))
         return fun
 
     def init_fun_id_gen(self):
@@ -385,66 +373,40 @@ class ContractBuild(object):
     def get_issuer_fun_id_without_split_gen(self):
         return struct.pack(">H", meta.get_issuer_without_split)
 
-    def init_fun_type_gen(self):
-        return bytes([meta.on_init_trigger_type])
-    def supersede_fun_type_gen(self):
-        return bytes([meta.public_func_type])
-    def issue_fun_type_gen(self):
-        return bytes([meta.public_func_type])
-    def destroy_fun_type_gen(self):
-        return bytes([meta.public_func_type])
-    def split_fun_type_gen(self):
-        return bytes([meta.public_func_type])
-    def send_fun_type_gen(self):
-        return bytes([meta.public_func_type])
-    def transfer_fun_type_gen(self):
-        return bytes([meta.public_func_type])
-    def deposit_fun_type_gen(self):
-        return bytes([meta.public_func_type])
-    def withdraw_fun_type_gen(self):
-        return bytes([meta.public_func_type])
-    def total_supply_fun_type_gen(self):
-        return bytes([meta.public_func_type])
-    def max_supply_fun_type_gen(self):
-        return bytes([meta.public_func_type])
-    def balance_of_fun_type_gen(self):
-        return bytes([meta.public_func_type])
-    def get_issuer_fun_type_gen(self):
-        return bytes([meta.public_func_type])
 
     def proto_type_gen(self, return_type, list_para_types):
         proto_type = deser.serialize_array(return_type) + deser.serialize_array(list_para_types)
         return proto_type
 
     def init_para_type_wrong(self):
-        return [meta.amount, meta.amount]
+        return [self.data_type_list.get('Amount'), self.data_type_list.get('Amount')]
 
     def init_para_type(self):
-        return [meta.amount, meta.amount, meta.short_text]
+        return [self.data_type_list.get('Amount'), self.data_type_list.get('Amount'), self.data_type_list.get('ShortText')]
 
     def supersede_para_type(self):
-        return [meta.account]
+        return [self.data_type_list.get('Account')]
 
     def issue_para_type(self):
-        return [meta.amount]
+        return [self.data_type_list.get('Amount')]
 
     def destroy_para_type(self):
-        return [meta.amount]
+        return [self.data_type_list.get('Amount')]
 
     def split_para_type(self):
-        return [meta.amount]
+        return [self.data_type_list.get('Amount')]
 
     def send_para_type(self):
-        return [meta.account, meta.amount]
+        return [self.data_type_list.get('Account'), self.data_type_list.get('Amount')]
 
     def transfer_para_type(self):
-        return [meta.account, meta.account, meta.amount]
+        return [self.data_type_list.get('Account'), self.data_type_list.get('Account'), self.data_type_list.get('Amount')]
 
     def deposit_para_type(self):
-        return [meta.account, meta.contract_account, meta.amount]
+        return [self.data_type_list.get('Account'), self.data_type_list.get('ContractAccount'), self.data_type_list.get('Amount')]
 
     def withdraw_para_type(self):
-        return [meta.contract_account, meta.account, meta.amount]
+        return [self.data_type_list.get('ContractAccount'), self.data_type_list.get('Account'), self.data_type_list.get('Amount')]
 
     def total_supply_para_type(self):
         return bytes('', encoding='utf-8')
@@ -453,52 +415,10 @@ class ContractBuild(object):
         return bytes('', encoding='utf-8')
 
     def balance_of_para_type(self):
-        return [meta.account]
+        return [self.data_type_list.get('Account')]
 
     def get_issuer_para_type(self):
         return bytes('', encoding='utf-8')
-
-    def proto_type_init_wrong_gen(self):
-        return self.proto_type_gen(meta.non_return_type, self.init_para_type_wrong())
-
-    def proto_type_init_gen(self):
-        return self.proto_type_gen(meta.non_return_type, self.init_para_type())
-
-    def proto_type_supersede_gen(self):
-        return self.proto_type_gen(meta.non_return_type, self.supersede_para_type())
-
-    def proto_type_issue_gen(self):
-        return self.proto_type_gen(meta.non_return_type, self.issue_para_type())
-
-    def proto_type_destroy_gen(self):
-        return self.proto_type_gen(meta.non_return_type, self.destroy_para_type())
-
-    def proto_type_split_gen(self):
-        return self.proto_type_gen(meta.non_return_type, self.split_para_type())
-
-    def proto_type_send_gen(self):
-        return self.proto_type_gen(meta.non_return_type, self.send_para_type())
-
-    def proto_type_transfer_gen(self):
-        return self.proto_type_gen(meta.non_return_type, self.transfer_para_type())
-
-    def proto_type_deposit_gen(self):
-        return self.proto_type_gen(meta.non_return_type, self.deposit_para_type())
-
-    def proto_type_withdraw_gen(self):
-        return self.proto_type_gen(meta.non_return_type, self.withdraw_para_type())
-
-    def proto_type_total_supply_gen(self):
-        return self.proto_type_gen([meta.amount], self.total_supply_para_type())
-
-    def proto_type_max_supply_gen(self):
-        return self.proto_type_gen([meta.amount], self.max_supply_para_type())
-
-    def proto_type_balance_of_gen(self):
-        return self.proto_type_gen([meta.amount], self.balance_of_para_type())
-
-    def proto_type_get_issuer_gen(self):
-        return self.proto_type_gen([meta.account], self.get_issuer_para_type())
 
 
     def list_opc_gen(self, ids, index_input):
@@ -508,48 +428,6 @@ class ContractBuild(object):
         len_list_opc = length + num_opc + list_opc
         return len_list_opc
 
-
-    def init_opc_line_wrong_tdb_gen(self):
-        return self.list_opc_gen(self.init_wrong_tdb_opc(), self.init_opc_index())
-
-    def init_opc_line_gen(self):
-        return self.list_opc_gen(self.init_opc(), self.init_opc_index())
-
-    def supersede_opc_line_gen(self):
-        return self.list_opc_gen(self.supersede_opc(), self.supersede_opc_index())
-
-    def issue_opc_line_gen(self):
-        return self.list_opc_gen(self.issue_opc(), self.issue_opc_index())
-
-    def destroy_opc_line_gen(self):
-        return self.list_opc_gen(self.destroy_opc(), self.destroy_opc_index())
-
-    def split_opc_line_gen(self):
-        return self.list_opc_gen(self.split_opc(), self.split_opc_index())
-
-    def send_opc_line_gen(self):
-        return self.list_opc_gen(self.send_opc(), self.send_opc_index())
-
-    def transfer_opc_line_gen(self):
-        return self.list_opc_gen(self.transfer_opc(), self.transfer_opc_index())
-
-    def deposit_opc_line_gen(self):
-        return self.list_opc_gen(self.deposit_opc(), self.deposit_opc_index())
-
-    def withdraw_opc_line_gen(self):
-        return self.list_opc_gen(self.withdraw_opc(), self.withdraw_opc_index())
-
-    def total_supply_opc_line_gen(self):
-        return self.list_opc_gen(self.total_supply_opc(), self.total_supply_opc_index())
-
-    def max_supply_opc_line_gen(self):
-        return self.list_opc_gen(self.max_supply_opc(), self.max_supply_opc_index())
-
-    def balance_of_opc_line_gen(self):
-        return self.list_opc_gen(self.balance_of_opc(), self.balance_of_opc_index())
-
-    def get_issuer_opc_line_gen(self):
-        return self.list_opc_gen(self.get_issuer_opc(), self.get_issuer_opc_index())
 
     def opc_load_signer_index(self):
         return bytes([3])
@@ -716,93 +594,3 @@ class ContractBuild(object):
     def get_issuer_opc_index(self):
         return [self.get_issuer_opc_cdbvr_get_index(), bytes([0])]
 
-
-    # datastack
-    @staticmethod
-    def init_data_stack_gen(max, unity, desc):
-        max = DataEntry(max, Type.amount)
-        unit = DataEntry(unity, Type.amount)
-        short_txt = DataEntry(desc, Type.short_text)
-        init_data_stack = [max.bytes, unit.bytes, short_txt.bytes]
-        return deser.serialize_array(init_data_stack)
-
-    @staticmethod
-    def supersede_data_stack_gen(new_iss):
-        iss = DataEntry(new_iss, Type.address)
-        supersede_data_stack = [iss.bytes]
-        return deser.serialize_array(supersede_data_stack)
-
-    @staticmethod
-    def split_data_stack_gen(new_unity, token_id):
-        unit = DataEntry(new_unity, Type.amount)
-        index = DataEntry(token_id, Type.int32)
-        split_data_stack = [unit.bytes, index.bytes]
-        return deser.serialize_array(split_data_stack)
-
-    @staticmethod
-    def destroy_data_stack_gen(amount, token_id):
-        am = DataEntry(amount, Type.amount)
-        index = DataEntry(token_id, Type.int32)
-        destroy_data_stack = [am.bytes, index.bytes]
-        return deser.serialize_array(destroy_data_stack)
-
-    @staticmethod
-    def issue_data_stack_gen(amount, token_id):
-        max = DataEntry(amount, Type.amount)
-        index = DataEntry(token_id, Type.int32)
-        issue_data_stack = [max.bytes, index.bytes]
-        return deser.serialize_array(issue_data_stack)
-
-    @staticmethod
-    def send_data_stack_gen(recipient, amount, token_id):
-        reci = DataEntry(recipient, Type.address)
-        am = DataEntry(amount, Type.amount)
-        index = DataEntry(token_id, Type.int32)
-        send_data_stack = [reci.bytes, am.bytes, index.bytes]
-        return deser.serialize_array(send_data_stack)
-
-    @staticmethod
-    def transfer_data_stack_gen(sender, recipient, amount, token_id):
-        se = DataEntry(sender, Type.address)
-        reci = DataEntry(recipient, Type.address)
-        am = DataEntry(amount, Type.amount)
-        index = DataEntry(token_id, Type.int32)
-        transfer_data_stack = [se.bytes, reci.bytes, am.bytes, index.bytes]
-        return deser.serialize_array(transfer_data_stack)
-
-    @staticmethod
-    def deposit_data_stack_gen(sender, smart_contract, amount, token_id):
-        se = DataEntry(sender, Type.address)
-        sc = DataEntry(smart_contract, Type.address)
-        am = DataEntry(amount, Type.amount)
-        index = DataEntry(token_id, Type.int32)
-        deposit_data_stack = [se.bytes, sc.bytes, am.bytes, index.bytes]
-        return deser.serialize_array(deposit_data_stack)
-
-    @staticmethod
-    def withdraw_data_stack_gen(smart_contract, recipient, amount, token_id):
-        sc = DataEntry(smart_contract.bytes.arr, Type.address)
-        reci = DataEntry(recipient.bytes.arr, Type.address)
-        am = DataEntry(amount, Type.amount)
-        index = DataEntry(token_id, Type.int32)
-        withdraw_data_stack = [sc.bytes, reci.bytes, am.bytes, index.bytes]
-        return deser.serialize_array(withdraw_data_stack)
-
-    @staticmethod
-    def total_supply_data_stack_gen(token_id):
-        index = DataEntry(token_id, Type.int32)
-        total_supply_data_stack = [index.bytes]
-        return deser.serialize_array(total_supply_data_stack)
-
-    @staticmethod
-    def max_supply_data_stack_gen(token_id):
-        index = DataEntry(token_id, Type.int32)
-        max_supply_data_stack = [index.bytes]
-        return deser.serialize_array(max_supply_data_stack)
-
-    @staticmethod
-    def balance_of_data_stack_gen(account, token_id):
-        acc =  DataEntry(account.bytes.arr, Type.address)
-        index = DataEntry(token_id, Type.int32)
-        balance_of_data_stack = [acc.bytes, index.bytes]
-        return deser.serialize_array(balance_of_data_stack)

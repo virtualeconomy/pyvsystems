@@ -20,8 +20,7 @@ from .contract_meta import ContractMeta as meta
 
 class Contract(object):
     def __init__(self):
-        self.contract_without_split_default = ContractBuild().create('vdds', 1, split=False)
-        self.contract_with_split_default = ContractBuild().create('vdds', 1, split=True)
+        self.default_contract = ContractBuild(True)
 
     def show_contract_function(self, bytes_string='', contract_id='', wrapper=None):
         if not bytes_string and not contract_id:
@@ -117,16 +116,11 @@ class Contract(object):
             pyvsystems.throw_error(msg, NetworkException)
             return 0
 
-    # def sign_register_contract(self, privatekey):
-    #     a = 1
-    #
-    # def sign_execute_contract(self):
-
     def contract_permitted(self, split=True):
         if split:
-            contract = self.contract_with_split_default
+            contract = self.default_contract.create('vdds', 1, split=True)
         else:
-            contract = self.contract_without_split_default
+            contract = self.default_contract.create('vdds', 1, split=False)
         return contract
 
     @staticmethod
@@ -240,6 +234,7 @@ class Contract(object):
         try:
             status = resp["status"]
             if status == "Success":
+                print("height: " + resp["height"])
                 return True
             else:
                 return False
@@ -254,7 +249,7 @@ class Contract(object):
             if status is True:
                 return True
             else:
-                time.sleep(5.0)
+                time.sleep(10.0)
                 status = self.get_contract_status(wrapper, tx_id)
                 if status is True:
                     return True
