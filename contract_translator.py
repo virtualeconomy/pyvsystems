@@ -15,8 +15,8 @@ class ContractTranslator(object):
         self.opcode_info = Opcode()
 
     def print_functions(self, functions_opcode, all_info):
-        trigger = all_info[0][0]
-        execute_fun = all_info[1][0]
+        trigger = all_info[0]
+        execute_fun = all_info[1]
         if len(functions_opcode) != (len(trigger) + len(execute_fun)):
             msg = 'Functions are not well defined in opc and texture!'
             pyvsystems.throw_error(msg, InvalidParameterException)
@@ -124,18 +124,16 @@ class ContractTranslator(object):
         specification_header = ['id', 'return_type', 'function_name', 'variables...']
         info = copy.deepcopy([specification_header, initializer_spec])
         self.print_function_specification(info)
-        info.pop(0)
-        [item.pop(0) for item in info]
-        all_info.append(info)
+        info[1].pop(0)
+        all_info.append(info[1])
 
         [descriptor_bytes, _] = parse_arrays(bytes_arrays[1])
         descriptor_spec = self.specification_from_bytes(descriptor_bytes, 1)
         print("Descriptor Functions:")
         info = copy.deepcopy([specification_header, descriptor_spec])
         self.print_function_specification(info)
-        info.pop(0)
-        [item.pop(0) for item in info]
-        all_info.append(info)
+        info[1].pop(0)
+        all_info.append(info[1])
 
         [state_var_bytes, _] = parse_arrays(bytes_arrays[2])
         state_var = self.specification_from_bytes(state_var_bytes, 2)
@@ -143,9 +141,8 @@ class ContractTranslator(object):
         print("State Variables:")
         info = copy.deepcopy([specification_header, state_var])
         self.print_state_var_specification(info)
-        info.pop(0)
-        [item.pop(0) for item in info]
-        all_info.append(info)
+        info[1].pop(0)
+        all_info.append(info[1])
         return all_info
 
     @staticmethod
@@ -223,7 +220,7 @@ class ContractTranslator(object):
     @staticmethod
     def specification_from_bytes(spec_bytes, spec_type):
         string_list = []
-        function_count = 0
+        id_count = 0
         max_length_string = 2
         if spec_type != 2:
             for info in spec_bytes:
@@ -231,7 +228,7 @@ class ContractTranslator(object):
                 string_sublist = []
                 [function_name_bytes, function_name_end] = parse_array_size(info, start_position)
                 function_name = function_name_bytes.decode("utf-8")
-                string_sublist.append("{:02d}".format(function_count))
+                string_sublist.append("{:02d}".format(id_count))
                 string_sublist.append(function_name)
                 if max_length_string < len(function_name):
                     max_length_string = len(function_name)
@@ -258,15 +255,15 @@ class ContractTranslator(object):
                         max_length_string = len(para_name)
                 string_sublist.append(para_name_string)
                 string_list.append(string_sublist)
-                function_count += 1
+                id_count += 1
         else:
             for info in spec_bytes:
-                string_sublist = ["{:02d}".format(function_count)]
+                string_sublist = ["{:02d}".format(id_count)]
                 para_name = info.decode("utf-8")
                 string_sublist.append(para_name)
                 if max_length_string < len(para_name):
                     max_length_string = len(para_name)
                 string_list.append(string_sublist)
-                function_count += 1
+                id_count += 1
         string_list.insert(0, max_length_string)
         return string_list
