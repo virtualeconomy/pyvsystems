@@ -84,7 +84,7 @@ class Contract(object):
 
     def get_contract_info(self, wrapper, contract_id):
         try:
-            resp = wrapper.request('/info/%s' % (contract_id))
+            resp = wrapper.request('contract/info/%s' % (contract_id))
             logging.debug(resp)
             return resp['info']
         except Exception as ex:
