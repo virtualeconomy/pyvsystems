@@ -5,6 +5,7 @@ from .opcode import *
 from .deser import *
 from .contract_build import *
 from .contract_translator import *
+from .contract_meta import ContractMeta as meta
 
 
 class Contract(object):
@@ -22,19 +23,19 @@ class Contract(object):
         start_position = 0
         print("Total Length of Contract:", str(len(bytes_object)) + ' (Bytes)')
 
-        language_code = bytes_object[start_position: contract_translator.language_code_byte_length]
+        language_code = bytes_object[start_position: meta.language_code_byte_length]
         bytes_to_hex = convert_bytes_to_hex(language_code)
         print("Language Code: " + "(" + str(len(bytes_to_hex)) + " Bytes)")
         print(' '.join(bytes_to_hex))
 
-        language_version = bytes_object[contract_translator.language_code_byte_length:(contract_translator.language_code_byte_length
-                                                                        + contract_translator.language_version_byte_length)]
+        language_version = bytes_object[meta.language_code_byte_length:(meta.language_code_byte_length
+                                                                        + meta.language_version_byte_length)]
         bytes_to_hex = convert_bytes_to_hex(language_version)
         print("Language Version: " + "(" + str(len(bytes_to_hex)) + " Bytes)")
         print(' '.join(bytes_to_hex))
 
-        [trigger_with_header, trigger_end] = parse_array_size(bytes_object, contract_translator.language_code_byte_length
-                                                              + contract_translator.language_version_byte_length)
+        [trigger_with_header, trigger_end] = parse_array_size(bytes_object, meta.language_code_byte_length
+                                                              + meta.language_version_byte_length)
         [trigger, _] = parse_arrays(trigger_with_header)
         bytes_to_hex = convert_bytes_to_hex(trigger[0])
         print("Trigger: " + "(" + str(len(bytes_to_hex)) + " Bytes)")

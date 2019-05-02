@@ -4,12 +4,11 @@ import pyvsystems
 from .opcode import *
 from .deser import *
 from .contract_build import *
+from pyvsystems.contract_meta import ContractMeta as meta
 
 
 class ContractTranslator(object):
     def __init__(self):
-        self.language_code_byte_length = 4
-        self.language_version_byte_length = 4
         self.data_type_list = {'01': 'PublicKey', '02': 'Address', '03': 'Amount', '04': 'Int32', '05': 'ShortText',
                                '06': 'ContractAccount', '07': 'Account'}
         self.function_type_map = {'000': 'onInit', '100': 'public'}
@@ -97,10 +96,12 @@ class ContractTranslator(object):
             print("| - ", end='')
         print("| ")
         list_opc_name = [self.opcode_info.function_name[opc[0] + opc[1]]
-                         if len(opc) >= 2 else logging.exception("Error: opc function is not right!")
+                         if len(opc) >= 2 else
+                         pyvsystems.throw_error('opc function is not right!', InvalidParameterException)
                          for opc in list_opc]
         if len(list_opc_name) != len(list_opc):
-            logging.exception("Error: opc function is not right!")
+            msg = 'Opc function is not right!'
+            pyvsystems.throw_error(msg, InvalidParameterException)
         else:
             name_list = copy.deepcopy(para_name)
             for i in range(len(list_opc_name)):
