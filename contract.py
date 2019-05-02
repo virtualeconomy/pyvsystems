@@ -20,7 +20,7 @@ from .contract_meta import ContractMeta as meta
 
 class Contract(object):
     def __init__(self):
-        self.default_contract = ContractBuild(True)
+        self.default_contract_builder = ContractBuild(True)
 
     def show_contract_function(self, bytes_string='', contract_id='', wrapper=None):
         if not bytes_string and not contract_id:
@@ -84,7 +84,7 @@ class Contract(object):
 
     def get_contract_info(self, wrapper, contract_id):
         try:
-            resp = wrapper.request('/info/%s' % (contract_id))
+            resp = wrapper.request('contract/info/%s' % (contract_id))
             logging.debug(resp)
             return resp['info']
         except Exception as ex:
@@ -108,7 +108,7 @@ class Contract(object):
             pyvsystems.throw_error(msg, MissingAddressException)
             return None
         try:
-            resp = wrapper.request('/balance/%s/%s' % (address, token_id))
+            resp = wrapper.request('contract/balance/%s/%s' % (address, token_id))
             logging.debug(resp)
             return resp
         except Exception as ex:
@@ -118,9 +118,9 @@ class Contract(object):
 
     def contract_permitted(self, split=True):
         if split:
-            contract = self.default_contract.create('vdds', 1, split=True)
+            contract = self.default_contract_builder.create('vdds', 1, split=True)
         else:
-            contract = self.default_contract.create('vdds', 1, split=False)
+            contract = self.default_contract_builder.create('vdds', 1, split=False)
         return contract
 
     @staticmethod
