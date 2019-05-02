@@ -22,45 +22,6 @@ class ContractBuild(object):
         contract_byte_str = base58.b58encode(contract_bytes)
         return contract_byte_str
 
-    def assert_gteq_zero_gen(self):
-        return self.opc_assert_gteq_zero()
-    def assert_lteq_gen(self):
-        return self.opc_assert_lteq()
-    def assert_lt_int64_gen(self):
-        return self.opc_assert_lt_int64()
-    def assert_gt_zero_gen(self):
-        return self.opc_assert_gt_zero()
-    def assert_eq_gen(self):
-        return self.opc_assert_eq()
-    def assert_is_caller_origin_gen(self):
-        return self.opc_assert_is_caller_origin()
-    def assert_is_signer_origin_gen(self):
-        return self.opc_assert_is_signer_origin()
-    def load_signer_gen(self):
-        return self.opc_load_signer()
-    def load_caller_gen(self):
-        return self.opc_load_caller()
-    def cdbv_set_gen(self):
-        return self.opc_cdbv_set()
-    def cdbvr_get_gen(self):
-        return self.opc_cdbvr_get()
-    def tdb_new_token_gen(self):
-        return self.opc_tdb_new_token()
-    def tdb_split_gen(self):
-        return self.opc_tdb_split()
-    def tdbr_opc_max(self):
-        return self.opc_tdbr_opc_max()
-    def tdbr_opc_total_gen(self):
-        return self.opc_tdbr_opc_total()
-    def tdba_deposit_gen(self):
-        return self.opc_tdba_deposit()
-    def tdba_withdraw_gen(self):
-        return self.opc_tdba_withdraw()
-    def tdba_transfer_gen(self):
-        return self.opc_tdba_transfer()
-    def tdbar_balance_gen(self):
-        return self.opc_tdbar_balance()
-
     def opc_assert_gteq_zero(self):
         return meta.assert_opc + meta.gteq_zero_assert
 
