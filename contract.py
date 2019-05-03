@@ -82,7 +82,6 @@ class Contract(object):
             logging.debug(resp)
             return resp.get('info')
 
-
     def get_contract_content(self, wrapper, contract_id):
         resp = wrapper.request('/contract/content/%s' % (contract_id))
         logging.debug(resp)
