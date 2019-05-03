@@ -63,6 +63,6 @@ def set_throw_on_error(throw=True):
     global THROW_EXCEPTION_ON_ERROR
     THROW_EXCEPTION_ON_ERROR = throw
 
-
+from .account import *
 from .contract import *
 from .data_entry import *
