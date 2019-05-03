@@ -32,3 +32,10 @@ class NetworkException(PyVException):
 
 class InvalidStatus(PyVException):
     pass
+
+
+class MissingContractIdException(PyVException):
+    pass
+
+class MissingTokenIndexException(PyVException):
+    pass
