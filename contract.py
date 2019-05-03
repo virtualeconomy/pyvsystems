@@ -75,38 +75,31 @@ class Contract(object):
         contract_translator.print_functions(functions_bytes, all_info)
 
     def get_contract_info(self, wrapper, contract_id):
-        try:
-            resp = wrapper.request('/contract/info/%s' % (contract_id))
+        resp = wrapper.request('/contract/info/%s' % (contract_id))
+        if resp.get('error'):
+            return resp
+        else:
             logging.debug(resp)
-            return resp['info']
-        except Exception as ex:
-            msg = "Failed to get contract info. ({})".format(ex)
-            pyvsystems.throw_error(msg, NetworkException)
-            return 0
+            return resp.get('info')
+
 
     def get_contract_content(self, wrapper, contract_id):
-        try:
-            resp = wrapper.request('/contract/content/%s' % (contract_id))
-            logging.debug(resp)
-            return resp
-        except Exception as ex:
-            msg = "Failed to get contract content. ({})".format(ex)
-            pyvsystems.throw_error(msg, NetworkException)
-            return 0
+        resp = wrapper.request('/contract/content/%s' % (contract_id))
+        logging.debug(resp)
+        return resp
 
     def get_token_balance(self, wrapper, address, token_id):
         if not address:
             msg = 'Address required'
             pyvsystems.throw_error(msg, MissingAddressException)
             return None
-        try:
-            resp = wrapper.request('/contract/balance/%s/%s' % (address, token_id))
-            logging.debug(resp)
+
+        resp = wrapper.request('/contract/balance/%s/%s' % (address, token_id))
+        if resp.get('error'):
             return resp
-        except Exception as ex:
-            msg = "Failed to get token balance. ({})".format(ex)
-            pyvsystems.throw_error(msg, NetworkException)
-            return 0
+        else:
+            print(resp.get('balance'))
+            return resp.get('balance')
 
     def contract_permitted(self, split=True):
         if split:
