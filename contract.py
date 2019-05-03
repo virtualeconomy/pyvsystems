@@ -101,7 +101,7 @@ class Contract(object):
             pyvsystems.throw_error(msg, MissingTokenIndexException)
             return None
 
-        resp = wrapper.request('/contract/balance/%s/%s' % (address, base58.b58encode(base58.b58decode(contract_id) + struct.pack(">I", token_index))))
+        resp = wrapper.request('/contract/balance/%s/%s' % (address, bytes2str(base58.b58encode(base58.b58decode(contract_id) + struct.pack(">I", token_index)))))
         if resp.get('error'):
             return resp
         else:
@@ -118,7 +118,7 @@ class Contract(object):
             pyvsystems.throw_error(msg, MissingTokenIndexException)
             return None
 
-        resp = wrapper.request('/contract/tokenInfo/%s' % (base58.b58encode(base58.b58decode(contract_id) + struct.pack(">I", token_index))))
+        resp = wrapper.request('/contract/tokenInfo/%s' % (bytes2str(base58.b58encode(base58.b58decode(contract_id) + struct.pack(">I", token_index)))))
         logging.debug(resp)
         return resp
 
