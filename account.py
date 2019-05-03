@@ -457,3 +457,29 @@ class Account(object):
             res = self.chain.self_check()
         # add more check if need
         return res
+
+    def get_tx_status(self, tx_id):
+        if is_offline():
+            pyvsystems.throw_error("Cannot check transaction in offline mode.", NetworkException)
+        utx_res = self.chain.unconfirmed_tx(tx_id)
+        if "id" in utx_res:
+            pyvsystems.throw_error("Transaction {} is pending in UTX pool.".format(tx_id), InvalidStatus)
+        else:
+            tx_res = self.chain.tx(tx_id)
+            if 'id' not in tx_res:
+                pyvsystems.throw_error("Transaction does not exist!", InvalidStatus)
+            else:
+                return tx_res['status']
+
+    def get_tx_height(self, tx_id):
+        if is_offline():
+            pyvsystems.throw_error("Cannot check transaction in offline mode.", NetworkException)
+        utx_res = self.chain.unconfirmed_tx(tx_id)
+        if "id" in utx_res:
+            pyvsystems.throw_error("Transaction {} is pending in UTX pool.".format(tx_id), InvalidStatus)
+        else:
+            tx_res = self.chain.tx(tx_id)
+            if 'id' not in tx_res:
+                pyvsystems.throw_error("Transaction does not exist!", InvalidStatus)
+            else:
+                return tx_res['height']

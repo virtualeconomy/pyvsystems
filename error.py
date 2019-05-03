@@ -28,3 +28,7 @@ class InsufficientBalanceException(PyVException):
 
 class NetworkException(PyVException):
     pass
+
+
+class InvalidStatus(PyVException):
+    pass
