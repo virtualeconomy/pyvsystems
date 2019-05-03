@@ -100,6 +100,16 @@ class Contract(object):
             print(resp.get('balance'))
             return resp.get('balance')
 
+    def get_token_info(self, wrapper, token_id):
+        if not token_id:
+            msg = 'Token Id required'
+            pyvsystems.throw_error(msg, MissingAddressException)
+            return None
+
+        resp = wrapper.request('/contract/tokenInfo/%s' % (token_id))
+        logging.debug(resp)
+        return resp
+
     def contract_permitted(self, split=True):
         if split:
             contract = self.default_contract_builder.create('vdds', 1, split=True)
