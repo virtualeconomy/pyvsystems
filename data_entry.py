@@ -102,7 +102,7 @@ class DataEntry:
         elif dataType == Type.int32:
             self.bytes = dataType + struct.pack(">I", data)
         elif dataType == Type.short_text:
-            self.bytes = dataType + deser.serialize_array(str2bytes(data))
+            self.bytes = dataType + serialize_array(str2bytes(data))
         elif dataType == Type.contract_account:
             self.bytes = dataType + base58.b58decode(data)
         elif dataType == Type.account:
