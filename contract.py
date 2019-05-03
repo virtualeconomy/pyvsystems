@@ -215,35 +215,3 @@ class Contract(object):
             })
 
             return account.wrapper.request('/contract/broadcast/execute', data)
-
-    def get_contract_status(self, wrapper, tx_id):
-        try:
-            resp = wrapper.request('/transactions/info/%s' % (tx_id))
-            logging.debug(resp)
-            status = resp["status"]
-            if status == "Success":
-                print("height: " + '%s' % (resp["height"]))
-                return True
-            else:
-                return False
-        except KeyError:
-            pass
-            return False
-
-    def timed_get_contract_status(self, wrapper, tx_id):
-        retries = 5
-        while retries > 0:
-            status = self.get_contract_status(wrapper, tx_id)
-            if status is True:
-                return True
-            else:
-                time.sleep(4.0)
-                status = self.get_contract_status(wrapper, tx_id)
-                if status is True:
-                    return True
-                else:
-                    retries -= 1
-        return False
-
-
-
