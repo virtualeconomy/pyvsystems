@@ -102,7 +102,7 @@ class Contract(object):
 
     def get_token_info(self, wrapper, contract_id, token_index):
         if not token_index:
-            msg = 'Token Id required'
+            msg = 'Token index required'
             pyvsystems.throw_error(msg, MissingAddressException)
             return None
 
