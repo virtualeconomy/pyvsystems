@@ -92,11 +92,11 @@ class Contract(object):
             msg = 'Address required'
             pyvsystems.throw_error(msg, MissingAddressException)
             return None
-        if not contract_id:
+        if contract_id is None:
             msg = 'Contract ID required'
             pyvsystems.throw_error(msg, MissingContractIdException)
             return None
-        if not token_index:
+        if token_index is None:
             msg = 'Token Index required'
             pyvsystems.throw_error(msg, MissingTokenIndexException)
             return None
@@ -105,15 +105,14 @@ class Contract(object):
         if resp.get('error'):
             return resp
         else:
-            print(resp.get('balance'))
             return resp.get('balance')
 
     def get_token_info(self, wrapper, contract_id, token_index):
-        if not contract_id:
+        if contract_id is None:
             msg = 'Contract ID required'
             pyvsystems.throw_error(msg, MissingContractIdException)
             return None
-        if not token_index:
+        if token_index is None:
             msg = 'Token Index required'
             pyvsystems.throw_error(msg, MissingTokenIndexException)
             return None
