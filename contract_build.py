@@ -10,7 +10,7 @@ from .crypto import *
 
 class ContractBuild(object):
 
-    def __init__(self, default_contract=False):
+    def __init__(self, default_contract=True):
         self.data_type_list = {value: bytes([int(key)]) for key, value in meta.data_type_list.items()}
         self.function_type_map = {value: bytes([int(key[1:])]) for key, value in meta.function_type_map.items()}
 
