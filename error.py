@@ -37,5 +37,6 @@ class InvalidStatus(PyVException):
 class MissingContractIdException(PyVException):
     pass
 
+
 class MissingTokenIndexException(PyVException):
     pass
