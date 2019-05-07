@@ -1,5 +1,7 @@
 
 class ContractMeta:
+    token_address_version = -124
+    check_sum_length = 4
 
     language_code_byte_length = 4
     language_version_byte_length = 4

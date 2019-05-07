@@ -8,6 +8,7 @@ from pyvsystems import is_offline
 from .contract_meta import ContractMeta as meta
 from .contract_translator import *
 from .setting import *
+from .crypto import hashChain
 
 
 class Contract(object):
@@ -219,37 +220,11 @@ class Contract(object):
 
             return account.wrapper.request('/contract/broadcast/execute', data)
 
-    def get_contract_status(self, wrapper, tx_id):
-        try:
-            resp = wrapper.request('/transactions/info/%s' % (tx_id))
-            logging.debug(resp)
-            status = resp["status"]
-            if status == "Success":
-                print("height: " + '%s' % (resp["height"]))
-                return True
-            else:
-                return False
-        except KeyError:
-            pass
-            return False
+    def calc_check_sum(self, without_check_sum):
+        return hashChain(without_check_sum)[0:meta.check_sum_length]
 
-    def timed_get_contract_status(self, wrapper, tx_id):
-        retries = 5
-        while retries > 0:
-            status = self.get_contract_status(wrapper, tx_id)
-            if status is True:
-                return True
-            else:
-                time.sleep(4.0)
-                status = self.get_contract_status(wrapper, tx_id)
-                if status is True:
-                    return True
-                else:
-                    retries -= 1
-        return False
-
-    def get_token_id(self, contract_id, token_index):
-        return '/contract/balance/%s/%s' % (bytes2str(base58.b58encode(base58.b58decode(contract_id) + struct.pack(">I", token_index))))
-
-
-
+    def token_id_from_bytes(self, address_bytes, idx_bytes):
+        address_bytes = base58.b58decode(address_bytes)
+        contract_id_no_check_sum = address_bytes.tail.dropRight(meta.check_sum_length)
+        without_check_sum = bytes([meta.token_address_version]) + contract_id_no_check_sum + idx_bytes
+        return bytes2str(base58.b58encode(without_check_sum + self.calc_check_sum(without_check_sum)))
