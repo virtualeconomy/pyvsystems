@@ -220,6 +220,7 @@ class Contract(object):
 
             return account.wrapper.request('/contract/broadcast/execute', data)
 
+
     def calc_check_sum(self, without_check_sum):
         return hashChain(without_check_sum)[0:meta.check_sum_length]
 
