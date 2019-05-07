@@ -228,4 +228,4 @@ class Contract(object):
         address_bytes = base58.b58decode(address)
         contract_id_no_check_sum = address_bytes[0:len(address_bytes)-meta.check_sum_length]
         without_check_sum = meta.token_address_version.to_bytes(1, byteorder='big', signed=True) + contract_id_no_check_sum + struct.pack(">I", idx)
-        return bytes2str(base58.b58encode(without_check_sum + self.calc_check_sum(without_check_sum)))
+        return bytes2str(without_check_sum + self.calc_check_sum(without_check_sum))
