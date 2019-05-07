@@ -222,7 +222,7 @@ class Contract(object):
 
 
     def calc_check_sum(self, without_check_sum):
-        return hashChain(without_check_sum)[0:meta.check_sum_length]
+        return str2bytes(hashChain(without_check_sum)[0:meta.check_sum_length])
 
     def token_id_from_bytes(self, address, idx):
         address_bytes = base58.b58decode(address)
