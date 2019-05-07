@@ -224,8 +224,8 @@ class Contract(object):
     def calc_check_sum(self, without_check_sum):
         return hashChain(without_check_sum)[0:meta.check_sum_length]
 
-    def token_id_from_bytes(self, address_bytes, idx_bytes):
-        address_bytes = base58.b58decode(address_bytes)
+    def token_id_from_bytes(self, address, idx):
+        address_bytes = base58.b58decode(address)
         contract_id_no_check_sum = address_bytes.tail.dropRight(meta.check_sum_length)
-        without_check_sum = bytes([meta.token_address_version]) + contract_id_no_check_sum + idx_bytes
+        without_check_sum = bytes([meta.token_address_version]) + contract_id_no_check_sum + bytes([idx])
         return bytes2str(base58.b58encode(without_check_sum + self.calc_check_sum(without_check_sum)))
