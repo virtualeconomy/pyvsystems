@@ -8,6 +8,7 @@ from pyvsystems import is_offline
 from .contract_meta import ContractMeta as meta
 from .contract_translator import *
 from .setting import *
+from .crypto import hashChain
 
 
 class Contract(object):
@@ -87,43 +88,35 @@ class Contract(object):
         logging.debug(resp)
         return resp
 
-    def get_token_balance(self, wrapper, address, contract_id, token_index):
+    def get_token_balance(self, wrapper, address, token_id):
         if not address:
             msg = 'Address required'
             pyvsystems.throw_error(msg, MissingAddressException)
             return None
-        if contract_id is None:
-            msg = 'Contract ID required'
-            pyvsystems.throw_error(msg, MissingContractIdException)
+        if token_id is None:
+            msg = 'Token ID required'
+            pyvsystems.throw_error(msg, MissingTokenIdException)
             return None
-        if token_index is None:
-            msg = 'Token Index required'
-            pyvsystems.throw_error(msg, MissingTokenIndexException)
-            return None
+        resp = wrapper.request('/contract/balance/%s/%s' % (address, token_id))
 
-        resp = wrapper.request('/contract/balance/%s/%s' % (address, bytes2str(base58.b58encode(base58.b58decode(contract_id) + struct.pack(">I", token_index)))))
         if resp.get('error'):
             return resp
         else:
             return resp.get('balance')
 
-    def get_token_info(self, wrapper, contract_id, token_index):
-        if contract_id is None:
-            msg = 'Contract ID required'
-            pyvsystems.throw_error(msg, MissingContractIdException)
-            return None
-        if token_index is None:
-            msg = 'Token Index required'
-            pyvsystems.throw_error(msg, MissingTokenIndexException)
+    def get_token_info(self, wrapper, token_id):
+        if token_id is None:
+            msg = 'Token ID required'
+            pyvsystems.throw_error(msg, MissingTokenIdException)
             return None
 
-        resp = wrapper.request('/contract/tokenInfo/%s' % (bytes2str(base58.b58encode(base58.b58decode(contract_id) + struct.pack(">I", token_index)))))
+        resp = wrapper.request('/contract/tokenInfo/%s' % token_id)
         logging.debug(resp)
         return resp
 
     def contract_permitted(self, split=True):
         if split:
-            contract = self.default_contract_builder.create('vdds', 1, split=True)
+            contract = self.default_contract_builder.create('vdd', 1, split=True)
         else:
             contract = self.default_contract_builder.create('vdds', 1, split=False)
         return contract
@@ -226,3 +219,13 @@ class Contract(object):
             })
 
             return account.wrapper.request('/contract/broadcast/execute', data)
+
+
+    def calc_check_sum(self, without_check_sum):
+        return str2bytes(hashChain(without_check_sum)[0:meta.check_sum_length])
+
+    def token_id_from_bytes(self, address, idx):
+        address_bytes = base58.b58decode(address)
+        contract_id_no_check_sum = address_bytes[0:len(address_bytes)-meta.check_sum_length]
+        without_check_sum = meta.token_address_version.to_bytes(1, byteorder='big', signed=True) + contract_id_no_check_sum + struct.pack(">I", idx)
+        return bytes2str(without_check_sum + self.calc_check_sum(without_check_sum))
