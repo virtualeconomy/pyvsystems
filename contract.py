@@ -117,7 +117,7 @@ class Contract(object):
 
     def contract_permitted(self, split=True):
         if split:
-            contract = self.default_contract_builder.create('vdd', 1, split=True)
+            contract = self.default_contract_builder.create('vdds', 1, split=True)
         else:
             contract = self.default_contract_builder.create('vdds', 1, split=False)
         return contract
