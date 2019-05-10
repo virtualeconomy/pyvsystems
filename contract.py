@@ -6,6 +6,7 @@ import pyvsystems
 from pyvsystems import is_offline
 
 from .contract_meta import ContractMeta as meta
+from .data_entry import serialize_data
 from .contract_translator import *
 from .setting import *
 from .crypto import hashChain
@@ -144,13 +145,14 @@ class Contract(object):
             msg = 'Insufficient VSYS balance'
             pyvsystems.throw_error(msg, InsufficientBalanceException)
         else:
+            data_stack_bytes = serialize_data(data_stack)
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
             sData = struct.pack(">B", REGISTER_CONTRACT_TX_TYPE) + \
                     struct.pack(">H", len(base58.b58decode(contract))) + \
                     base58.b58decode(contract) + \
-                    struct.pack(">H", len(data_stack)) + \
-                    data_stack + \
+                    struct.pack(">H", len(data_stack_bytes)) + \
+                    data_stack_bytes + \
                     struct.pack(">H", len(description)) + \
                     str2bytes(description) + \
                     struct.pack(">Q", tx_fee) + \
@@ -158,7 +160,7 @@ class Contract(object):
                     struct.pack(">Q", timestamp)
             signature = bytes2str(sign(account.privateKey, sData))
             description_str = bytes2str(base58.b58encode(str2bytes(description)))
-            data_stack_str = bytes2str(base58.b58encode(data_stack))
+            data_stack_str = bytes2str(base58.b58encode(data_stack_bytes))
             data = json.dumps({
                 "senderPublicKey": account.publicKey,
                 "contract": contract,
@@ -191,13 +193,14 @@ class Contract(object):
             msg = 'Insufficient VSYS balance'
             pyvsystems.throw_error(msg, InsufficientBalanceException)
         else:
+            data_stack_bytes = serialize_data(data_stack)
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
             sData = struct.pack(">B", EXECUTE_CONTRACT_FUNCTION_TX_TYPE) + \
                     base58.b58decode(contract_id) + \
                     struct.pack(">H", func_id) + \
-                    struct.pack(">H", len(data_stack)) + \
-                    data_stack + \
+                    struct.pack(">H", len(data_stack_bytes)) + \
+                    data_stack_bytes + \
                     struct.pack(">H", len(attachment)) + \
                     str2bytes(attachment) + \
                     struct.pack(">Q", tx_fee) + \
@@ -205,7 +208,7 @@ class Contract(object):
                     struct.pack(">Q", timestamp)
             signature = bytes2str(sign(account.privateKey, sData))
             description_str = bytes2str(base58.b58encode(str2bytes(attachment)))
-            data_stack_str = bytes2str(base58.b58encode(data_stack))
+            data_stack_str = bytes2str(base58.b58encode(data_stack_bytes))
             data = json.dumps({
                 "senderPublicKey": account.publicKey,
                 "contractId": contract_id,
@@ -226,6 +229,6 @@ class Contract(object):
 
     def token_id_from_bytes(self, address, idx):
         address_bytes = base58.b58decode(address)
-        contract_id_no_check_sum = address_bytes[0:len(address_bytes)-meta.check_sum_length]
+        contract_id_no_check_sum = address_bytes[1:len(address_bytes)-meta.check_sum_length]
         without_check_sum = meta.token_address_version.to_bytes(1, byteorder='big', signed=True) + contract_id_no_check_sum + struct.pack(">I", idx)
-        return bytes2str(without_check_sum + self.calc_check_sum(without_check_sum))
+        return bytes2str(base58.b58encode(without_check_sum + self.calc_check_sum(without_check_sum)))
