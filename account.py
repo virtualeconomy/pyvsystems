@@ -461,20 +461,19 @@ class Account(object):
     def get_tx_status(self, tx_id):
         self.check_is_offline()
         if not self.check_tx_is_unconfirmed(tx_id):
-            tx_res = self.chain.tx(tx_id)
-            if 'id' not in tx_res:
-                pyvsystems.throw_error("Transaction does not exist!", InvalidStatus)
-            else:
-                return tx_res['status']
+            return self.get_tx_attribute(tx_id, 'status')
 
     def get_tx_height(self, tx_id):
         self.check_is_offline()
         if not self.check_tx_is_unconfirmed(tx_id):
-            tx_res = self.chain.tx(tx_id)
-            if 'id' not in tx_res:
-                pyvsystems.throw_error("Transaction does not exist!", InvalidStatus)
-            else:
-                return tx_res['height']
+            return self.get_tx_attribute(tx_id, 'height')
+
+    def get_tx_attribute(self, tx_id, attribute):
+        tx_res = self.chain.tx(tx_id)
+        if 'id' not in tx_res:
+            return None
+        else:
+            return tx_res[attribute]
 
     def check_tx_is_unconfirmed(self, tx_id):
         utx_res = self.chain.unconfirmed_tx(tx_id)
