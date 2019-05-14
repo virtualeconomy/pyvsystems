@@ -76,20 +76,23 @@ class Contract(object):
         print("All Functions with Opcode:")
         contract_translator.print_functions(functions_bytes, all_info)
 
-    def get_contract_info(self, wrapper, contract_id):
-        resp = wrapper.request('/contract/info/%s' % (contract_id))
+    @staticmethod
+    def get_contract_info(wrapper, contract_id):
+        resp = wrapper.request('/contract/info/%s' % contract_id)
         if resp.get('error'):
             return resp
         else:
             logging.debug(resp)
             return resp.get('info')
 
-    def get_contract_content(self, wrapper, contract_id):
-        resp = wrapper.request('/contract/content/%s' % (contract_id))
+    @staticmethod
+    def get_contract_content(wrapper, contract_id):
+        resp = wrapper.request('/contract/content/%s' % contract_id)
         logging.debug(resp)
         return resp
 
-    def get_token_balance(self, wrapper, address, token_id):
+    @staticmethod
+    def get_token_balance(wrapper, address, token_id):
         if not address:
             msg = 'Address required'
             pyvsystems.throw_error(msg, MissingAddressException)
@@ -105,7 +108,8 @@ class Contract(object):
         else:
             return resp.get('balance')
 
-    def get_token_info(self, wrapper, token_id):
+    @staticmethod
+    def get_token_info(wrapper, token_id):
         if token_id is None:
             msg = 'Token ID required'
             pyvsystems.throw_error(msg, MissingTokenIdException)
@@ -223,8 +227,8 @@ class Contract(object):
 
             return account.wrapper.request('/contract/broadcast/execute', data)
 
-
-    def calc_check_sum(self, without_check_sum):
+    @staticmethod
+    def calc_check_sum(without_check_sum):
         return str2bytes(hashChain(without_check_sum)[0:meta.check_sum_length])
 
     def token_id_from_bytes(self, address, idx):
