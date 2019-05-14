@@ -69,8 +69,8 @@ class Contract(object):
         print("id" + " | byte")
         contract_translator.print_bytes_arrays(state_var)
 
-        [texture, _] = parse_arrays(bytes_object[state_var_end:len(bytes_object)])
-        all_info = contract_translator.print_texture_from_bytes(texture)
+        [textual, _] = parse_arrays(bytes_object[state_var_end:len(bytes_object)])
+        all_info = contract_translator.print_textual_from_bytes(textual)
 
         functions_bytes = copy.deepcopy(trigger + descriptor)
         print("All Functions with Opcode:")
