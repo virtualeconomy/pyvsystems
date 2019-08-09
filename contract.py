@@ -163,7 +163,7 @@ class Contract(object):
                     struct.pack(">H", fee_scale) + \
                     struct.pack(">Q", timestamp)
             signature = bytes2str(sign(account.privateKey, sData))
-            description_str = bytes2str(base58.b58encode(str2bytes(description)))
+            description_str = description
             data_stack_str = bytes2str(base58.b58encode(data_stack_bytes))
             data = json.dumps({
                 "senderPublicKey": account.publicKey,
