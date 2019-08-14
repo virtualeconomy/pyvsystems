@@ -15,7 +15,7 @@ class ContractTranslator(object):
         trigger = all_info[0]
         execute_fun = all_info[1]
         if len(functions_opcode) != (len(trigger) + len(execute_fun)):
-            msg = 'Functions are not well defined in opc and texture!'
+            msg = 'Functions are not well defined in opc and textual!'
             pyvsystems.throw_error(msg, InvalidParameterException)
         else:
             functions_spec = copy.deepcopy([trigger[0]] + execute_fun)
@@ -110,10 +110,10 @@ class ContractTranslator(object):
                 print('| ' + list_opc[i][0] + ' ' + list_opc[i][1] + ' | ' + ' '.join(list_opc[i][2:]) + ' |')
             print(" ")
 
-    def print_texture_from_bytes(self, bytes_arrays):
+    def print_textual_from_bytes(self, bytes_arrays):
         all_info = []
         if len(bytes_arrays) != 3:
-            msg = 'Texture is invalid!'
+            msg = 'Textual is invalid!'
             pyvsystems.throw_error(msg, InvalidParameterException)
         [initializer_bytes, _] = parse_arrays(bytes_arrays[0])
         initializer_spec = self.specification_from_bytes(initializer_bytes, 0)
@@ -181,7 +181,7 @@ class ContractTranslator(object):
 
         for items in all_info[1:]:
             if len(items) != 4:
-                msg = 'Texture in function is invalid!'
+                msg = 'Textual in function is invalid!'
                 pyvsystems.throw_error(msg, InvalidParameterException)
             function_id = items[0]
             return_type = items[1]
