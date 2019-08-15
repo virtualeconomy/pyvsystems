@@ -197,7 +197,8 @@ def check_data_type(data, data_type):
     elif data_type == Type.short_text:
         data_bytes = serialize_array(str2bytes(data))
         return struct.unpack(">H", data_bytes[0:2])[0] + 2 == len(data_bytes) and len(data_bytes) <= Type.max_short_text_size + 2
-
+    else:
+        return True
 
 
 class DataEntry:
