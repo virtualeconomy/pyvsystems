@@ -1,18 +1,16 @@
 from.error import *
 from .deser import *
-from .setting import *
 from .crypto import *
 import base58
 import pyvsystems
 
 
 def init_data_stack_gen(max, unity, desc):
-    max = DataEntry(max, Type.amount)
+    maximum = DataEntry(max, Type.amount)
     unit = DataEntry(unity, Type.amount)
     short_txt = DataEntry(desc, Type.short_text)
-    init_data_stack = [max, unit, short_txt]
+    init_data_stack = [maximum, unit, short_txt]
     return init_data_stack
-
 
 def supersede_data_stack_gen(new_iss):
     iss = DataEntry(new_iss, Type.address)
@@ -183,6 +181,22 @@ def data_entry_from_bytes(bytes_object):
     elif bytes_object[0:1] == Type.contract_account:
         return DataEntry(bytes2str(base58.b58encode(bytes_object[1:])), bytes_object[0:1])
 
+def check_data_type(data, data_type):
+    if data_type == Type.public_key:
+        data_bytes = base58.b58decode(data)
+        return len(data_bytes) == Type.key_length
+    elif data_type == Type.address:
+        data_bytes = base58.b58decode(data)
+        return len(data_bytes) == Type.address_length
+    elif data_type == Type.amount:
+        data_bytes = struct.pack(">Q", data)
+        return len(data_bytes) == Type.amount_length and struct.unpack(">Q", data_bytes)[0] > 0
+    elif data_type == Type.int32:
+        data_bytes = struct.pack(">I", data)
+        return len(data_bytes) == Type.amount_length and struct.unpack(">I", data_bytes)[0] > 0
+    elif data_type == Type.short_text:
+        data_bytes = serialize_array(str2bytes(data))
+        return struct.unpack(">H", data_bytes[0:2])[0] + 2 == len(data_bytes) and len(data_bytes) <= Type.max_short_text_size + 2
 
 
 
@@ -190,6 +204,9 @@ class DataEntry:
     def __init__(self, data, data_type):
         if not type(data_type) is bytes:
             msg = 'Data Type must be bytes'
+            pyvsystems.throw_error(msg, InvalidParameterException)
+        if not check_data_type(data, data_type):
+            msg = 'Invalid DataEntry'
             pyvsystems.throw_error(msg, InvalidParameterException)
         if data_type == Type.public_key:
             self.data_bytes = base58.b58decode(data)
@@ -204,12 +221,8 @@ class DataEntry:
             self.data_bytes = struct.pack(">I", data)
             self.data_type = 'int32'
         elif data_type == Type.short_text:
-            if len(str2bytes(data)) > MAX_ATTACHMENT_SIZE:
-                msg = 'description length must be <= %d' % MAX_ATTACHMENT_SIZE
-                pyvsystems.throw_error(msg, InvalidParameterException)
-            else:
-                self.data_bytes = serialize_array(str2bytes(data))
-                self.data_type = 'short_text'
+            self.data_bytes = serialize_array(str2bytes(data))
+            self.data_type = 'short_text'
         elif data_type == Type.contract_account:
             self.data_bytes = base58.b58decode(data)
             self.data_type = 'contract_account'
@@ -230,6 +243,7 @@ class Type:
     int32 = bytes([4])
     int32_length = 4
     short_text = bytes([5])
+    max_short_text_size = 140
     contract_account = bytes([6])
     contract_account_length = 26
     account = bytes([7])
