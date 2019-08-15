@@ -3,6 +3,7 @@ from .crypto import *
 from .error import *
 from .words import WORDS
 from pyvsystems import is_offline
+from .contract_methods import register_contract, execute_contract
 import pyvsystems
 import time
 import struct
@@ -373,6 +374,14 @@ class Account(object):
             })
 
             return self.wrapper.request('/database/broadcast/put', data)
+
+    def register_contract(self, contract, data_stack, description='', tx_fee=DEFAULT_REGISTER_CONTRACT_FEE,
+                      fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
+        return register_contract(self, contract, data_stack, description, tx_fee, fee_scale, timestamp)
+
+    def execute_contract(self, contract_id, func_id, data_stack, attachment='', tx_fee=DEFAULT_EXECUTE_CONTRACT_FEE,
+                     fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
+        return execute_contract(self, contract_id, func_id, data_stack, attachment, tx_fee, fee_scale, timestamp)
 
     def get_info(self):
         if not (self.address and self.publicKey):

@@ -1,7 +1,8 @@
-from .contract_build import *
-from .error import *
+from.error import *
 from .deser import *
 from .setting import *
+from .crypto import *
+import base58
 import pyvsystems
 
 
