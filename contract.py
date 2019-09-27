@@ -2,6 +2,7 @@ from pyvsystems.contract_methods import *
 from pyvsystems.contract_builder import *
 import base58
 
+
 class Contract(object):
     def __init__(self, language_code='vdds', language_version=1, trigger=None, descriptor=None, state_var=None, textual=None, split=False):
         self.contract_lang_code = language_code_builder(language_code)
@@ -39,6 +40,7 @@ class Contract(object):
     def show_functions(self):
         show_contract_function(bytes_string=self.contract_bytes_string)
 
+
 def contract_from_json(contract_json):
     triggers = [base58.b58decode(item) for item in contract_json['triggers']]
     descriptors = [base58.b58decode(item) for item in contract_json['descriptors']]
@@ -49,6 +51,7 @@ def contract_from_json(contract_json):
     contract = Contract(contract_json['languageCode'], contract_json['languageVersion'],
                                                   triggers, descriptors, state_variables, textuals)
     return contract
+
 
 def show_contract_function(bytes_string='', contract_id='', wrapper=None):
     if not bytes_string and not contract_id:
