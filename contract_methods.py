@@ -53,7 +53,6 @@ def get_token_info(wrapper, token_id):
 
 def register_contract(account, contract, data_stack, description='', tx_fee=DEFAULT_REGISTER_CONTRACT_FEE,
                       fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
-
     data_stack_bytes = serialize_data(data_stack)
     if timestamp == 0:
         timestamp = int(time.time() * 1000000000)
