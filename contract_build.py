@@ -151,6 +151,7 @@ class ContractBuild(object):
             return language_code
         else:
             logging.error("Wrong language code length")
+            raise Exception("Wrong language code length")
 
     def language_version_builder(self, version):
         try:
@@ -158,6 +159,7 @@ class ContractBuild(object):
                 return struct.pack(">I", version)
             else:
                 logging.error("Wrong language version length")
+                raise Exception("Wrong language code length")
         except:
             print("Wrong language version length")
 

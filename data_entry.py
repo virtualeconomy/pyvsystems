@@ -6,25 +6,10 @@ import pyvsystems
 
 
 def init_data_stack_gen(max, unity, desc):
-    maximum = 0
-    unit = 0
-    short_txt = None
+    maximum = DataEntry(max, Type.amount)
+    unit = DataEntry(unity, Type.amount)
+    short_txt = DataEntry(desc, Type.short_text)
 
-    if max > MAX:
-        msg = 'Max. must be <= %d' % MAX
-        pyvsystems.throw_error(msg, InvalidParameterException)
-    else:
-        maximum = DataEntry(max, Type.amount)
-    if unity > UNITY:
-        msg = 'Unity must be <= %d' % UNITY
-        pyvsystems.throw_error(msg, InvalidParameterException)
-    else:
-        unit = DataEntry(unity, Type.amount)
-    if len(desc) > MAX_ATTACHMENT_SIZE:
-        msg = 'Attachment length of token must be <= %d' % MAX_ATTACHMENT_SIZE
-        pyvsystems.throw_error(msg, InvalidParameterException)
-    else:
-        short_txt = DataEntry(desc, Type.short_text)
     init_data_stack = [maximum, unit, short_txt]
     return init_data_stack
 
@@ -196,8 +181,6 @@ def data_entry_from_bytes(bytes_object):
         return DataEntry(bytes2str(bytes_object[3:]), bytes_object[0:1])
     elif bytes_object[0:1] == Type.contract_account:
         return DataEntry(bytes2str(base58.b58encode(bytes_object[1:])), bytes_object[0:1])
-
-
 
 
 class DataEntry:
