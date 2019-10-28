@@ -28,3 +28,15 @@ class InsufficientBalanceException(PyVException):
 
 class NetworkException(PyVException):
     pass
+
+
+class InvalidStatus(PyVException):
+    pass
+
+
+class MissingContractIdException(PyVException):
+    pass
+
+
+class MissingTokenIdException(PyVException):
+    pass

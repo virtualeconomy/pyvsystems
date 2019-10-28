@@ -3,6 +3,7 @@ from .crypto import *
 from .error import *
 from .words import WORDS
 from pyvsystems import is_offline
+from .contract_methods import register_contract, execute_contract
 import pyvsystems
 import time
 import struct
@@ -374,6 +375,14 @@ class Account(object):
 
             return self.wrapper.request('/database/broadcast/put', data)
 
+    def register_contract(self, contract, data_stack, description='', tx_fee=DEFAULT_REGISTER_CONTRACT_FEE,
+                      fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
+        return register_contract(self, contract, data_stack, description, tx_fee, fee_scale, timestamp)
+
+    def execute_contract(self, contract_id, func_id, data_stack, attachment='', tx_fee=DEFAULT_EXECUTE_CONTRACT_FEE,
+                     fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
+        return execute_contract(self, contract_id, func_id, data_stack, attachment, tx_fee, fee_scale, timestamp)
+
     def get_info(self):
         if not (self.address and self.publicKey):
             msg = 'Address required'
@@ -457,3 +466,32 @@ class Account(object):
             res = self.chain.self_check()
         # add more check if need
         return res
+
+    def get_tx_status(self, tx_id):
+        self.check_is_offline()
+        if not self.check_tx_is_unconfirmed(tx_id):
+            return self.get_tx_attribute(tx_id, 'status')
+
+    def get_tx_height(self, tx_id):
+        self.check_is_offline()
+        if not self.check_tx_is_unconfirmed(tx_id):
+            return self.get_tx_attribute(tx_id, 'height')
+
+    def get_tx_attribute(self, tx_id, attribute):
+        tx_res = self.chain.tx(tx_id)
+        if 'id' not in tx_res:
+            return None
+        else:
+            return tx_res[attribute]
+
+    def check_tx_is_unconfirmed(self, tx_id):
+        utx_res = self.chain.unconfirmed_tx(tx_id)
+        if "id" in utx_res:
+            pyvsystems.throw_error("Transaction {} is pending in UTX pool.".format(tx_id), InvalidStatus)
+        else:
+            return False
+
+    @staticmethod
+    def check_is_offline():
+        if is_offline():
+            pyvsystems.throw_error("Cannot check transaction in offline mode.", NetworkException)
