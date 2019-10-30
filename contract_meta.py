@@ -11,7 +11,7 @@ class ContractMeta:
 
     function_type_map = {'000': 'onInit', '100': 'public'}
 
-    non_return_type = bytes('', encoding='utf-8')
+    non_return_type = bytes('')
 
     state_var_name = ["issuer", "maker"]
 

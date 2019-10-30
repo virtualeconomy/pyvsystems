@@ -19,7 +19,7 @@ def serialize_string(string):
 
 
 def serialize_arrays(bs):
-    sa = bytes('', encoding='utf-8')
+    sa = bytes('')
     for b in bs:
         b = serialize_array(b)
         sa += b
@@ -28,7 +28,7 @@ def serialize_arrays(bs):
 
 def serialize_array(b):
     if type(b) is list:
-        b_bytes = bytes('', encoding='utf-8')
+        b_bytes = bytes('')
         for b_element in b:
             b_bytes += b_element
         return struct.pack(">H", len(b)) + b_bytes

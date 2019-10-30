@@ -52,15 +52,15 @@ class Opcode(object):
     def opc_tdb_new(arg):
         data = copy.deepcopy(arg[0])
         name_list = copy.deepcopy(arg[1])
-        print('operation.token.new', end='')
-        print('(' + name_list[data[2]] + ', ' + name_list[data[3]] + ', ' + name_list[data[4]] + ')')
+        print 'operation.token.new',
+        print '(' + name_list[data[2]] + ', ' + name_list[data[3]] + ', ' + name_list[data[4]] + ')'
 
     @staticmethod
     def opc_tdb_split(arg):
         data = copy.deepcopy(arg[0])
         name_list = copy.deepcopy(arg[1])
-        print('operation.token.split', end='')
-        print('(' + name_list[data[2]] + ')')
+        print 'operation.token.split',
+        print '(' + name_list[data[2]] + ')'
 
     @staticmethod
     def opc_tdbr_max(arg):
@@ -78,36 +78,35 @@ class Opcode(object):
     def opc_tdba_deposit(arg):
         data = copy.deepcopy(arg[0])
         name_list = copy.deepcopy(arg[1])
-        print('operation.token.deposit', end='')
-        print('(' + name_list[data[2]] + ', ' + name_list[data[3]] + ')')
+        print 'operation.token.deposit',
+        print '(' + name_list[data[2]] + ', ' + name_list[data[3]] + ')'
 
     @staticmethod
     def opc_tdba_withdraw(arg):
         data = copy.deepcopy(arg[0])
         name_list = copy.deepcopy(arg[1])
-        print('operation.token.withdraw', end='')
-        print('(' + name_list[data[2]] + ', ' + name_list[data[3]] + ')')
+        print 'operation.token.withdraw',
+        print '(' + name_list[data[2]] + ', ' + name_list[data[3]] + ')'
 
     @staticmethod
     def opc_tdba_transfer(arg):
         data = copy.deepcopy(arg[0])
         name_list = copy.deepcopy(arg[1])
-        print('operation.token.transfer', end='')
-        print('(' + name_list[data[2]] + ', ' + name_list[data[3]] + ', '
-              + name_list[data[4]] + ')')
+        print 'operation.token.transfer',
+        print '(' + name_list[data[2]] + ', ' + name_list[data[3]] + ', ' + name_list[data[4]] + ')'
 
     @staticmethod
     def opc_tdbar_balance(arg):
         data = copy.deepcopy(arg[0])
         name_list = copy.deepcopy(arg[1])
-        print(name_list[data[3]] + ' = ' + 'operation.token.getBalance', end='')
-        print('(' + name_list[data[2]] + ')')
+        print name_list[data[3]] + ' = ' + 'operation.token.getBalance',
+        print '(' + name_list[data[2]] + ')'
 
     @staticmethod
     def opc_value_return(arg):
         name_list = copy.deepcopy(arg[1])
-        print('operation.control.return', end='')
-        print('(' + name_list[-1] + ')')
+        print 'operation.control.return',
+        print '(' + name_list[-1] + ')'
 
     def get_opc(self, arg, arg_outside):
         return getattr(self, arg)(arg_outside)

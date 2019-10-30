@@ -321,16 +321,16 @@ def withdraw_para_type():
     return [data_type_list.get('ContractAccount'), data_type_list.get('Account'), data_type_list.get('Amount')]
 
 def total_supply_para_type():
-    return bytes('', encoding='utf-8')
+    return bytes('')
 
 def max_supply_para_type():
-    return bytes('', encoding='utf-8')
+    return bytes('')
 
 def balance_of_para_type():
     return [data_type_list.get('Account')]
 
 def get_issuer_para_type():
-    return bytes('', encoding='utf-8')
+    return bytes('')
 
 
 def list_opc_gen(ids, index_input):
@@ -505,7 +505,6 @@ def get_issuer_opc():
 
 def get_issuer_opc_index():
     return [get_issuer_opc_cdbvr_get_index(), bytes([0])]
-
 
 
 class ContractDefaults:
