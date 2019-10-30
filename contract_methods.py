@@ -124,7 +124,7 @@ def calc_check_sum(without_check_sum):
 def token_id_from_bytes(contract_id, idx):
     address_bytes = base58.b58decode(contract_id)
     contract_id_no_check_sum = address_bytes[1:(len(address_bytes) - meta.check_sum_length)]
-    without_check_sum = meta.token_address_version.to_bytes(1, byteorder='big', signed=True) + contract_id_no_check_sum + struct.pack(">I", idx)
+    without_check_sum = struct.pack("b", meta.token_address_version) + contract_id_no_check_sum + struct.pack(">I", idx)
     return bytes2str(base58.b58encode(without_check_sum + calc_check_sum(without_check_sum)))
 
 
