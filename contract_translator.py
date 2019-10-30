@@ -1,3 +1,4 @@
+from __future__ import print_function
 from .error import *
 import pyvsystems
 from .opcode import Opcode
@@ -61,16 +62,16 @@ def print_a_function(function_type, function_hex, functions_spec, list_para_type
             prefix = "function"
             if shorts_from_byte_array(function_hex[0:2]) == 0:
                 print("Descriptor Functions: ")
-        print function_type + ' ' + prefix + ' ' + function_name + "(",
+        print(function_type + ' ' + prefix + ' ' + function_name + "(", end='')
         if len(list_para_type) > 0:
             for i in range(len(list_para_type)):
-                print list_para_type[i] + ' ',
+                print(list_para_type[i] + ' ', end='')
                 if i == (len(list_para_type) - 1):
-                    print list_para[i] + ') ',
+                    print(list_para[i] + ') ', end='')
                 else:
-                    print list_para[i] + ', ',
+                    print(list_para[i] + ', ', end='')
         else:
-            print ') ',
+            print(') ', end='')
 
     if function_hex[4]:
         for i in range(len(return_type)):
@@ -78,15 +79,15 @@ def print_a_function(function_type, function_hex, functions_spec, list_para_type
     else:
         print(' ')
 
-    print "| " + ' '.join(function_hex[0:2]) + " | " + function_hex[2] + " ",
+    print("| " + ' '.join(function_hex[0:2]) + " | " + function_hex[2] + " ", end='')
     if function_hex[3]:
-        print "| " + ' '.join(function_hex[3]) + " ",
+        print("| " + ' '.join(function_hex[3]) + " ", end='')
     else:
-        print "| - ",
+        print("| - ", end='')
     if function_hex[4]:
-        print "| " + ' '.join(function_hex[4]) + " ",
+        print("| " + ' '.join(function_hex[4]) + " ", end='')
     else:
-        print "| - ",
+        print("| - ", end='')
     print("| ")
     list_opc_name = [Opcode().function_name[opc[0] + opc[1]]
                      if len(opc) >= 2 else
@@ -99,11 +100,11 @@ def print_a_function(function_type, function_hex, functions_spec, list_para_type
         name_list = copy.deepcopy(para_name)
         for i in range(len(list_opc_name)):
             data = copy.deepcopy([int(index) for index in list_opc[i]])
-            print ' ' * 13,
+            print(' ' * 13, end='')
             Opcode().get_opc(list_opc_name[i], [data, name_list, state_var])
-            print ' ' * 13,
-            print '| ' + list_opc[i][0] + ' ' + list_opc[i][1] + ' | ' + ' '.join(list_opc[i][2:]) + ' |'
-        print " "
+            print(' ' * 13, end='')
+            print('| ' + list_opc[i][0] + ' ' + list_opc[i][1] + ' | ' + ' '.join(list_opc[i][2:]) + ' |')
+        print(" ")
 
 def print_textual_from_bytes(bytes_arrays):
     all_info = []
@@ -164,10 +165,10 @@ def print_function_specification(nested_list):
         if max_length < len(item):
             max_length = len(item)
 
-    print header[0] + " | ",
+    print(header[0] + " | ", end='')
     for item in header[1:]:
         if header.index(item) != (len(header) - 1):
-            print item + " " * (max_length - len(item) + 1),
+            print(item + " " * (max_length - len(item) + 1), end='')
         else:
             print(item + " " * (max_length - len(item) + 1))
 
@@ -179,15 +180,15 @@ def print_function_specification(nested_list):
         return_type = items[1]
         function_name = items[2]
         para_list = items[3]
-        print function_id + " | ",
+        print(function_id + " | ", end='')
         for return_name in return_type:
-            print return_name + " " * (max_length - len(return_name) + 1),
-        print function_name + " " * (max_length - len(function_name) + 1),
+            print(return_name + " " * (max_length - len(return_name) + 1), end='')
+        print(function_name + " " * (max_length - len(function_name) + 1), end='')
         for item in para_list:
             if para_list.index(item) != (len(para_list) - 1):
-                print item + " " * (max_length - len(item) + 1),
+                print(item + " " * (max_length - len(item) + 1), end='')
             else:
-                print item + " " * (max_length - len(item) + 1)
+                print(item + " " * (max_length - len(item) + 1))
 
 def print_state_var_specification(nested_list):
     header = nested_list[0]
@@ -196,14 +197,14 @@ def print_state_var_specification(nested_list):
     for item in header:
         if max_length < len(item):
             max_length = len(item)
-    print header[0] + " | ",
+    print(header[0] + " | ", end='')
     for item in header[1:]:
         if header.index(item) != (len(header) - 1):
-            print item + " " * (max_length - len(item) + 1),
+            print(item + " " * (max_length - len(item) + 1), end='')
         else:
-            print item + " " * (max_length - len(item) + 1)
+            print(item + " " * (max_length - len(item) + 1))
     for item in all_info[1:]:
-        print item[0] + " | " + item[1]
+        print(item[0] + " | " + item[1])
 
 def specification_from_bytes(spec_bytes, spec_type):
     string_list = []
