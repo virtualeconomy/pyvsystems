@@ -235,16 +235,16 @@ class DataEntry:
 
 
 class Type:
-    public_key = bytes([1])
+    public_key = struct.pack(">B", 1)
     key_length = 32
-    address = bytes([2])
+    address = struct.pack(">B", 2)
     address_length = 26
-    amount = bytes([3])
+    amount = struct.pack(">B", 3)
     amount_length = 8
-    int32 = bytes([4])
+    int32 = struct.pack(">B", 4)
     int32_length = 4
-    short_text = bytes([5])
+    short_text = struct.pack(">B", 5)
     max_short_text_size = 140
-    contract_account = bytes([6])
+    contract_account = struct.pack(">B", 6)
     contract_account_length = 26
-    account = bytes([7])
+    account = struct.pack(">B", 7)

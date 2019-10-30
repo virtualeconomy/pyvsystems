@@ -1,6 +1,7 @@
 import itertools
 import logging
 import struct
+from pyvsystems.crypto import no_return_bytes
 
 from pyvsystems import deser
 from pyvsystems.contract_meta import ContractMeta as meta
@@ -321,16 +322,16 @@ def withdraw_para_type():
     return [data_type_list.get('ContractAccount'), data_type_list.get('Account'), data_type_list.get('Amount')]
 
 def total_supply_para_type():
-    return bytes('', encoding='utf-8')
+    return no_return_bytes
 
 def max_supply_para_type():
-    return bytes('', encoding='utf-8')
+    return no_return_bytes
 
 def balance_of_para_type():
     return [data_type_list.get('Account')]
 
 def get_issuer_para_type():
-    return bytes('', encoding='utf-8')
+    return no_return_bytes
 
 
 def list_opc_gen(ids, index_input):
@@ -505,7 +506,6 @@ def get_issuer_opc():
 
 def get_issuer_opc_index():
     return [get_issuer_opc_cdbvr_get_index(), bytes([0])]
-
 
 
 class ContractDefaults:

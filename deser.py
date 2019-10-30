@@ -1,9 +1,10 @@
 import struct
 import logging
+from pyvsystems.crypto import list2bytes, to_hex
 
 
 def convert_bytes_to_hex(bytes_object):
-    return [bytes([byte]).hex() for byte in bytes_object]
+    return [to_hex(bytes([byte])) for byte in bytes_object]
 
 
 def shorts_from_byte_array(byte_array):
@@ -19,18 +20,16 @@ def serialize_string(string):
 
 
 def serialize_arrays(bs):
-    sa = bytes('', encoding='utf-8')
+    sa = bytes()
     for b in bs:
         b = serialize_array(b)
         sa += b
-    return struct.pack(">H", len(bs)) + sa
+    return struct.pack(">H", len(bs)) + bytes(sa)
 
 
 def serialize_array(b):
     if type(b) is list:
-        b_bytes = bytes('', encoding='utf-8')
-        for b_element in b:
-            b_bytes += b_element
+        b_bytes = list2bytes(b)
         return struct.pack(">H", len(b)) + b_bytes
     else:
         return struct.pack(">H", len(b)) + b

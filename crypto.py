@@ -13,10 +13,16 @@ if bytes == str:  # python2
     str2bytes = lambda s: s
     bytes2str = lambda b: b
     str2list = lambda s: [ord(c) for c in s]
+    list2bytes = lambda s: ''.join(s)
+    no_return_bytes = [chr(0)]
+    to_hex = lambda s: ''.join('{:02x}'.format(x) for x in s)
 else:  # python3
     str2bytes = lambda s: s.encode('latin-1')
     bytes2str = lambda b: ''.join(map(chr, b))
     str2list = lambda s: [c for c in s]
+    list2bytes = lambda s: b''.join(s)
+    no_return_bytes = bytes('', encoding='utf-8')
+    to_hex = lambda s: s.hex()
 
 
 RoundConstants = [
