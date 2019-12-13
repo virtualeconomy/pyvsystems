@@ -35,13 +35,6 @@ def is_offline():
 
 
 from .setting import *
-from .error import PyVException
-
-
-def throw_error(msg, exception=PyVException):
-    logging.error(msg)
-    if THROW_EXCEPTION_ON_ERROR:
-        raise exception(msg)
 
 
 def create_api_wrapper(node_host=DEFAULT_NODE, api_key=DEFAULT_API_KEY):
@@ -58,10 +51,6 @@ def testnet_chain(api_wrapper=create_api_wrapper(DEFAULT_TESTNET_NODE, DEFAULT_T
 def default_chain(api_wrapper=create_api_wrapper()):
     return Chain(DEFAULT_CHAIN, DEFAULT_CHAIN_ID, ADDRESS_VERSION, api_wrapper)
 
-
-def set_throw_on_error(throw=True):
-    global THROW_EXCEPTION_ON_ERROR
-    THROW_EXCEPTION_ON_ERROR = throw
 
 from .account import *
 from .contract import *

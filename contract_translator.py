@@ -1,6 +1,5 @@
 from __future__ import print_function
 from .error import *
-import pyvsystems
 from .opcode import Opcode
 from .deser import *
 import copy
@@ -12,7 +11,7 @@ def print_functions(functions_opcode, all_info):
     execute_fun = all_info[1]
     if len(functions_opcode) != (len(trigger) + len(execute_fun)):
         msg = 'Functions are not well defined in opc and textual!'
-        pyvsystems.throw_error(msg, InvalidParameterException)
+        throw_error(msg, InvalidParameterException)
     else:
         functions_spec = copy.deepcopy([trigger[0]] + execute_fun)
         for i in range(len(functions_opcode)):
