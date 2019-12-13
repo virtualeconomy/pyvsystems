@@ -119,4 +119,8 @@ For more detail, please refer:
     my_address.lease_cancel(tx_id)
     ```
     
-[Sample code](https://github.com/virtualeconomy/pyvsystems/wiki/PYVSYSTEMS-User-Guide-Specification-%28English%29#sample-code) for reference
+[Sample code for Send Transaction](https://github.com/virtualeconomy/pyvsystems/wiki/PYVSYSTEMS-User-Guide-Specification-%28English%29#sample-code) for reference
+
+[Sample Code for Smart Contract](https://github.com/virtualeconomy/pyvsystems/wiki/Sample-Code-for-Smart-Contract) for reference
+
+[Sample Code for Exchange](https://github.com/virtualeconomy/pyvsystems/wiki/Sample-Code-for-Exchange) for reference
