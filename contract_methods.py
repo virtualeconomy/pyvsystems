@@ -1,11 +1,9 @@
 import json
-import math
-from pyvsystems import is_offline
 
-from pyvsystems.data_entry import serialize_data
-from pyvsystems.contract_translator import *
-from pyvsystems.setting import *
-from pyvsystems.crypto import *
+from .data_entry import serialize_data
+from .contract_translator import *
+from .setting import *
+from .crypto import *
 import time
 
 def get_contract_info(wrapper, contract_id):
@@ -26,11 +24,11 @@ def get_contract_content(wrapper, contract_id):
 def get_token_balance(wrapper, address, token_id):
     if not address:
         msg = 'Address required'
-        pyvsystems.throw_error(msg, MissingAddressException)
+        throw_error(msg, MissingAddressException)
         return None
     if token_id is None:
         msg = 'Token ID required'
-        pyvsystems.throw_error(msg, MissingTokenIdException)
+        throw_error(msg, MissingTokenIdException)
         return None
     resp = wrapper.request('/contract/balance/%s/%s' % (address, token_id))
 
@@ -43,7 +41,7 @@ def get_token_balance(wrapper, address, token_id):
 def get_token_info(wrapper, token_id):
     if token_id is None:
         msg = 'Token ID required'
-        pyvsystems.throw_error(msg, MissingTokenIdException)
+        throw_error(msg, MissingTokenIdException)
         return None
 
     resp = wrapper.request('/contract/tokenInfo/%s' % token_id)

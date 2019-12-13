@@ -1,4 +1,4 @@
-from pyvsystems.crypto import no_return_bytes
+from .crypto import no_return_bytes
 
 
 class ContractMeta:

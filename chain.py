@@ -5,7 +5,7 @@ from .crypto import hashChain, bytes2str, str2bytes
 from .setting import ADDRESS_LENGTH, ADDRESS_CHECKSUM_LENGTH, DEFAULT_SUPER_NODE_NUM
 from .error import NetworkException, throw_error
 from .wrapper import Wrapper
-from pyvsystems import is_offline
+from . import is_offline
 
 
 class Chain(object):

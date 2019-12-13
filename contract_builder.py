@@ -1,10 +1,9 @@
 import itertools
 import logging
 import struct
-from pyvsystems.crypto import no_return_bytes
 
-from pyvsystems import deser
-from pyvsystems.contract_meta import ContractMeta as meta
+import deser
+from .contract_meta import ContractMeta as meta
 
 from .crypto import *
 
