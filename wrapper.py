@@ -2,7 +2,7 @@ import logging
 import requests
 from requests.exceptions import RequestException
 from .error import NetworkException
-from pyvsystems import is_offline
+from . import is_offline
 
 
 class Wrapper(object):
