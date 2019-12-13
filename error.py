@@ -1,3 +1,5 @@
+import logging
+
 class PyVException(Exception):
     pass
 
@@ -40,3 +42,14 @@ class MissingContractIdException(PyVException):
 
 class MissingTokenIdException(PyVException):
     pass
+
+
+def set_throw_on_error(throw=True):
+    global THROW_EXCEPTION_ON_ERROR
+    THROW_EXCEPTION_ON_ERROR = throw
+
+
+def throw_error(msg, exception=PyVException):
+    logging.error(msg)
+    if THROW_EXCEPTION_ON_ERROR:
+        raise exception(msg)

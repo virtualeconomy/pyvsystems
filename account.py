@@ -3,8 +3,8 @@ from .crypto import *
 from .error import *
 from .words import WORDS
 from pyvsystems import is_offline
+from pyvsystems import default_chain
 from .contract_methods import register_contract, execute_contract
-import pyvsystems
 import time
 import struct
 import json
@@ -13,7 +13,7 @@ import logging
 
 
 class Account(object):
-    def __init__(self, chain=pyvsystems.default_chain(), address='', public_key='', private_key='', seed='', alias='', nonce=0):
+    def __init__(self, chain=default_chain(), address='', public_key='', private_key='', seed='', alias='', nonce=0):
         self.chain = chain
         self.wrapper = chain.api_wrapper
         if nonce < 0 or nonce > MAX_NONCE:
@@ -55,7 +55,7 @@ class Account(object):
 
     def balance(self, confirmations=0):
         if is_offline():
-            pyvsystems.throw_error("Cannot check balance in offline mode.", NetworkException)
+            throw_error("Cannot check balance in offline mode.", NetworkException)
             return 0
         try:
             confirmations_str = '' if confirmations == 0 else '/%d' % confirmations
@@ -64,7 +64,7 @@ class Account(object):
             return resp['balance']
         except Exception as ex:
             msg = "Failed to get balance. ({})".format(ex)
-            pyvsystems.throw_error(msg, NetworkException)
+            throw_error(msg, NetworkException)
             return 0
 
     def balance_detail(self):
@@ -74,7 +74,7 @@ class Account(object):
             return resp
         except Exception as ex:
             msg = "Failed to get balance detail. ({})".format(ex)
-            pyvsystems.throw_error(msg, NetworkException)
+            throw_error(msg, NetworkException)
             return None
 
     def _generate(self, public_key='', private_key='', seed='', nonce=0):
@@ -112,25 +112,25 @@ class Account(object):
     def send_payment(self, recipient, amount, attachment='', tx_fee=DEFAULT_PAYMENT_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
         if not self.privateKey:
             msg = 'Private key required'
-            pyvsystems.throw_error(msg, MissingPrivateKeyException)
+            throw_error(msg, MissingPrivateKeyException)
         if not self.chain.validate_address(recipient.address):
             msg = 'Invalid recipient address'
-            pyvsystems.throw_error(msg, InvalidAddressException)
+            throw_error(msg, InvalidAddressException)
         elif amount <= 0:
             msg = 'Amount must be > 0'
-            pyvsystems.throw_error(msg, InvalidParameterException)
+            throw_error(msg, InvalidParameterException)
         elif tx_fee < DEFAULT_PAYMENT_FEE:
             msg = 'Transaction fee must be >= %d' % DEFAULT_PAYMENT_FEE
-            pyvsystems.throw_error(msg, InvalidParameterException)
+            throw_error(msg, InvalidParameterException)
         elif len(attachment) > MAX_ATTACHMENT_SIZE:
             msg = 'Attachment length must be <= %d' % MAX_ATTACHMENT_SIZE
-            pyvsystems.throw_error(msg, InvalidParameterException)
+            throw_error(msg, InvalidParameterException)
         elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
             msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
-            pyvsystems.throw_error(msg, InvalidParameterException)
+            throw_error(msg, InvalidParameterException)
         elif not is_offline() and self.balance() < amount + tx_fee:
             msg = 'Insufficient VSYS balance'
-            pyvsystems.throw_error(msg, InsufficientBalanceException)
+            throw_error(msg, InsufficientBalanceException)
         else:
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
@@ -160,22 +160,22 @@ class Account(object):
     def lease(self, recipient, amount, tx_fee=DEFAULT_LEASE_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
         if not self.privateKey:
             msg = 'Private key required'
-            pyvsystems.throw_error(msg, MissingPrivateKeyException)
+            throw_error(msg, MissingPrivateKeyException)
         if not self.chain.validate_address(recipient.address):
             msg = 'Invalid recipient address'
-            pyvsystems.throw_error(msg, InvalidAddressException)
+            throw_error(msg, InvalidAddressException)
         elif amount <= 0:
             msg = 'Amount must be > 0'
-            pyvsystems.throw_error(msg, InvalidParameterException)
+            throw_error(msg, InvalidParameterException)
         elif tx_fee < DEFAULT_LEASE_FEE:
             msg = 'Transaction fee must be >= %d' % DEFAULT_LEASE_FEE
-            pyvsystems.throw_error(msg, InvalidParameterException)
+            throw_error(msg, InvalidParameterException)
         elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
             msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
-            pyvsystems.throw_error(msg, InvalidParameterException)
+            throw_error(msg, InvalidParameterException)
         elif not is_offline() and self.balance() < amount + tx_fee:
             msg = 'Insufficient VSYS balance'
-            pyvsystems.throw_error(msg, InsufficientBalanceException)
+            throw_error(msg, InsufficientBalanceException)
         else:
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
@@ -202,19 +202,19 @@ class Account(object):
         decode_lease_id = base58.b58decode(lease_id)
         if not self.privateKey:
             msg = 'Private key required'
-            pyvsystems.throw_error(msg, MissingPrivateKeyException)
+            throw_error(msg, MissingPrivateKeyException)
         elif tx_fee < DEFAULT_CANCEL_LEASE_FEE:
             msg = 'Transaction fee must be > %d' % DEFAULT_CANCEL_LEASE_FEE
-            pyvsystems.throw_error(msg, InvalidParameterException)
+            throw_error(msg, InvalidParameterException)
         elif len(decode_lease_id) != LEASE_TX_ID_BYTES:
             msg = 'Invalid lease transaction id'
-            pyvsystems.throw_error(msg, InvalidParameterException)
+            throw_error(msg, InvalidParameterException)
         elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
             msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
-            pyvsystems.throw_error(msg, InvalidParameterException)
+            throw_error(msg, InvalidParameterException)
         elif not is_offline() and self.balance() < tx_fee:
             msg = 'Insufficient VSYS balance'
-            pyvsystems.throw_error(msg, InsufficientBalanceException)
+            throw_error(msg, InsufficientBalanceException)
         else:
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
@@ -238,10 +238,10 @@ class Account(object):
     def contend(self, slot_id, tx_fee=DEFAULT_CONTEND_SLOT_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
         if not self.privateKey:
             msg = 'Private key required'
-            pyvsystems.throw_error(msg, MissingPrivateKeyException)
+            throw_error(msg, MissingPrivateKeyException)
         elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
             msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
-            pyvsystems.throw_error(msg, InvalidParameterException)
+            throw_error(msg, InvalidParameterException)
         elif self.check_contend(slot_id, tx_fee):
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
@@ -264,11 +264,11 @@ class Account(object):
     def check_contend(self, slot_id, tx_fee):
         if tx_fee < DEFAULT_CONTEND_SLOT_FEE:
             msg = 'Transaction fee must be >= %d' % DEFAULT_CONTEND_SLOT_FEE
-            pyvsystems.throw_error(msg, InvalidParameterException)
+            throw_error(msg, InvalidParameterException)
             return False
         if slot_id >= 60 or slot_id < 0:
             msg = 'Slot id must be in 0 to 59'
-            pyvsystems.throw_error(msg, InvalidParameterException)
+            throw_error(msg, InvalidParameterException)
             return False
         if is_offline():  # if offline, skip other check
             return True
@@ -276,36 +276,36 @@ class Account(object):
         min_effective_balance = MIN_CONTEND_SLOT_BALANCE + tx_fee
         if balance_detail["effective"] < min_effective_balance:
             msg = 'Insufficient VSYS balance. (The effective balance must be >= %d)' % min_effective_balance
-            pyvsystems.throw_error(msg, InvalidParameterException)
+            throw_error(msg, InvalidParameterException)
             return False
         slot_info = self.chain.slot_info(slot_id)
         if not slot_info or slot_info.get("mintingAverageBalance") is None:
             msg = 'Failed to get slot minting average balance'
-            pyvsystems.throw_error(msg, NetworkException)
+            throw_error(msg, NetworkException)
             return False
         elif slot_info["mintingAverageBalance"] >= balance_detail["mintingAverage"]:
             msg = 'The minting average balance of slot %d is greater than or equals to yours. ' \
                   'You will contend this slot failed.' % slot_id
-            pyvsystems.throw_error(msg, InsufficientBalanceException)
+            throw_error(msg, InsufficientBalanceException)
             return False
         return True
 
     def release(self, slot_id, tx_fee=DEFAULT_RELEASE_SLOT_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
         if not self.privateKey:
             msg = 'Private key required'
-            pyvsystems.throw_error(msg, MissingPrivateKeyException)
+            throw_error(msg, MissingPrivateKeyException)
         elif tx_fee < DEFAULT_RELEASE_SLOT_FEE:
             msg = 'Transaction fee must be >= %d' % DEFAULT_RELEASE_SLOT_FEE
-            pyvsystems.throw_error(msg, InvalidParameterException)
+            throw_error(msg, InvalidParameterException)
         elif slot_id >= 60 or slot_id < 0:
             msg = 'Slot id must be in 0 to 59'
-            pyvsystems.throw_error(msg, InvalidParameterException)
+            throw_error(msg, InvalidParameterException)
         elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
             msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
-            pyvsystems.throw_error(msg, InvalidParameterException)
+            throw_error(msg, InvalidParameterException)
         elif not is_offline() and self.balance() < tx_fee:
             msg = 'Insufficient VSYS balance'
-            pyvsystems.throw_error(msg, InsufficientBalanceException)
+            throw_error(msg, InsufficientBalanceException)
         else:
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
@@ -328,19 +328,19 @@ class Account(object):
     def dbput(self, db_key, db_data, db_data_type="ByteArray", tx_fee=DEFAULT_DBPUT_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
         if not self.privateKey:
             msg = 'Private key required'
-            pyvsystems.throw_error(msg, MissingPrivateKeyException)
+            throw_error(msg, MissingPrivateKeyException)
         elif tx_fee < DEFAULT_DBPUT_FEE:
             msg = 'Transaction fee must be >= %d' % DEFAULT_DBPUT_FEE
-            pyvsystems.throw_error(msg, InvalidParameterException)
+            throw_error(msg, InvalidParameterException)
         elif len(db_key) > MAX_DB_KEY_SIZE or len(db_key) < MIN_DB_KEY_SIZE:
             msg = 'DB key length must be greater than %d and smaller than %d' % (MIN_DB_KEY_SIZE, MAX_ATTACHMENT_SIZE)
-            pyvsystems.throw_error(msg, InvalidParameterException)
+            throw_error(msg, InvalidParameterException)
         elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
             msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
-            pyvsystems.throw_error(msg, InvalidParameterException)
+            throw_error(msg, InvalidParameterException)
         elif not is_offline() and self.balance() < tx_fee:
             msg = 'Insufficient VSYS balance'
-            pyvsystems.throw_error(msg, InsufficientBalanceException)
+            throw_error(msg, InsufficientBalanceException)
         else:
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
@@ -350,7 +350,7 @@ class Account(object):
             # TODO: add more DB data type here
             else:
                 msg = 'Unsupported data type: {}'.format(db_data_type)
-                pyvsystems.throw_error(msg, InvalidParameterException)
+                throw_error(msg, InvalidParameterException)
                 return
             sData = struct.pack(">B", DBPUT_TX_TYPE) + \
                     struct.pack(">H", len(db_key)) + \
@@ -386,11 +386,11 @@ class Account(object):
     def get_info(self):
         if not (self.address and self.publicKey):
             msg = 'Address required'
-            pyvsystems.throw_error(msg, MissingAddressException)
+            throw_error(msg, MissingAddressException)
             return None
         if not self.publicKey:
             msg = 'Public key and address required'
-            pyvsystems.throw_error(msg, MissingPublicKeyException)
+            throw_error(msg, MissingPublicKeyException)
             return None
         if is_offline():
             info = {
@@ -401,21 +401,21 @@ class Account(object):
         info = self.balance_detail()
         if not info:
             msg = 'Failed to get balance detail'
-            pyvsystems.throw_error(msg, NetworkException)
+            throw_error(msg, NetworkException)
         else:
             info["publicKey"] = self.publicKey
             return info
 
     def get_tx_history(self, limit=100, type_filter=PAYMENT_TX_TYPE):
         if is_offline():
-            pyvsystems.throw_error("Cannot check history in offline mode.", NetworkException)
+            throw_error("Cannot check history in offline mode.", NetworkException)
             return []
         if not self.address:
             msg = 'Address required'
-            pyvsystems.throw_error(msg, MissingAddressException)
+            throw_error(msg, MissingAddressException)
         elif limit > MAX_TX_HISTORY_LIMIT:
             msg = 'Too big sequences requested (Max limitation is %d).' % MAX_TX_HISTORY_LIMIT
-            pyvsystems.throw_error(msg, InvalidParameterException)
+            throw_error(msg, InvalidParameterException)
         else:
             url = '/transactions/address/{}/limit/{}'.format(self.address, limit)
             resp = self.wrapper.request(url)
@@ -430,7 +430,7 @@ class Account(object):
         Return None if Transaction does not exist!
         """
         if is_offline():
-            pyvsystems.throw_error("Cannot check transaction in offline mode.", NetworkException)
+            throw_error("Cannot check transaction in offline mode.", NetworkException)
             return None
         utx_res = self.chain.unconfirmed_tx(tx_id)
         if "id" in utx_res:
@@ -458,7 +458,7 @@ class Account(object):
 
     def check_node(self, other_node_host=None):
         if is_offline():
-            pyvsystems.throw_error("Cannot check node in offline mode.", NetworkException)
+            throw_error("Cannot check node in offline mode.", NetworkException)
             return False
         if other_node_host:
             res = self.chain.check_with_other_node(other_node_host)
@@ -487,11 +487,11 @@ class Account(object):
     def check_tx_is_unconfirmed(self, tx_id):
         utx_res = self.chain.unconfirmed_tx(tx_id)
         if "id" in utx_res:
-            pyvsystems.throw_error("Transaction {} is pending in UTX pool.".format(tx_id), InvalidStatus)
+            throw_error("Transaction {} is pending in UTX pool.".format(tx_id), InvalidStatus)
         else:
             return False
 
     @staticmethod
     def check_is_offline():
         if is_offline():
-            pyvsystems.throw_error("Cannot check transaction in offline mode.", NetworkException)
+            throw_error("Cannot check transaction in offline mode.", NetworkException)
