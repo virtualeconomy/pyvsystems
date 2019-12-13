@@ -1,5 +1,5 @@
-from pyvsystems.contract_methods import *
-from pyvsystems.contract_builder import *
+from .contract_methods import *
+from .contract_builder import *
 import base58
 
 
@@ -56,16 +56,16 @@ def contract_from_json(contract_json):
 def show_contract_function(bytes_string='', contract_id='', wrapper=None):
     if not bytes_string and not contract_id:
         msg = 'Input contract is empty!'
-        pyvsystems.throw_error(msg, InvalidParameterException)
+        throw_error(msg, InvalidParameterException)
 
     if bytes_string and contract_id:
         msg = 'Multiple input in contract!'
-        pyvsystems.throw_error(msg, InvalidParameterException)
+        throw_error(msg, InvalidParameterException)
 
     if contract_id:
         if not wrapper:
             msg = 'No wrapper information!'
-            pyvsystems.throw_error(msg, InvalidParameterException)
+            throw_error(msg, InvalidParameterException)
         contract_content = get_contract_content(wrapper, contract_id)
         bytes_string = str2bytes(contract_from_json(contract_content).contract_bytes_string)
 

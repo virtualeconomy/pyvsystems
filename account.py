@@ -2,8 +2,8 @@ from .setting import *
 from .crypto import *
 from .error import *
 from .words import WORDS
-from pyvsystems import is_offline
-from pyvsystems import default_chain
+from . import is_offline
+from . import default_chain
 from .contract_methods import register_contract, execute_contract
 import time
 import struct

@@ -3,7 +3,7 @@ from .error import *
 from .opcode import Opcode
 from .deser import *
 import copy
-from pyvsystems.contract_meta import ContractMeta as meta
+from .contract_meta import ContractMeta as meta
 
 
 def print_functions(functions_opcode, all_info):
@@ -51,7 +51,7 @@ def print_a_function(function_type, function_hex, functions_spec, list_para_type
         list_para = []
     if len(list_para_type) != len(list_para):
         msg = 'List of parameter is not right!'
-        pyvsystems.throw_error(msg, InvalidParameterException)
+        throw_error(msg, InvalidParameterException)
     else:
         if function_type == meta.function_type_map['000']:
             prefix = "trigger"
@@ -90,11 +90,11 @@ def print_a_function(function_type, function_hex, functions_spec, list_para_type
     print("| ")
     list_opc_name = [Opcode().function_name[opc[0] + opc[1]]
                      if len(opc) >= 2 else
-                     pyvsystems.throw_error('Opc function is not right!', InvalidParameterException)
+                     throw_error('Opc function is not right!', InvalidParameterException)
                      for opc in list_opc]
     if len(list_opc_name) != len(list_opc):
         msg = 'Opc function is not right!'
-        pyvsystems.throw_error(msg, InvalidParameterException)
+        throw_error(msg, InvalidParameterException)
     else:
         name_list = copy.deepcopy(para_name)
         for i in range(len(list_opc_name)):
@@ -109,7 +109,7 @@ def print_textual_from_bytes(bytes_arrays):
     all_info = []
     if len(bytes_arrays) != 3:
         msg = 'Textual is invalid!'
-        pyvsystems.throw_error(msg, InvalidParameterException)
+        throw_error(msg, InvalidParameterException)
     [initializer_bytes, _] = parse_arrays(bytes_arrays[0])
     initializer_spec = specification_from_bytes(initializer_bytes, 0)
     print("Initializer Function:")
@@ -174,7 +174,7 @@ def print_function_specification(nested_list):
     for items in all_info[1:]:
         if len(items) != 4:
             msg = 'Textual in function is invalid!'
-            pyvsystems.throw_error(msg, InvalidParameterException)
+            throw_error(msg, InvalidParameterException)
         function_id = items[0]
         return_type = items[1]
         function_name = items[2]
