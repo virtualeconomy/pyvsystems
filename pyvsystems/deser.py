@@ -1,6 +1,6 @@
 import struct
 import logging
-from .crypto import list2bytes, to_hex
+from pyvsystems.crypto import list2bytes, to_hex
 
 
 def convert_bytes_to_hex(bytes_object):

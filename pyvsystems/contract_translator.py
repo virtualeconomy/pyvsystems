@@ -1,9 +1,9 @@
 from __future__ import print_function
-from .error import *
-from .opcode import Opcode
-from .deser import *
+from pyvsystems.error import *
+from pyvsystems.opcode import Opcode
+from pyvsystems.deser import *
 import copy
-from .contract_meta import ContractMeta as meta
+from pyvsystems.contract_meta import ContractMeta as meta
 
 
 def print_functions(functions_opcode, all_info):

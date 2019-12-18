@@ -1,9 +1,9 @@
 import json
 
-from .data_entry import serialize_data
-from .contract_translator import *
-from .setting import *
-from .crypto import *
+from pyvsystems.data_entry import serialize_data
+from pyvsystems.contract_translator import *
+from pyvsystems.setting import *
+from pyvsystems.crypto import *
 import time
 
 def get_contract_info(wrapper, contract_id):
