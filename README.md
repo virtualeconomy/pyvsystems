@@ -7,12 +7,19 @@ For more detail, please refer:
 
 [PYVSYSTEMS 使用详细指南(中文)](https://github.com/virtualeconomy/pyvsystems/wiki/PYVSYSTEMS-使用详细指南%28中文%29)
 
-## Install 
+## Install
+
+Library can be pulled via pip directly:
+
+```git+https://github.com/virtualeconomy/pyvsystems.git```
+
+Or:
+
 1. clone the repo under you workspace
 ```git clone https://github.com/virtualeconomy/pyvsystems.git```
-2. install packages in pyvsystems/requirement.txt by 
-```pip install -r ./pyvsystems/requirements.txt```
-3. Then you can ```import pyvsystems``` in your workspace
+2. install the package 
+```pip3 install pyvsystems/.```
+3. Then you can  ```import pyvsystems```  in your workspace
 
 ## Usage
 

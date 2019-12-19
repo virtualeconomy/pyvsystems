@@ -17,5 +17,7 @@ setup(
     author="V SYSTEMS",
     author_email="info@v.systems",
     license="MIT",
-    packages=["pyvsystems"]
+    packages=["pyvsystems"],
+    install_requires=["requests", "python-axolotl-curve25519", "pyblake2", "base58"],
+    python_requires='>=3.4'
 )

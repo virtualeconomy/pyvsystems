@@ -1,5 +1,5 @@
-from pyvsystems.contract_methods import *
-from pyvsystems.contract_builder import *
+from .contract_methods import *
+from .contract_builder import *
 import base58
 
 

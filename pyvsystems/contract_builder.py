@@ -2,10 +2,10 @@ import itertools
 import logging
 import struct
 
-from pyvsystems.deser import serialize_string, serialize_array, serialize_arrays
-from pyvsystems.contract_meta import ContractMeta as meta
+from .deser import serialize_string, serialize_array, serialize_arrays
+from .contract_meta import ContractMeta as meta
 
-from pyvsystems.crypto import *
+from .crypto import *
 
 
 data_type_list = {value: bytes([int(key)]) for key, value in meta.data_type_list.items()}

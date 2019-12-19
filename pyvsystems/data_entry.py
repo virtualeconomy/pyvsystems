@@ -1,6 +1,6 @@
-from pyvsystems.error import *
-from pyvsystems.deser import *
-from pyvsystems.crypto import *
+from .error import *
+from .deser import *
+from .crypto import *
 import base58
 
 

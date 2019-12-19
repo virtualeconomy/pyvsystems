@@ -1,10 +1,10 @@
-from pyvsystems.setting import *
-from pyvsystems.crypto import *
-from pyvsystems.error import *
-from pyvsystems.words import WORDS
+from .setting import *
+from .crypto import *
+from .error import *
+from .words import WORDS
 from . import is_offline
 from . import default_chain
-from pyvsystems.contract_methods import register_contract, execute_contract
+from .contract_methods import register_contract, execute_contract
 import time
 import struct
 import json

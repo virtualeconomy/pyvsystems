@@ -1,7 +1,7 @@
 import logging
 import requests
 from requests.exceptions import RequestException
-from pyvsystems.error import NetworkException
+from .error import NetworkException
 from . import is_offline
 
 
