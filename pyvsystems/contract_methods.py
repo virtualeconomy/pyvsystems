@@ -6,6 +6,7 @@ from .setting import *
 from .crypto import *
 import time
 
+
 def get_contract_info(wrapper, contract_id):
     resp = wrapper.request('/contract/info/%s' % contract_id)
     if resp.get('error'):

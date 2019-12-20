@@ -2,10 +2,11 @@ import itertools
 import logging
 import struct
 
-import deser
+from .deser import serialize_string, serialize_array, serialize_arrays
 from .contract_meta import ContractMeta as meta
 
 from .crypto import *
+
 
 data_type_list = {value: bytes([int(key)]) for key, value in meta.data_type_list.items()}
 function_type_map = {value: bytes([int(key[1:])]) for key, value in meta.function_type_map.items()}
@@ -57,7 +58,7 @@ def opc_return_value():
 
 def language_code_builder(code):
     if len(code) == meta.language_code_byte_length:
-        language_code = deser.serialize_string(code)
+        language_code = serialize_string(code)
         return language_code
     else:
         logging.error("Wrong language code length")
@@ -76,14 +77,14 @@ def language_version_builder(version):
 
 def bytes_builder_from_list(input_list):
     if type(input_list) is list:
-        return deser.serialize_array(deser.serialize_arrays(input_list))
+        return serialize_array(serialize_arrays(input_list))
     else:
         logging.error("The input should be a list")
 
 def textual_fun_gen(name, ret, para):
-    func_byte = deser.serialize_array(deser.serialize_string(name))
-    ret_byte = deser.serialize_array(deser.serialize_arrays([deser.serialize_string(r) for r in ret]))
-    para_byte = deser.serialize_arrays([deser.serialize_string(p) for p in para])
+    func_byte = serialize_array(serialize_string(name))
+    ret_byte = serialize_array(serialize_arrays([serialize_string(r) for r in ret]))
+    para_byte = serialize_arrays([serialize_string(p) for p in para])
     textual = func_byte + ret_byte + para_byte
     return textual
 
@@ -133,7 +134,7 @@ def state_var_random_gen():
     return state_var
 
 def state_var_gen(state_vars):
-    state_vars = deser.serialize_arrays(state_vars)
+    state_vars = serialize_arrays(state_vars)
     return state_vars
 
 def a_function_gen(fun_idx, fun_type, proto_type, list_opc):
@@ -287,7 +288,7 @@ def get_issuer_fun_id_without_split_gen():
 
 
 def proto_type_gen(return_type, list_para_types):
-    proto_type = deser.serialize_array(return_type) + deser.serialize_array(list_para_types)
+    proto_type = serialize_array(return_type) + serialize_array(list_para_types)
     return proto_type
 
 def init_para_type_wrong():
@@ -527,10 +528,10 @@ class ContractDefaults:
 
     state_var = bytes_builder_from_list([meta.state_var_issuer + data_type_list.get('Address'), meta.state_var_maker + data_type_list.get('Address')])
 
-    state_var_textual = deser.serialize_arrays([deser.serialize_string(name) for name in meta.state_var_name])
-    initializer_textual = deser.serialize_arrays([init_func_bytes()])
+    state_var_textual = serialize_arrays([serialize_string(name) for name in meta.state_var_name])
+    initializer_textual = serialize_arrays([init_func_bytes()])
 
-    descriptor_textual_without_split = deser.serialize_arrays([supersede_func_bytes(),
+    descriptor_textual_without_split = serialize_arrays([supersede_func_bytes(),
                                                       issue_func_bytes(),
                                                       destroy_func_bytes(),
                                                       send_func_bytes(),
@@ -542,7 +543,7 @@ class ContractDefaults:
                                                       balance_of_func_bytes(),
                                                       get_issuer_func_bytes()])
 
-    descriptor_textual_with_split = deser.serialize_arrays([supersede_func_bytes(),
+    descriptor_textual_with_split = serialize_arrays([supersede_func_bytes(),
                                                       issue_func_bytes(),
                                                       destroy_func_bytes(),
                                                       split_func_bytes(),
@@ -555,8 +556,8 @@ class ContractDefaults:
                                                       balance_of_func_bytes(),
                                                       get_issuer_func_bytes()])
 
-    textual_without_split = deser.serialize_arrays([initializer_textual, descriptor_textual_without_split, state_var_textual])
-    textual_with_split = deser.serialize_arrays(
+    textual_without_split = serialize_arrays([initializer_textual, descriptor_textual_without_split, state_var_textual])
+    textual_with_split = serialize_arrays(
         [initializer_textual, descriptor_textual_with_split, state_var_textual])
 
 
