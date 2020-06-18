@@ -1,10 +1,10 @@
 from .setting import *
 from .crypto import *
-from .error import *
+from .errors import *
 from .words import WORDS
+from .contract import serialize_data
 from . import is_offline
 from . import default_chain
-from .contract_methods import register_contract, execute_contract
 import time
 import struct
 import json
@@ -13,7 +13,9 @@ import logging
 
 
 class Account(object):
-    def __init__(self, chain=default_chain(), address='', public_key='', private_key='', seed='', alias='', nonce=0):
+    def __init__(self, chain=default_chain(), address='', public_key='', private_key='', seed='', nonce=0):
+        """Constructor.
+        """
         self.chain = chain
         self.wrapper = chain.api_wrapper
         if nonce < 0 or nonce > MAX_NONCE:
@@ -33,49 +35,47 @@ class Account(object):
                 self.privateKey = private_key
                 self.seed = seed
                 self.nonce = nonce
-        elif alias:
-            raise InvalidParameterException("The alias is not support in V systems")
         else:
             self._generate(nonce=nonce)
+        self.logger = logging.getLogger(__name__)
 
     def __str__(self):
+        """Returns readable representation.
+        """
         if not self.address:
             raise InvalidAddressException("No address")
         result = 'address = %s\npublicKey = %s\nprivateKey = %s\nseed = %s\nnonce = %d' % \
-               (self.address, self.publicKey, self.privateKey, self.seed, self.nonce)
+                 (self.address, self.publicKey, self.privateKey, self.seed, self.nonce)
         if not is_offline():
             try:
                 balance = self.balance()
                 result += "\nbalance: {}".format(balance)
             except NetworkException:
-                logging.error("Failed to get balance")
+                self.logger.error("Failed to get balance")
         return result
 
     __repr__ = __str__
 
     def balance(self, confirmations=0):
         if is_offline():
-            throw_error("Cannot check balance in offline mode.", NetworkException)
-            return 0
+            raise NetworkException("Cannot check height in offline mode.")
         try:
             confirmations_str = '' if confirmations == 0 else '/%d' % confirmations
-            resp = self.wrapper.request('/addresses/balance/%s%s' % (self.address, confirmations_str))
-            logging.debug(resp)
+            resp = self.wrapper.request('addresses/balance/%s%s' % (self.address, confirmations_str))
+            self.logger.debug(resp)
             return resp['balance']
         except Exception as ex:
             msg = "Failed to get balance. ({})".format(ex)
-            throw_error(msg, NetworkException)
-            return 0
+            raise NetworkException(msg)
 
     def balance_detail(self):
         try:
-            resp = self.wrapper.request('/addresses/balance/details/%s' % self.address)
-            logging.debug(resp)
+            resp = self.wrapper.request('addresses/balance/details/%s' % self.address)
+            self.logger.debug(resp)
             return resp
         except Exception as ex:
             msg = "Failed to get balance detail. ({})".format(ex)
-            throw_error(msg, NetworkException)
-            return None
+            raise NetworkException(msg)
 
     def _generate(self, public_key='', private_key='', seed='', nonce=0):
         self.seed = seed
@@ -97,7 +97,7 @@ class Account(object):
             pubKey = base58.b58decode(public_key)
             privKey = ""
         else:
-            seedHash = hashChain(str2bytes(str(nonce)+self.seed))
+            seedHash = hashChain(str2bytes(str(nonce) + self.seed))
             accountSeedHash = sha256(seedHash)
             if not private_key:
                 privKey = curve.generatePrivateKey(accountSeedHash)
@@ -109,29 +109,40 @@ class Account(object):
         if privKey != "":
             self.privateKey = bytes2str(base58.b58encode(privKey))
 
-    def send_payment(self, recipient, amount, attachment='', tx_fee=DEFAULT_PAYMENT_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
+    def _check(self, tx_fee, fee_scale, address=None, amount=None, attachment=None, lease_id=None, slot_id=None,
+               db_key=None, default_fee=DEFAULT_PAYMENT_FEE):
         if not self.privateKey:
-            msg = 'Private key required'
-            throw_error(msg, MissingPrivateKeyException)
-        if not self.chain.validate_address(recipient.address):
-            msg = 'Invalid recipient address'
-            throw_error(msg, InvalidAddressException)
-        elif amount <= 0:
-            msg = 'Amount must be > 0'
-            throw_error(msg, InvalidParameterException)
-        elif tx_fee < DEFAULT_PAYMENT_FEE:
-            msg = 'Transaction fee must be >= %d' % DEFAULT_PAYMENT_FEE
-            throw_error(msg, InvalidParameterException)
-        elif len(attachment) > MAX_ATTACHMENT_SIZE:
-            msg = 'Attachment length must be <= %d' % MAX_ATTACHMENT_SIZE
-            throw_error(msg, InvalidParameterException)
+            raise MissingPrivateKeyException('Private key required')
+        elif address and not self.chain.validate_address(address):
+            raise InvalidAddressException('Invalid recipient address')
+        elif amount and amount < 0:
+            raise InvalidParameterException('Amount must be >= 0')
+        elif attachment and len(attachment) > MAX_ATTACHMENT_SIZE:
+            raise InvalidParameterException('Attachment length must be <= %d' % MAX_ATTACHMENT_SIZE)
+        elif lease_id and len(base58.b58decode(lease_id)) != LEASE_TX_ID_BYTES:
+            raise InvalidParameterException('Invalid lease transaction id')
+        elif slot_id and (slot_id >= 60 or slot_id < 0):
+            raise InvalidParameterException('Slot id must be in 0 to 59')
+        elif db_key and (len(db_key) > MAX_DB_KEY_SIZE or len(db_key) < MIN_DB_KEY_SIZE):
+            raise InvalidParameterException('DB key length must be greater than %d and smaller than %d'
+                                            % (MIN_DB_KEY_SIZE, MAX_ATTACHMENT_SIZE))
+        elif tx_fee < default_fee:
+            raise InvalidParameterException('Transaction fee must be >= %d' % default_fee)
         elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
-            msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
-            throw_error(msg, InvalidParameterException)
-        elif not is_offline() and self.balance() < amount + tx_fee:
-            msg = 'Insufficient VSYS balance'
-            throw_error(msg, InsufficientBalanceException)
+            raise InvalidParameterException('Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE)
+        elif not is_offline() and amount and self.balance() < amount + tx_fee:
+            raise InsufficientBalanceException('Insufficient VSYS balance')
         else:
+            return True
+
+    def sign(self, sData):
+        if not self.privateKey:
+            raise MissingPrivateKeyException('Private key required')
+        return bytes2str(sign(self.privateKey, base58.b58decode(sData)))
+
+    def send_payment(self, recipient, amount, attachment='', tx_fee=DEFAULT_PAYMENT_FEE, fee_scale=DEFAULT_FEE_SCALE,
+                     timestamp=0):
+        if self._check(tx_fee, fee_scale, address=recipient.address, amount=amount, attachment=attachment):
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
             sData = struct.pack(">B", PAYMENT_TX_TYPE) + \
@@ -154,29 +165,10 @@ class Account(object):
                 "attachment": attachment_str,
                 "signature": signature
             })
-
-            return self.wrapper.request('/vsys/broadcast/payment', data)
+            return self.wrapper.request('vsys/broadcast/payment', data)
 
     def lease(self, recipient, amount, tx_fee=DEFAULT_LEASE_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
-        if not self.privateKey:
-            msg = 'Private key required'
-            throw_error(msg, MissingPrivateKeyException)
-        if not self.chain.validate_address(recipient.address):
-            msg = 'Invalid recipient address'
-            throw_error(msg, InvalidAddressException)
-        elif amount <= 0:
-            msg = 'Amount must be > 0'
-            throw_error(msg, InvalidParameterException)
-        elif tx_fee < DEFAULT_LEASE_FEE:
-            msg = 'Transaction fee must be >= %d' % DEFAULT_LEASE_FEE
-            throw_error(msg, InvalidParameterException)
-        elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
-            msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
-            throw_error(msg, InvalidParameterException)
-        elif not is_offline() and self.balance() < amount + tx_fee:
-            msg = 'Insufficient VSYS balance'
-            throw_error(msg, InsufficientBalanceException)
-        else:
+        if self._check(tx_fee, fee_scale, address=recipient.address, amount=amount):
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
             sData = struct.pack(">B", LEASE_TX_TYPE) + \
@@ -195,34 +187,17 @@ class Account(object):
                 "timestamp": timestamp,
                 "signature": signature
             })
-            req = self.wrapper.request('/leasing/broadcast/lease', data)
-            return req
+            return self.wrapper.request('leasing/broadcast/lease', data)
 
-    def lease_cancel(self, lease_id, tx_fee=DEFAULT_CANCEL_LEASE_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
-        decode_lease_id = base58.b58decode(lease_id)
-        if not self.privateKey:
-            msg = 'Private key required'
-            throw_error(msg, MissingPrivateKeyException)
-        elif tx_fee < DEFAULT_CANCEL_LEASE_FEE:
-            msg = 'Transaction fee must be > %d' % DEFAULT_CANCEL_LEASE_FEE
-            throw_error(msg, InvalidParameterException)
-        elif len(decode_lease_id) != LEASE_TX_ID_BYTES:
-            msg = 'Invalid lease transaction id'
-            throw_error(msg, InvalidParameterException)
-        elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
-            msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
-            throw_error(msg, InvalidParameterException)
-        elif not is_offline() and self.balance() < tx_fee:
-            msg = 'Insufficient VSYS balance'
-            throw_error(msg, InsufficientBalanceException)
-        else:
+    def cancel_lease(self, lease_id, tx_fee=DEFAULT_CANCEL_LEASE_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
+        if self._check(tx_fee, fee_scale, amount=0, lease_id=lease_id):
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
             sData = struct.pack(">B", LEASE_CANCEL_TX_TYPE) + \
                     struct.pack(">Q", tx_fee) + \
                     struct.pack(">H", fee_scale) + \
                     struct.pack(">Q", timestamp) + \
-                    decode_lease_id
+                    base58.b58decode(lease_id)
             signature = bytes2str(sign(self.privateKey, sData))
             data = json.dumps({
                 "senderPublicKey": self.publicKey,
@@ -232,17 +207,24 @@ class Account(object):
                 "timestamp": timestamp,
                 "signature": signature
             })
-            req = self.wrapper.request('/leasing/broadcast/cancel', data)
+            req = self.wrapper.request('leasing/broadcast/cancel', data)
             return req
 
     def contend(self, slot_id, tx_fee=DEFAULT_CONTEND_SLOT_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
-        if not self.privateKey:
-            msg = 'Private key required'
-            throw_error(msg, MissingPrivateKeyException)
-        elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
-            msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
-            throw_error(msg, InvalidParameterException)
-        elif self.check_contend(slot_id, tx_fee):
+        if self._check(tx_fee, fee_scale, slot_id=slot_id, default_fee=DEFAULT_CONTEND_SLOT_FEE):
+            if not is_offline():
+                balance_detail = self.get_info()
+                min_effective_balance = MIN_CONTEND_SLOT_BALANCE + tx_fee
+                if balance_detail["effective"] < min_effective_balance:
+                    raise InvalidParameterException('Insufficient VSYS balance. (The effective balance must be >= %d)'
+                                                    % min_effective_balance)
+                slot_info = self.chain.slot_info(slot_id)
+                if not slot_info or slot_info.get("mintingAverageBalance") is None:
+                    raise NetworkException('Failed to get slot minting average balance')
+                elif slot_info["mintingAverageBalance"] >= balance_detail["mintingAverage"]:
+                    raise InsufficientBalanceException(
+                        'The minting average balance of slot %d is greater than or equals '
+                        'to yours. You will fail in contending this slot.' % slot_id)
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
             sData = struct.pack(">B", CONTEND_SLOT_TX_TYPE) + \
@@ -259,54 +241,10 @@ class Account(object):
                 "timestamp": timestamp,
                 "signature": signature
             })
-            return self.wrapper.request('/spos/broadcast/contend', data)
-
-    def check_contend(self, slot_id, tx_fee):
-        if tx_fee < DEFAULT_CONTEND_SLOT_FEE:
-            msg = 'Transaction fee must be >= %d' % DEFAULT_CONTEND_SLOT_FEE
-            throw_error(msg, InvalidParameterException)
-            return False
-        if slot_id >= 60 or slot_id < 0:
-            msg = 'Slot id must be in 0 to 59'
-            throw_error(msg, InvalidParameterException)
-            return False
-        if is_offline():  # if offline, skip other check
-            return True
-        balance_detail = self.get_info()
-        min_effective_balance = MIN_CONTEND_SLOT_BALANCE + tx_fee
-        if balance_detail["effective"] < min_effective_balance:
-            msg = 'Insufficient VSYS balance. (The effective balance must be >= %d)' % min_effective_balance
-            throw_error(msg, InvalidParameterException)
-            return False
-        slot_info = self.chain.slot_info(slot_id)
-        if not slot_info or slot_info.get("mintingAverageBalance") is None:
-            msg = 'Failed to get slot minting average balance'
-            throw_error(msg, NetworkException)
-            return False
-        elif slot_info["mintingAverageBalance"] >= balance_detail["mintingAverage"]:
-            msg = 'The minting average balance of slot %d is greater than or equals to yours. ' \
-                  'You will contend this slot failed.' % slot_id
-            throw_error(msg, InsufficientBalanceException)
-            return False
-        return True
+            return self.wrapper.request('spos/broadcast/contend', data)
 
     def release(self, slot_id, tx_fee=DEFAULT_RELEASE_SLOT_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
-        if not self.privateKey:
-            msg = 'Private key required'
-            throw_error(msg, MissingPrivateKeyException)
-        elif tx_fee < DEFAULT_RELEASE_SLOT_FEE:
-            msg = 'Transaction fee must be >= %d' % DEFAULT_RELEASE_SLOT_FEE
-            throw_error(msg, InvalidParameterException)
-        elif slot_id >= 60 or slot_id < 0:
-            msg = 'Slot id must be in 0 to 59'
-            throw_error(msg, InvalidParameterException)
-        elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
-            msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
-            throw_error(msg, InvalidParameterException)
-        elif not is_offline() and self.balance() < tx_fee:
-            msg = 'Insufficient VSYS balance'
-            throw_error(msg, InsufficientBalanceException)
-        else:
+        if self._check(tx_fee, fee_scale, amount=0, slot_id=slot_id):
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
             sData = struct.pack(">B", RELEASE_SLOT_TX_TYPE) + \
@@ -323,25 +261,11 @@ class Account(object):
                 "timestamp": timestamp,
                 "signature": signature
             })
-            return self.wrapper.request('/spos/broadcast/release', data)
+            return self.wrapper.request('spos/broadcast/release', data)
 
-    def dbput(self, db_key, db_data, db_data_type="ByteArray", tx_fee=DEFAULT_DBPUT_FEE, fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
-        if not self.privateKey:
-            msg = 'Private key required'
-            throw_error(msg, MissingPrivateKeyException)
-        elif tx_fee < DEFAULT_DBPUT_FEE:
-            msg = 'Transaction fee must be >= %d' % DEFAULT_DBPUT_FEE
-            throw_error(msg, InvalidParameterException)
-        elif len(db_key) > MAX_DB_KEY_SIZE or len(db_key) < MIN_DB_KEY_SIZE:
-            msg = 'DB key length must be greater than %d and smaller than %d' % (MIN_DB_KEY_SIZE, MAX_ATTACHMENT_SIZE)
-            throw_error(msg, InvalidParameterException)
-        elif CHECK_FEE_SCALE and fee_scale != DEFAULT_FEE_SCALE:
-            msg = 'Wrong fee scale (currently, fee scale must be %d).' % DEFAULT_FEE_SCALE
-            throw_error(msg, InvalidParameterException)
-        elif not is_offline() and self.balance() < tx_fee:
-            msg = 'Insufficient VSYS balance'
-            throw_error(msg, InsufficientBalanceException)
-        else:
+    def dbput(self, db_key, db_data, db_data_type="ByteArray", tx_fee=DEFAULT_DBPUT_FEE, fee_scale=DEFAULT_FEE_SCALE,
+              timestamp=0):
+        if self._check(tx_fee, fee_scale, amount=0, db_key=db_key, default_fee=DEFAULT_DBPUT_FEE):
             if timestamp == 0:
                 timestamp = int(time.time() * 1000000000)
             # "ByteArray" is the only supported type in first version
@@ -349,13 +273,11 @@ class Account(object):
                 data_type_id = b'\x01'
             # TODO: add more DB data type here
             else:
-                msg = 'Unsupported data type: {}'.format(db_data_type)
-                throw_error(msg, InvalidParameterException)
-                return
+                raise InvalidParameterException('Unsupported data type: {}'.format(db_data_type))
             sData = struct.pack(">B", DBPUT_TX_TYPE) + \
                     struct.pack(">H", len(db_key)) + \
                     str2bytes(db_key) + \
-                    struct.pack(">H", len(db_data)+1) + \
+                    struct.pack(">H", len(db_data) + 1) + \
                     data_type_id + \
                     str2bytes(db_data) + \
                     struct.pack(">Q", tx_fee) + \
@@ -363,35 +285,83 @@ class Account(object):
                     struct.pack(">Q", timestamp)
             signature = bytes2str(sign(self.privateKey, sData))
             data = json.dumps({
-                  "senderPublicKey": self.publicKey,
-                  "dbKey": db_key,
-                  "dataType": db_data_type,
-                  "data": db_data,
-                  "fee": tx_fee,
-                  "feeScale": fee_scale,
-                  "timestamp": timestamp,
-                  "signature": signature
+                "senderPublicKey": self.publicKey,
+                "dbKey": db_key,
+                "dataType": db_data_type,
+                "data": db_data,
+                "fee": tx_fee,
+                "feeScale": fee_scale,
+                "timestamp": timestamp,
+                "signature": signature
             })
-
-            return self.wrapper.request('/database/broadcast/put', data)
+            return self.wrapper.request('database/broadcast/put', data)
 
     def register_contract(self, contract, data_stack, description='', tx_fee=DEFAULT_REGISTER_CONTRACT_FEE,
-                      fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
-        return register_contract(self, contract, data_stack, description, tx_fee, fee_scale, timestamp)
+                          fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
+        if self._check(tx_fee, fee_scale, amount=0, default_fee=DEFAULT_REGISTER_CONTRACT_FEE):
+            data_stack_bytes = serialize_data(data_stack)
+            if timestamp == 0:
+                timestamp = int(time.time() * 1000000000)
+            sData = struct.pack(">B", REGISTER_CONTRACT_TX_TYPE) + \
+                    struct.pack(">H", len(contract.bytes)) + \
+                    contract.bytes + \
+                    struct.pack(">H", len(data_stack_bytes)) + \
+                    data_stack_bytes + \
+                    struct.pack(">H", len(description)) + \
+                    str2bytes(description) + \
+                    struct.pack(">Q", tx_fee) + \
+                    struct.pack(">H", fee_scale) + \
+                    struct.pack(">Q", timestamp)
+            signature = bytes2str(sign(self.privateKey, sData))
+            description_str = description
+            data_stack_str = bytes2str(base58.b58encode(data_stack_bytes))
+            data = json.dumps({
+                "senderPublicKey": self.publicKey,
+                "contract": bytes2str(base58.b58encode(contract.bytes)),
+                "initData": data_stack_str,
+                "description": description_str,
+                "fee": tx_fee,
+                "feeScale": fee_scale,
+                "timestamp": timestamp,
+                "signature": signature
+            })
+            return self.wrapper.request('contract/broadcast/register', data)
 
     def execute_contract(self, contract_id, func_id, data_stack, attachment='', tx_fee=DEFAULT_EXECUTE_CONTRACT_FEE,
-                     fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
-        return execute_contract(self, contract_id, func_id, data_stack, attachment, tx_fee, fee_scale, timestamp)
+                         fee_scale=DEFAULT_FEE_SCALE, timestamp=0):
+        if self._check(tx_fee, fee_scale, amount=0, default_fee=DEFAULT_EXECUTE_CONTRACT_FEE):
+            data_stack_bytes = serialize_data(data_stack)
+            if timestamp == 0:
+                timestamp = int(time.time() * 1000000000)
+            sData = struct.pack(">B", EXECUTE_CONTRACT_FUNCTION_TX_TYPE) + \
+                    base58.b58decode(contract_id) + \
+                    struct.pack(">H", func_id) + \
+                    struct.pack(">H", len(data_stack_bytes)) + \
+                    data_stack_bytes + \
+                    struct.pack(">H", len(attachment)) + \
+                    str2bytes(attachment) + \
+                    struct.pack(">Q", tx_fee) + \
+                    struct.pack(">H", fee_scale) + \
+                    struct.pack(">Q", timestamp)
+            signature = bytes2str(sign(self.privateKey, sData))
+            description_str = bytes2str(base58.b58encode(str2bytes(attachment)))
+            data_stack_str = bytes2str(base58.b58encode(data_stack_bytes))
+            data = json.dumps({
+                "senderPublicKey": self.publicKey,
+                "contractId": contract_id,
+                "functionIndex": func_id,
+                "functionData": data_stack_str,
+                "attachment": description_str,
+                "fee": tx_fee,
+                "feeScale": fee_scale,
+                "timestamp": timestamp,
+                "signature": signature
+            })
+            return self.wrapper.request('contract/broadcast/execute', data)
 
     def get_info(self):
         if not (self.address and self.publicKey):
-            msg = 'Address required'
-            throw_error(msg, MissingAddressException)
-            return None
-        if not self.publicKey:
-            msg = 'Public key and address required'
-            throw_error(msg, MissingPublicKeyException)
-            return None
+            raise MissingAddressException('Address and Public key required')
         if is_offline():
             info = {
                 "publicKey": self.publicKey,
@@ -400,24 +370,20 @@ class Account(object):
             return info
         info = self.balance_detail()
         if not info:
-            msg = 'Failed to get balance detail'
-            throw_error(msg, NetworkException)
+            raise NetworkException('Failed to get balance detail')
         else:
             info["publicKey"] = self.publicKey
             return info
 
     def get_tx_history(self, limit=100, type_filter=PAYMENT_TX_TYPE):
         if is_offline():
-            throw_error("Cannot check history in offline mode.", NetworkException)
-            return []
+            raise NetworkException("Cannot check history in offline mode.")
         if not self.address:
-            msg = 'Address required'
-            throw_error(msg, MissingAddressException)
+            raise MissingAddressException('Address required')
         elif limit > MAX_TX_HISTORY_LIMIT:
-            msg = 'Too big sequences requested (Max limitation is %d).' % MAX_TX_HISTORY_LIMIT
-            throw_error(msg, InvalidParameterException)
+            raise InvalidParameterException('Too big sequences requested (Max limitation is %d).' % MAX_TX_HISTORY_LIMIT)
         else:
-            url = '/transactions/address/{}/limit/{}'.format(self.address, limit)
+            url = 'transactions/address/{}/limit/{}'.format(self.address, limit)
             resp = self.wrapper.request(url)
             if isinstance(resp, list) and type_filter:
                 resp = [tx for tx in resp[0] if tx['type'] == type_filter]
@@ -430,11 +396,10 @@ class Account(object):
         Return None if Transaction does not exist!
         """
         if is_offline():
-            throw_error("Cannot check transaction in offline mode.", NetworkException)
-            return None
+            raise NetworkException("Cannot check transaction in offline mode.")
         utx_res = self.chain.unconfirmed_tx(tx_id)
         if "id" in utx_res:
-            logging.error("Transaction {} is pending in UTX pool.".format(tx_id))
+            self.logger.error("Transaction {} is pending in UTX pool.".format(tx_id))
             return False
         else:
             tx_res = self.chain.tx(tx_id)
@@ -442,24 +407,23 @@ class Account(object):
                 tx_height = tx_res["height"]
                 cur_height = self.chain.height()
                 if cur_height >= tx_height + confirmations:
-                    logging.debug("Transaction {} is fully confirmed.".format(tx_id))
+                    self.logger.debug("Transaction {} is fully confirmed.".format(tx_id))
                     return True
                 else:
-                    logging.info("Transaction {} is sent but not fully confirmed.".format(tx_id))
+                    self.logger.info("Transaction {} is sent but not fully confirmed.".format(tx_id))
                     return False
             elif "id" not in tx_res:
-                logging.error("Transaction does not exist!")
-                logging.debug("Tx API response: {}".format(tx_res))
+                self.logger.error("Transaction does not exist!")
+                self.logger.debug("Tx API response: {}".format(tx_res))
                 return None
             else:
-                logging.error("Transaction failed to process!")
-                logging.debug("Tx API response: {}".format(tx_res))
+                self.logger.error("Transaction failed to process!")
+                self.logger.debug("Tx API response: {}".format(tx_res))
                 return False
 
     def check_node(self, other_node_host=None):
         if is_offline():
-            throw_error("Cannot check node in offline mode.", NetworkException)
-            return False
+            raise NetworkException("Cannot check transaction in offline mode.")
         if other_node_host:
             res = self.chain.check_with_other_node(other_node_host)
         else:
@@ -487,11 +451,11 @@ class Account(object):
     def check_tx_is_unconfirmed(self, tx_id):
         utx_res = self.chain.unconfirmed_tx(tx_id)
         if "id" in utx_res:
-            throw_error("Transaction {} is pending in UTX pool.".format(tx_id), InvalidStatus)
+            raise InvalidStatus("Transaction {} is pending in UTX pool.".format(tx_id))
         else:
             return False
 
     @staticmethod
     def check_is_offline():
         if is_offline():
-            throw_error("Cannot check transaction in offline mode.", NetworkException)
+            raise NetworkException("Cannot check transaction in offline mode.")

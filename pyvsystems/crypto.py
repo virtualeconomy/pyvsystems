@@ -54,10 +54,12 @@ def rol(value, left, bits):
     bot = (value & Masks[bits - left]) << left
     return bot | top
 
+
 def ror(value, right, bits):
     top = value >> right
     bot = (value & Masks[right]) << (bits - right)
     return bot | top
+
 
 def multirate_padding(used_bytes, align_bytes):
     padlen = align_bytes - used_bytes
@@ -260,18 +262,21 @@ class KeccakHash(object):
 
 keccak256 = KeccakHash()
 
+
 def sha256(s):
     return hashlib.sha256(str2bytes(s)).digest()
+
 
 def hashChain(s):
     a=pyblake2.blake2b(s, digest_size=32).digest()
     b=keccak256.digest(a)
     return b
 
+
 def sign(privateKey, message):
     random64 = os.urandom(64)
-
     return base58.b58encode(curve.calculateSignature(random64, base58.b58decode(privateKey), message))
+
 
 def id(message):
     return base58.b58encode(hashlib.sha256(message).digest())
