@@ -108,6 +108,11 @@ def bytes_builder_from_list(input_list):
     else:
         logging.error("The input should be a list")
 
+def chain_system_contract_id(chain):
+    unhashedAddress = chr(6) + str(chain.chain_id) + hashChain(base58.b58encode(''))[0:20]
+    addressHash = hashChain(str2bytes(unhashedAddress))[0:4]
+    contract_id = bytes2str(base58.b58encode(str2bytes(unhashedAddress + addressHash)))
+    return contract_id
 
 def token_id_from_contract_id(contract_id, idx):
     address_bytes = base58.b58decode(contract_id)
