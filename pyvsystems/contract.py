@@ -2,6 +2,7 @@ from .crypto import *
 from .deser import Deser
 from .setting import ContractMeta
 from .errors import *
+from typing import NamedTuple
 import struct
 import base58
 
@@ -149,142 +150,114 @@ def data_entries_from_bytes(bytes_object):
 
 
 def parse_data_entry_array_size(bytes_object, start_position):
-    if bytes_object[start_position: start_position + 1] == Type.public_key:
-        return (data_entry_from_bytes(bytes_object[start_position:start_position + Type.key_length + 1]),
-                start_position + Type.key_length + 1)
-    elif bytes_object[start_position: start_position + 1] == Type.address:
-        return (data_entry_from_bytes(bytes_object[start_position:start_position + Type.address_length + 1]),
-                start_position + Type.address_length + 1)
-    elif bytes_object[start_position: start_position + 1] == Type.amount:
-        return (data_entry_from_bytes(bytes_object[start_position:start_position + Type.amount_length + 1]),
-                start_position + Type.amount_length + 1)
-    elif bytes_object[start_position: start_position + 1] == Type.int32:
-        return (data_entry_from_bytes(bytes_object[start_position:start_position + Type.int32_length + 1]),
-                start_position + Type.int32_length + 1)
-    elif bytes_object[start_position: start_position + 1] == Type.short_text:
-        return (data_entry_from_bytes(bytes_object[start_position:start_position + struct.unpack(">H", bytes_object[
-                                                                                                       start_position + 1:start_position + 3])[
-            0] + 3]),
-                start_position + struct.unpack(">H", bytes_object[start_position + 1: start_position + 3])[0] + 3)
-    elif bytes_object[start_position: start_position + 1] == Type.contract_account:
-        return (data_entry_from_bytes(bytes_object[start_position:start_position + Type.address_length + 1]),
-                start_position + Type.address_length + 1)
-    elif bytes_object[start_position: start_position + 1] == Type.token_id:
-        return (data_entry_from_bytes(bytes_object[start_position:start_position + Type.token_address_length + 1]),
-                start_position + Type.token_address_length + 1)
-    elif bytes_object[start_position: start_position + 1] == Type.timestamp:
-        return (data_entry_from_bytes(bytes_object[start_position:start_position + Type.amount_length + 1]),
-                start_position + Type.amount_length + 1)
-    elif bytes_object[start_position: start_position + 1] == Type.short_bytes:
-        return (data_entry_from_bytes(bytes_object[start_position:start_position + struct.unpack(">H", bytes_object[
-                                                                                                       start_position + 1:start_position + 3])[
-            0] + 3]),
-                start_position + struct.unpack(">H", bytes_object[start_position + 1: start_position + 3])[0] + 3)
-
+    index = bytes_object[start_position: start_position + 1]
+    data_type = Type().by_index(index)
+    return data_type.parse_data_entry_size(bytes_object, start_position)
 
 def data_entry_from_bytes(bytes_object):
     if len(bytes_object) == 0:
         raise ValueError("Invalid DataEntry %s" % str(bytes_object))
-    elif bytes_object[0:1] == Type.public_key:
-        return DataEntry(bytes2str(base58.b58encode(bytes_object[1:])), bytes_object[0:1])
-    elif bytes_object[0:1] == Type.address:
-        return DataEntry(bytes2str(base58.b58encode(bytes_object[1:])), bytes_object[0:1])
-    elif bytes_object[0:1] == Type.amount:
-        return DataEntry(struct.unpack(">Q", bytes_object[1:])[0], bytes_object[0:1])
-    elif bytes_object[0:1] == Type.int32:
-        return DataEntry(struct.unpack(">I", bytes_object[1:])[0], bytes_object[0:1])
-    elif bytes_object[0:1] == Type.short_text:
-        return DataEntry(bytes2str(bytes_object[3:]), bytes_object[0:1])
-    elif bytes_object[0:1] == Type.contract_account:
-        return DataEntry(bytes2str(base58.b58encode(bytes_object[1:])), bytes_object[0:1])
-    elif bytes_object[0:1] == Type.token_id:
-        return DataEntry(bytes2str(base58.b58encode(bytes_object[1:])), bytes_object[0:1])
-    elif bytes_object[0:1] == Type.timestamp:
-        return DataEntry(struct.unpack(">Q", bytes_object[1:])[0], bytes_object[0:1])
-    elif bytes_object[0:1] == Type.short_bytes:
-        return DataEntry(bytes2str(bytes_object[3:]), bytes_object[0:1])
-
-
-def check_data_type(data, data_type):
-    if data_type == Type.public_key:
-        data_bytes = base58.b58decode(data)
-        return len(data_bytes) == Type.key_length
-    elif data_type == Type.address:
-        data_bytes = base58.b58decode(data)
-        return len(data_bytes) == Type.address_length
-    elif data_type == Type.amount:
-        data_bytes = struct.pack(">Q", data)
-        return len(data_bytes) == Type.amount_length and struct.unpack(">Q", data_bytes)[0] > 0
-    elif data_type == Type.int32:
-        data_bytes = struct.pack(">I", data)
-        return len(data_bytes) == Type.int32_length and struct.unpack(">I", data_bytes)[0] > 0
-    elif data_type == Type.short_text:
-        data_bytes = Deser.serialize_array(str2bytes(data))
-        return struct.unpack(">H", data_bytes[0:2])[0] + 2 == len(data_bytes) and len(
-            data_bytes) <= Type.max_short_text_size + 2
-    elif data_type == Type.short_bytes:
-        data_bytes = Deser.serialize_array(str2bytes(data))
-        return struct.unpack(">H", data_bytes[0:2])[0] + 2 == len(data_bytes) and len(
-            data_bytes) <= Type.max_short_bytes_size + 2
     else:
-        return True
-
+        type_object = Type().by_index(bytes_object[0:1])
+        return type_object.data_entry_from_data_bytes(bytes_object[1:])
 
 class DataEntry:
     def __init__(self, data, data_type):
-        if not check_data_type(data, data_type):
+        if not data_type.check_data_type(data):
             raise ValueError("Invalid DataEntry data: %s, type: %s" % (str(data), str(data_type)))
-        if data_type == Type.public_key:
-            self.data_bytes = base58.b58decode(data)
-            self.data_type = 'public_key'
-        elif data_type == Type.address:
-            self.data_bytes = base58.b58decode(data)
-            self.data_type = 'address'
-        elif data_type == Type.amount:
-            self.data_bytes = struct.pack(">Q", data)
-            self.data_type = 'amount'
-        elif data_type == Type.int32:
-            self.data_bytes = struct.pack(">I", data)
-            self.data_type = 'int32'
-        elif data_type == Type.short_text:
-            self.data_bytes = Deser.serialize_array(str2bytes(data))
-            self.data_type = 'short_text'
-        elif data_type == Type.contract_account:
-            self.data_bytes = base58.b58decode(data)
-            self.data_type = 'contract_account'
-        elif data_type == Type.token_id:
-            self.data_bytes = base58.b58decode(data)
-            self.data_type = 'token_id'
-        elif data_type == Type.timestamp:
-            self.data_bytes = struct.pack(">Q", data)
-            self.data_type = 'timestamp'
-        elif data_type == Type.short_bytes:
-            self.data_bytes = Deser.serialize_array(str2bytes(data))
-            self.data_type = 'short_bytes'
+        self.data_bytes = data_type.data_to_bytes(data)
+        self.data_name = data_type.name
         self.data = data
-        self.bytes = data_type + self.data_bytes
+        self.bytes = data_type.index + self.data_bytes
+
+class TypeStruct(NamedTuple):
+  index: bytes
+  length: int
+  name: str
+  data_category: str
+
+  def check_data_type(self, data):
+      data_bytes = self.data_to_bytes(data)
+      if self.data_category == 'b58':
+          return len(data_bytes) == self.length
+      elif self.data_category == 'long':
+          return len(data_bytes) == self.length and struct.unpack(">Q", data_bytes)[0] > 0
+      elif self.data_category == 'int':
+          return len(data_bytes) == self.length and struct.unpack(">I", data_bytes)[0] > 0
+      elif self.data_category == 'short_type':
+          return struct.unpack(">H", data_bytes[0:2])[0] + 2 == len(data_bytes) and len(
+              data_bytes) <= Type.short_text.length + 2
+      else:
+          return True
+
+  def data_to_bytes(self, data):
+      if self.data_category == 'b58':
+          return base58.b58decode(data)
+      elif self.data_category == 'long':
+          return struct.pack(">Q", data)
+      elif self.data_category == 'int':
+          return struct.pack(">I", data)
+      elif self.data_category == 'short_type':
+          return Deser.serialize_array(str2bytes(data))
+
+  def parse_data_entry_size(self, bytes_object, start_position):
+      if (self.data_category == 'short_type'):
+          return (data_entry_from_bytes(bytes_object[start_position:start_position + struct.unpack(">H", bytes_object[
+                                                                                                         start_position + 1:start_position + 3])[
+              0] + 3]),
+                  start_position + struct.unpack(">H", bytes_object[start_position + 1: start_position + 3])[0] + 3)
+      else:
+          return (data_entry_from_bytes(bytes_object[start_position:start_position + Type.address.length + 1]),
+                  start_position + self.length + 1)
+
+  def data_entry_from_data_bytes(self, data):
+      if self.data_category == 'b58':
+          return DataEntry(bytes2str(base58.b58encode(data)), self)
+      elif self.data_category == 'long':
+          return DataEntry(struct.unpack(">Q", data)[0], self)
+      elif self.data_category == 'int':
+          return DataEntry(struct.unpack(">I", data)[0], self)
+      elif self.data_category == 'short_type':
+          return DataEntry(bytes2str(data[2:]), self)
+
 
 
 class Type:
-    public_key = struct.pack(">B", 1)
-    key_length = 32
-    address = struct.pack(">B", 2)
-    address_length = 26
-    amount = struct.pack(">B", 3)
-    amount_length = 8
-    int32 = struct.pack(">B", 4)
-    int32_length = 4
-    short_text = struct.pack(">B", 5)
-    max_short_text_size = 140
-    contract_account = struct.pack(">B", 6)
-    contract_account_length = 26
-    account = struct.pack(">B", 7)
-    token_id = struct.pack(">B", 8)
-    token_address_length = 30
-    timestamp = struct.pack(">B", 9)
-    boolean = struct.pack(">B", 10)
-    short_bytes = struct.pack(">B", 11)
-    max_short_bytes_size = 255
-    balance = struct.pack(">B", 12)
+    public_key = TypeStruct(struct.pack(">B", 1), 32, 'public_key', 'b58')
+    address = TypeStruct(struct.pack(">B", 2), 26, 'address', 'b58')
+    amount = TypeStruct(struct.pack(">B", 3), 8, 'amount', 'long')
+    int32 = TypeStruct(struct.pack(">B", 4), 4, 'int32', 'int')
+    short_text = TypeStruct(struct.pack(">B", 5), 140, 'short_text', 'short_type')
+    contract_account = TypeStruct(struct.pack(">B", 6), 26, 'contract_account', 'b58')
+    account = TypeStruct(struct.pack(">B", 7), 26, 'account', 'b58')
+    token_id = TypeStruct(struct.pack(">B", 8), 30, 'token_id', 'b58')
+    timestamp = TypeStruct(struct.pack(">B", 9), 8, 'timestamp', 'long')
+    boolean = TypeStruct(struct.pack(">B", 10), 1, 'boolean', 'bool')
+    short_bytes = TypeStruct(struct.pack(">B", 11), 255, 'short_bytes', 'short_type')
+    balance = TypeStruct(struct.pack(">B", 12), 8, 'balance', 'long')
 
-
+    def by_index(self, index):
+        if index == 1 or index == struct.pack(">B", 1):
+            return Type.public_key
+        elif index == 2 or index == struct.pack(">B", 2):
+            return Type.address
+        elif index == 3 or index == struct.pack(">B", 3):
+            return Type.amount
+        elif index == 4 or index == struct.pack(">B", 4):
+            return Type.int32
+        elif index == 5 or index == struct.pack(">B", 5):
+            return Type.short_text
+        elif index == 6 or index == struct.pack(">B", 6):
+            return Type.contract_account
+        elif index == 7 or index == struct.pack(">B", 7):
+            return Type.account
+        elif index == 8 or index == struct.pack(">B", 8):
+            return Type.token_id
+        elif index == 9 or index == struct.pack(">B", 9):
+            return Type.timestamp
+        elif index == 10 or index == struct.pack(">B", 10):
+            return Type.boolean
+        elif index == 11 or index == struct.pack(">B", 11):
+            return Type.short_bytes
+        elif index == 12 or index == struct.pack(">B", 12):
+            return Type.balance
