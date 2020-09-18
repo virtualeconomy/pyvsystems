@@ -187,6 +187,9 @@ class TypeStruct(NamedTuple):
       elif self.data_category == 'short_type':
           return struct.unpack(">H", data_bytes[0:2])[0] + 2 == len(data_bytes) and len(
               data_bytes) <= Type.short_text.length + 2
+      elif self.data_category == 'short_bytes_string':
+          return struct.unpack(">H", data_bytes[0:2])[0] + 2 == len(data_bytes) and len(
+              data_bytes) <= Type.short_text.length + 2
       else:
           return True
 
@@ -199,6 +202,8 @@ class TypeStruct(NamedTuple):
           return struct.pack(">I", data)
       elif self.data_category == 'short_type':
           return Deser.serialize_array(str2bytes(data))
+      elif self.data_category == 'short_bytes_string':
+          return Deser.serialize_array(base58.b58decode(data))
 
   def parse_data_entry_size(self, bytes_object, start_position):
       if (self.data_category == 'short_type'):
@@ -206,8 +211,13 @@ class TypeStruct(NamedTuple):
                                                                                                          start_position + 1:start_position + 3])[
               0] + 3]),
                   start_position + struct.unpack(">H", bytes_object[start_position + 1: start_position + 3])[0] + 3)
+      elif (self.data_category == 'short_bytes_string'):
+          return (data_entry_from_bytes(bytes_object[start_position:start_position + struct.unpack(">H", bytes_object[
+                                                                                                         start_position + 1:start_position + 3])[
+              0] + 3]),
+                  start_position + struct.unpack(">H", bytes_object[start_position + 1: start_position + 3])[0] + 3)
       else:
-          return (data_entry_from_bytes(bytes_object[start_position:start_position + Type.address.length + 1]),
+          return (data_entry_from_bytes(bytes_object[start_position:start_position + self.length + 1]),
                   start_position + self.length + 1)
 
   def data_entry_from_data_bytes(self, data):
@@ -219,6 +229,8 @@ class TypeStruct(NamedTuple):
           return DataEntry(struct.unpack(">I", data)[0], self)
       elif self.data_category == 'short_type':
           return DataEntry(bytes2str(data[2:]), self)
+      elif self.data_category == 'short_bytes_string':
+          return DataEntry(base58.b58encode(data[2:]), self)
 
 
 
@@ -234,6 +246,7 @@ class Type:
     timestamp = TypeStruct(struct.pack(">B", 9), 8, 'timestamp', 'long')
     boolean = TypeStruct(struct.pack(">B", 10), 1, 'boolean', 'bool')
     short_bytes = TypeStruct(struct.pack(">B", 11), 255, 'short_bytes', 'short_type')
+    short_bytes_string = TypeStruct(struct.pack(">B", 11), 255, 'short_bytes_string', 'short_bytes_string')
     balance = TypeStruct(struct.pack(">B", 12), 8, 'balance', 'long')
 
     def by_index(self, index):
@@ -258,6 +271,6 @@ class Type:
         elif index == 10 or index == struct.pack(">B", 10):
             return Type.boolean
         elif index == 11 or index == struct.pack(">B", 11):
-            return Type.short_bytes
+            return Type.short_bytes_string
         elif index == 12 or index == struct.pack(">B", 12):
             return Type.balance
