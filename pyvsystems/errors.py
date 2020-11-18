@@ -43,6 +43,9 @@ class MissingContractIdException(PyVException):
 class MissingTokenIdException(PyVException):
     pass
 
+class InvalidContractException(PyVException):
+    pass
+
 
 def set_throw_on_error(throw=True):
     global THROW_EXCEPTION_ON_ERROR

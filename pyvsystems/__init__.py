@@ -54,4 +54,3 @@ def default_chain(api_wrapper=create_api_wrapper()):
 
 from .account import *
 from .contract import *
-from .data_entry import *
