@@ -91,7 +91,7 @@ def language_code_builder(code):
         language_code = Deser.serialize_string(code)
         return language_code
     else:
-        logging.error("Wrong language code length")
+        # Wrong language code length"
         raise Exception("Wrong language code length")
 
 
@@ -99,7 +99,7 @@ def language_version_builder(version):
     if len(struct.pack(">I", version)) == ContractMeta.language_version_byte_length:
         return struct.pack(">I", version)
     else:
-        logging.error("Wrong language version length")
+        # Wrong language version length"
         raise Exception("Wrong language code length")
 
 

@@ -91,14 +91,18 @@ class Chain(object):
     def validate_address(self, address):
         addr = bytes2str(base58.b58decode(address))
         if addr[0] != chr(self.address_version):
-            self.logger.error("Wrong address version")
+            # Wrong address version"
+            pass
         elif addr[1] != self.chain_id:
-            self.logger.error("Wrong chain id")
+            # Wrong chain id"
+            pass
         elif len(addr) != ADDRESS_LENGTH:
-            self.logger.error("Wrong address length")
+            # Wrong address length"
+            pass
         elif addr[-ADDRESS_CHECKSUM_LENGTH:] != hashChain(str2bytes(addr[:-ADDRESS_CHECKSUM_LENGTH]))[
                                                 :ADDRESS_CHECKSUM_LENGTH]:
-            self.logger.error("Wrong address checksum")
+            # Wrong address checksum"
+            pass
         else:
             return True
         return False
