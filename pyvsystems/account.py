@@ -396,7 +396,7 @@ class Account(object):
             raise NetworkException("Cannot check transaction in offline mode.")
         utx_res = self.chain.unconfirmed_tx(tx_id)
         if "id" in utx_res:
-            # "Transaction {} is pending in UTX pool.".format(tx_id)
+            # The transaction is pending in UTX pool.
             return False
         else:
             tx_res = self.chain.tx(tx_id)
@@ -404,18 +404,16 @@ class Account(object):
                 tx_height = tx_res["height"]
                 cur_height = self.chain.height()
                 if cur_height >= tx_height + confirmations:
-                    # Transaction {} is fully confirmed.".format(tx_id)
+                    # The transaction is fully confirmed.
                     return True
                 else:
-                    # Transaction {} is sent but not fully confirmed.".format(tx_id)
+                    # The transaction is sent but not fully confirmed.
                     return False
             elif "id" not in tx_res:
                 # Transaction does not exist!
-                # "Tx API response: {}".format(tx_res))
                 return None
             else:
                 # Transaction failed to process!
-                # "Tx API response: {}".format(tx_res))
                 return False
 
     def check_node(self, other_node_host=None):

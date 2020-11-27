@@ -25,7 +25,7 @@ class Chain(object):
             # check connected peers
             peers = self.get_connected_peers()
             if not peers:
-                # "The node {} does not connect any peers.".format(self.api_wrapper.node_host))
+                # This node does not connect any peers.
                 return False
             # check height
             h2 = h1 = self.height()
@@ -51,13 +51,13 @@ class Chain(object):
         try:
             h1 = self.height()
         except NetworkException:
-            # "Fail to connect {}".format(node_host)
+            # Fail to connect full node
             return False
         try:
             other_api = Wrapper(node_host)
             h2 = other_api.request('blocks/height')['height']
         except NetworkException:
-            # "Fail to connect {}.".format(node_host))
+            # Fail to connect full node
             return False
         # Add more check if need
         return h2 - h1 <= super_node_num
