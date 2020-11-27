@@ -1,5 +1,4 @@
 import base58
-import logging
 import time
 from .crypto import hashChain, bytes2str, str2bytes
 from .setting import ADDRESS_LENGTH, ADDRESS_CHECKSUM_LENGTH, DEFAULT_SUPER_NODE_NUM
@@ -14,7 +13,6 @@ class Chain(object):
         self.chain_id = chain_id
         self.address_version = address_version
         self.api_wrapper = api_wrapper
-        self.logger = logging.getLogger(__name__)
 
     def height(self):
         if is_offline():
@@ -27,7 +25,7 @@ class Chain(object):
             # check connected peers
             peers = self.get_connected_peers()
             if not peers:
-                self.logger.error("The node {} does not connect any peers.".format(self.api_wrapper.node_host))
+                # "The node {} does not connect any peers.".format(self.api_wrapper.node_host))
                 return False
             # check height
             h2 = h1 = self.height()
@@ -38,13 +36,13 @@ class Chain(object):
                 h2 = self.height()
                 count += 1
             if h2 <= h1:
-                self.logger.error("The height is not update. Full node has problem or stopped.")
+                # The height is not update. Full node has problem or stopped.
                 return False
             # Add more check if need
-            self.logger.debug("OK. Full node is alive.")
+            # OK, Full node is alive.
             return True
         except NetworkException:
-            self.logger.error("Fail to connect full node.")
+            # Fail to connect full node.
             return False
 
     def check_with_other_node(self, node_host, super_node_num=DEFAULT_SUPER_NODE_NUM):
@@ -53,13 +51,13 @@ class Chain(object):
         try:
             h1 = self.height()
         except NetworkException:
-            self.logger.error("Fail to connect {}.".format(node_host))
+            # "Fail to connect {}".format(node_host)
             return False
         try:
             other_api = Wrapper(node_host)
             h2 = other_api.request('blocks/height')['height']
         except NetworkException:
-            self.logger.error("Fail to connect {}.".format(node_host))
+            # "Fail to connect {}.".format(node_host))
             return False
         # Add more check if need
         return h2 - h1 <= super_node_num

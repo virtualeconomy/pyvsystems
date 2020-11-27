@@ -107,7 +107,8 @@ def bytes_builder_from_list(input_list):
     if type(input_list) is list:
         return Deser.serialize_array(Deser.serialize_arrays(input_list))
     else:
-        logging.error("The input should be a list")
+        # The input should be a list
+        pass
 
 def chain_system_contract_id(chain):
     unhashedAddress = chr(6) + str(chain.chain_id) + hashChain(base58.b58encode(''))[0:20]

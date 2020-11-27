@@ -1,4 +1,3 @@
-import logging
 
 class PyVException(Exception):
     pass
@@ -53,6 +52,5 @@ def set_throw_on_error(throw=True):
 
 
 def throw_error(msg, exception=PyVException):
-    logging.error(msg)
     if THROW_EXCEPTION_ON_ERROR:
         raise exception(msg)
