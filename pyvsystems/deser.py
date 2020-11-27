@@ -1,5 +1,4 @@
 import struct
-import logging
 from .crypto import list2bytes, to_hex
 
 
@@ -11,7 +10,8 @@ class Deser(object):
     @staticmethod
     def shorts_from_byte_array(byte_array):
         if len(byte_array) != 2:
-            logging.exception("Error: Input is not shorts!")
+            # Error: Input is not shorts!
+            pass
         return int(''.join(byte_array), 16)
 
     @staticmethod
