@@ -7,9 +7,10 @@ from . import is_offline
 
 class Wrapper(object):
 
-    def __init__(self, node_host, api_key=''):
+    def __init__(self, node_host, api_key='', timeout=None):
         self.node_host = node_host
         self.api_key = api_key
+        self.timeout = timeout
 
     def request(self, api, post_data=''):
         if is_offline():
@@ -26,12 +27,15 @@ class Wrapper(object):
         try:
             if post_data:
                 headers['Content-Type'] = 'application/json'
-                data_str = '-d {}'.format(post_data)
-                logging.info("curl -X POST %s %s %s" % (header_str, data_str, url))
-                return requests.post(url, data=post_data, headers=headers).json()
+                if self.timeout:
+                    return requests.post(url, data=post_data, headers=headers, timeout=self.timeout).json()
+                else:
+                    return requests.post(url, data=post_data, headers=headers).json()
             else:
-                logging.info("curl -X GET %s %s" % (header_str, url))
-                return requests.get(url, headers=headers).json()
+                if self.timeout:
+                    return requests.get(url, headers=headers, timeout=self.timeout).json()
+                else:
+                    return requests.get(url, headers=headers).json()
         except RequestException as ex:
             msg = 'Failed to get response: {}'.format(ex)
             raise NetworkException(msg)
