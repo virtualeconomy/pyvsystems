@@ -39,18 +39,18 @@ Or:
     ```python
     import pyvsystems as pv
     # you can set the request timeout
-    custom_wrapper = pv.create_api_wrapper('http://<full node ip>:9922', api_key='', timeout='')
+    custom_wrapper = pv.create_api_wrapper('http://<full node ip>:9922', api_key='', timeout=None)
     ts_chain = pv.testnet_chain(custom_wrapper)
     ```
 
 4. For completely custom chain:
     ```python
     import pyvsystems as pv
-    custom_wrapper = pv.create_api_wrapper('http://<full node ip>:9922', api_key='',  timeout=''))
+    custom_wrapper = pv.create_api_wrapper('http://<full node ip>:9922', api_key='',  timeout=None))
     t_chain = pv.Chain(chain_name='testnet', chain_id='T', address_version=5, api_wrapper=custom_wrapper)
-    custom_wrapper2 = pv.create_api_wrapper('http://<full node ip>:9922', api_key='',  timeout=''))
+    custom_wrapper2 = pv.create_api_wrapper('http://<full node ip>:9922', api_key='',  timeout=None))
     m_chain = pv.Chain(chain_name='mainnet', chain_id='M', address_version=5, api_wrapper=custom_wrapper2)
-    custom_wrapper3 = pv.create_api_wrapper('http://<full node ip>:9922', api_key='',  timeout=''))
+    custom_wrapper3 = pv.create_api_wrapper('http://<full node ip>:9922', api_key='',  timeout=None))
     c_chain = pv.Chain(chain_name='mychain', chain_id='C', address_version=1, api_wrapper=custom_wrapper3)
     ```
 

@@ -5,7 +5,7 @@ import requests
 
 
 class Wrapper(object):
-    def __init__(self, node_host, api_key='', timeout=''):
+    def __init__(self, node_host, api_key='', timeout=None):
         self.node_host = node_host
         self.api_key = api_key
         self.timeout = timeout
