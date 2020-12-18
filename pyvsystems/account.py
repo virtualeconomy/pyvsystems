@@ -9,7 +9,6 @@ import time
 import struct
 import json
 import base58
-import logging
 
 
 class Account(object):
@@ -48,7 +47,8 @@ class Account(object):
                 balance = self.balance()
                 result += "\nbalance: {}".format(balance)
             except NetworkException:
-                logging.error("Failed to get balance")
+                # Failed to get balance
+                pass
         return result
 
     __repr__ = __str__
@@ -60,7 +60,6 @@ class Account(object):
         try:
             confirmations_str = '' if confirmations == 0 else '/%d' % confirmations
             resp = self.wrapper.request('/addresses/balance/%s%s' % (self.address, confirmations_str))
-            logging.debug(resp)
             return resp['balance']
         except Exception as ex:
             msg = "Failed to get balance. ({})".format(ex)
@@ -70,7 +69,6 @@ class Account(object):
     def balance_detail(self):
         try:
             resp = self.wrapper.request('/addresses/balance/details/%s' % self.address)
-            logging.debug(resp)
             return resp
         except Exception as ex:
             msg = "Failed to get balance detail. ({})".format(ex)
@@ -434,7 +432,7 @@ class Account(object):
             return None
         utx_res = self.chain.unconfirmed_tx(tx_id)
         if "id" in utx_res:
-            logging.error("Transaction {} is pending in UTX pool.".format(tx_id))
+            # Transaction is pending in UTX pool.
             return False
         else:
             tx_res = self.chain.tx(tx_id)
@@ -442,18 +440,16 @@ class Account(object):
                 tx_height = tx_res["height"]
                 cur_height = self.chain.height()
                 if cur_height >= tx_height + confirmations:
-                    logging.debug("Transaction {} is fully confirmed.".format(tx_id))
+                    # Transaction is fully confirmed.
                     return True
                 else:
-                    logging.info("Transaction {} is sent but not fully confirmed.".format(tx_id))
+                    # Transaction is sent but not fully confirmed.
                     return False
             elif "id" not in tx_res:
-                logging.error("Transaction does not exist!")
-                logging.debug("Tx API response: {}".format(tx_res))
+                # Transaction does not exist!
                 return None
             else:
-                logging.error("Transaction failed to process!")
-                logging.debug("Tx API response: {}".format(tx_res))
+                # Transaction failed to process!
                 return False
 
     def check_node(self, other_node_host=None):
