@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-VERSION = "0.1.0"
+VERSION = "0.2.1"
 
 
 def get_version():
@@ -37,8 +37,8 @@ def is_offline():
 from .setting import *
 
 
-def create_api_wrapper(node_host=DEFAULT_NODE, api_key=DEFAULT_API_KEY):
-    return Wrapper(node_host, api_key)
+def create_api_wrapper(node_host=DEFAULT_NODE, api_key=DEFAULT_API_KEY, timeout=None):
+    return Wrapper(node_host, api_key, timeout)
 
 
 from .chain import *
