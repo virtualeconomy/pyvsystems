@@ -37,7 +37,7 @@ def is_offline():
 from .setting import *
 
 
-def create_api_wrapper(node_host=DEFAULT_NODE, api_key=DEFAULT_API_KEY, timeout=''):
+def create_api_wrapper(node_host=DEFAULT_NODE, api_key=DEFAULT_API_KEY, timeout=None):
     return Wrapper(node_host, api_key, timeout)
 
 
