@@ -24,9 +24,17 @@ class Wrapper(object):
                     return requests.post(url, data=post_data, headers=headers).json()
             else:
                 if self.timeout:
-                    return requests.get(url, headers=headers, timeout=self.timeout).json()
+                    req = requests.get(url, headers=headers, timeout=self.timeout).json()
+                    if (req.status_code != 200):
+                        raise NetworkException("Failed to get response in offline mode.")
+                    else:
+                        return req.json()
                 else:
-                    return requests.get(url, headers=headers).json()
+                    req = requests.get(url, headers=headers)
+                    if (req.status_code != 200):
+                        raise NetworkException("Failed to get response in offline mode.")
+                    else:
+                        return req.json()
         except RequestException as ex:
             msg = 'Failed to get response: {}'.format(ex)
             raise NetworkException(msg)
