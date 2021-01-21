@@ -52,5 +52,6 @@ def set_throw_on_error(throw=True):
 
 
 def throw_error(msg, exception=PyVException):
+    global THROW_EXCEPTION_ON_ERROR
     if THROW_EXCEPTION_ON_ERROR:
         raise exception(msg)
