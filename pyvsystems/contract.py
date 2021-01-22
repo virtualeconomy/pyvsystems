@@ -182,9 +182,9 @@ class TypeStruct(NamedTuple):
       if self.data_category == 'b58':
           return len(data_bytes) == self.length
       elif self.data_category == 'long':
-          return len(data_bytes) == self.length and struct.unpack(">Q", data_bytes)[0] > 0
+          return len(data_bytes) == self.length and struct.unpack(">Q", data_bytes)[0] >= 0
       elif self.data_category == 'int':
-          return len(data_bytes) == self.length and struct.unpack(">I", data_bytes)[0] > 0
+          return len(data_bytes) == self.length and struct.unpack(">I", data_bytes)[0] >= 0
       elif self.data_category == 'short_type':
           return struct.unpack(">H", data_bytes[0:2])[0] + 2 == len(data_bytes) and len(
               data_bytes) <= Type.short_text.length + 2
