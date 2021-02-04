@@ -86,6 +86,9 @@ class Chain(object):
     def slot_info(self, slot_id):
         return self.api_wrapper.request('consensus/slotInfo/%s' % slot_id)
 
+    def contract_db_query(self, contract_id, db_key):
+        return self.api_wrapper.request('contract/data/%s/%s' % (contract_id, db_key))
+
     def validate_address(self, address):
         addr = bytes2str(base58.b58decode(address))
         if addr[0] != chr(self.address_version):
