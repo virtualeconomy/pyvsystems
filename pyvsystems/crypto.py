@@ -277,6 +277,8 @@ def sign(privateKey, message):
     random64 = os.urandom(64)
     return base58.b58encode(curve.calculateSignature(random64, base58.b58decode(privateKey), message))
 
+def verifySignature(public_key, message, signature):
+    return curve.verifySignature(base58.b58decode(public_key), message, base58.b58decode(signature))
 
 def id(message):
     return base58.b58encode(hashlib.sha256(message).digest())
