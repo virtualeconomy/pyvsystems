@@ -1,5 +1,5 @@
 from requests.exceptions import RequestException
-from .errors import NetworkException
+from .error import NetworkException
 import os
 import requests
 

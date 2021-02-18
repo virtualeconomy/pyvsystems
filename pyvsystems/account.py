@@ -1,6 +1,6 @@
 from .setting import *
 from .crypto import *
-from .errors import *
+from .error import *
 from .words import WORDS
 from .contract import serialize_data
 from . import is_offline

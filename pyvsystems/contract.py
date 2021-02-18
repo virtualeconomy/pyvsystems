@@ -1,7 +1,7 @@
 from .crypto import *
 from .deser import Deser
 from .setting import ContractMeta
-from .errors import *
+from .error import *
 from typing import NamedTuple
 import struct
 import base58

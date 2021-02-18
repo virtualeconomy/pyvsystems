@@ -2,7 +2,7 @@ import base58
 import time
 from .crypto import hashChain, bytes2str, str2bytes
 from .setting import ADDRESS_LENGTH, ADDRESS_CHECKSUM_LENGTH, DEFAULT_SUPER_NODE_NUM
-from .errors import NetworkException
+from .error import NetworkException
 from .wrapper import Wrapper
 from . import is_offline
 
