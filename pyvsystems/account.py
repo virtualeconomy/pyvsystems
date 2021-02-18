@@ -58,13 +58,10 @@ class Account(object):
     def balance(self, confirmations=0):
         if is_offline():
             raise NetworkException("Cannot check height in offline mode.")
-        try:
+        else:
             confirmations_str = '' if confirmations == 0 else '/%d' % confirmations
             resp = self.wrapper.request('addresses/balance/%s%s' % (self.address, confirmations_str))
             return resp['balance']
-        except Exception as ex:
-            msg = "Failed to get balance. ({})".format(ex)
-            raise NetworkException(msg)
 
     def balance_detail(self):
         try:
