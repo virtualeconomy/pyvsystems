@@ -24,9 +24,17 @@ class Wrapper(object):
                     return requests.post(url, data=post_data, headers=headers).json()
             else:
                 if self.timeout:
-                    return requests.get(url, headers=headers, timeout=self.timeout).json()
+                    resp = requests.get(url, headers=headers, timeout=self.timeout)
+                    if (resp.status_code != 200):
+                        raise NetworkException("Failed to get response.")
+                    else:
+                        return resp.json()
                 else:
-                    return requests.get(url, headers=headers).json()
+                    resp = requests.get(url, headers=headers)
+                    if (resp.status_code != 200):
+                        raise NetworkException("Failed to get response.")
+                    else:
+                        return resp.json()
         except RequestException as ex:
             msg = 'Failed to get response: {}'.format(ex)
             raise NetworkException(msg)
