@@ -63,6 +63,15 @@ class Account(object):
             resp = self.wrapper.request('addresses/balance/%s%s' % (self.address, confirmations_str))
             return resp['balance']
 
+    def token_balance(self, token_id):
+        if is_offline():
+            raise NetworkException("Cannot check height in offline mode.")
+        if token_id is None:
+            raise MissingTokenIdException("Token ID required")
+        else:
+            resp = self.wrapper.request('contract/balance/%s/%s' % (self.address, token_id))
+            return resp['balance']
+
     def balance_detail(self):
         try:
             resp = self.wrapper.request('addresses/balance/details/%s' % self.address)
