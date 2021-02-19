@@ -129,6 +129,12 @@ Or:
     
 [Sample code for Send Transaction](https://github.com/virtualeconomy/pyvsystems/wiki/PYVSYSTEMS-User-Guide-Specification-%28English%29#sample-code) for reference
 
-[Sample Code for Smart Contract](https://github.com/virtualeconomy/pyvsystems/wiki/Sample-Code-for-Smart-Contract) for reference
-
 [Sample Code for Exchange](https://github.com/virtualeconomy/pyvsystems/wiki/Sample-Code-for-Exchange) for reference
+
+[Sample Code for Non Fungible Token Contract](https://github.com/virtualeconomy/pyvsystems/wiki/Sample-Code-for-Non-Fungible-Token-Contract) for reference
+
+[Sample Code for Payment Channel Contract](https://github.com/virtualeconomy/pyvsystems/wiki/Sample-Code-for-Payment-Channel-Contract) for reference
+
+[Sample Code for System Contract](https://github.com/virtualeconomy/pyvsystems/wiki/Sample-Code-for-System-Contract) for reference
+
+[Sample Code for Token Contract](https://github.com/virtualeconomy/pyvsystems/wiki/Sample-Code-for-Token-Contract) for reference
