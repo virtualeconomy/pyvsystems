@@ -29,7 +29,7 @@ DEFAULT_CHAIN_ID = 'M'
 TESTNET_CHAIN = 'testnet'
 TESTNET_CHAIN_ID = 'T'
 
-DEFAULT_TESTNET_NODE = 'http://test.v.systems:9922'
+DEFAULT_TESTNET_NODE = 'https://test.v.systems/api'
 DEFAULT_TESTNET_API_KEY = ''
 
 

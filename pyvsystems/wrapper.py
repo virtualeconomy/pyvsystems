@@ -1,5 +1,5 @@
 from requests.exceptions import RequestException
-from .errors import NetworkException
+from .error import NetworkException
 import os
 import requests
 
@@ -25,16 +25,10 @@ class Wrapper(object):
             else:
                 if self.timeout:
                     resp = requests.get(url, headers=headers, timeout=self.timeout)
-                    if (resp.status_code != 200):
-                        raise NetworkException("Failed to get response.")
-                    else:
-                        return resp.json()
+                    return resp.json()
                 else:
                     resp = requests.get(url, headers=headers)
-                    if (resp.status_code != 200):
-                        raise NetworkException("Failed to get response.")
-                    else:
-                        return resp.json()
+                    return resp.json()
         except RequestException as ex:
             msg = 'Failed to get response: {}'.format(ex)
             raise NetworkException(msg)
