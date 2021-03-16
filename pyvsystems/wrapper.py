@@ -1,6 +1,5 @@
 from requests.exceptions import RequestException
 from .error import NetworkException
-import os
 import requests
 
 
@@ -12,7 +11,7 @@ class Wrapper(object):
 
     def request(self, api, post_data=''):
         headers = {}
-        url = os.path.join(self.node_host, api)
+        url = self.node_host + '/' + api
         if self.api_key:
             headers['api_key'] = self.api_key
         try:
