@@ -8,14 +8,14 @@ with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="pyvsystems",
-    version="0.1.0",
+    version="0.3.2",
     description="A python wrapper for vsys api.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     keywords=["api wrapper", "blockchain", "vsystems", "smart contract", "supernode", "defi"],
     url="https://github.com/virtualeconomy/pyvsystems",
     author="V SYSTEMS",
-    author_email="info@v.systems",
+    author_email="developers@v.systems",
     license="MIT",
     packages=["pyvsystems"],
     install_requires=["requests", "python-axolotl-curve25519", "pyblake2", "base58"],
