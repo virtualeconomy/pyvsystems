@@ -1,6 +1,6 @@
 from .contract import Contract, DataEntry, Type
 from .setting import Contract_Token_With_Split, Contract_Token_Without_Split, Contract_Payment_Channel,\
-    Contract_Lock, Contract_Non_Fungible_Token
+    Contract_Lock, Contract_Non_Fungible_Token, Contract_V_Option
 from .crypto import bytes2str, sign
 import struct
 import base58
@@ -379,3 +379,131 @@ class NonFungibleContractHelper(object):
     def maker_db_key_generator(self):
         maker_key_bytes = struct.pack(">B", 1)
         return base58.b58encode(maker_key_bytes).decode()
+
+class VOptionContractHelper(object):
+    contract_object = Contract(Contract_V_Option)
+    supersede_function_index = 0
+    activate_function_index = 1
+    mint_function_index = 2
+    unlock_function_index = 3
+    execute_function_index = 4
+    collect_function_index = 5
+
+    def register_data_stack_generator(self, base_token_id, target_token_id, option_token_id, proof_token_id, execute_time, execute_deadline):
+        base_token_id_data_entry = DataEntry(base_token_id, Type.token_id)
+        target_token_id_data_entry = DataEntry(target_token_id, Type.token_id)
+        option_token_id_data_entry = DataEntry(option_token_id, Type.token_id)
+        proof_token_id_data_entry = DataEntry(proof_token_id, Type.token_id)
+        execute_time_data_entry = DataEntry(execute_time, Type.timestamp)
+        execute_deadline_data_entry = DataEntry(execute_deadline, Type.timestamp)
+        return [base_token_id_data_entry, target_token_id_data_entry, option_token_id_data_entry, proof_token_id_data_entry, execute_time_data_entry, execute_deadline_data_entry]
+
+    def supersede_data_stack_generator(self, new_owner):
+        new_owner_data_entry = DataEntry(new_owner, Type.address)
+        return [new_owner_data_entry]
+
+    def activate_data_stack_generator(self, max_issue_num, price, price_unit):
+        max_issue_num_data_entry = DataEntry(max_issue_num, Type.amount)
+        price_data_entry = DataEntry(price, Type.amount)
+        price_unit_data_entry = DataEntry(price_unit, Type.amount)
+        return [max_issue_num_data_entry, price_data_entry, price_unit_data_entry]
+
+    def mint_data_stack_generator(self, amount):
+        amount_data_entry = DataEntry(amount, Type.amount)
+        return [amount_data_entry]
+
+    def unlock_data_stack(self, amount):
+        amount_data_entry = DataEntry(amount, Type.amount)
+        return [amount_data_entry]
+
+    def execute_data_stack(self, amount):
+        amount_data_entry = DataEntry(amount, Type.amount)
+        return [amount_data_entry]
+
+    def collect_data_stack(self, amount):
+        amount_data_entry = DataEntry(amount, Type.amount)
+        return [amount_data_entry]
+
+    def maker_db_key_generator(self):
+        maker_key_bytes = struct.pack(">B", 0)
+        return base58.b58encode(maker_key_bytes)
+
+    def base_token_id_db_key_generator(self):
+        base_token_id_key_bytes = struct.pack(">B", 1)
+        return base58.b58encode(base_token_id_key_bytes).decode()
+
+    def target_token_id_db_key_generator(self):
+        target_token_id_key_bytes = struct.pack(">B", 2)
+        return base58.b58encode(target_token_id_key_bytes).decode()
+
+    def option_token_id_db_key_generator(self):
+        option_token_id_key_bytes = struct.pack(">B", 3)
+        return base58.b58encode(option_token_id_key_bytes).decode()
+
+    def proof_token_id_db_key_generator(self):
+        proof_token_id_key_bytes = struct.pack(">B", 4)
+        return base58.b58encode(proof_token_id_key_bytes).decode()
+
+    def execute_time_db_key_generator(self):
+        execute_time_key_bytes = struct.pack(">B", 5)
+        return base58.b58encode(execute_time_key_bytes).decode()
+
+    def execute_deadline_db_key_generator(self):
+        execute_deadline_key_bytes = struct.pack(">B", 6)
+        return base58.b58encode(execute_deadline_key_bytes).decode()
+
+    def option_status_db_key_generator(self):
+        option_status_key_bytes = struct.pack(">B", 7)
+        return base58.b58encode(option_status_key_bytes).decode()
+
+    def max_issue_num_db_key_generator(self):
+        max_issue_num_key_bytes = struct.pack(">B", 8)
+        return base58.b58encode(max_issue_num_key_bytes).decode()
+
+    def reserved_option_db_key_generator(self):
+        reserved_option_num_key_bytes = struct.pack(">B", 9)
+        return base58.b58encode(reserved_option_num_key_bytes).decode()
+
+    def reserved_proof_db_key_generator(self):
+        reserved_proof_key_bytes = struct.pack(">B", 10)
+        return base58.b58encode(reserved_proof_key_bytes).decode()
+
+    def price_db_key_generator(self):
+        price_key_bytes = struct.pack(">B", 11)
+        return base58.b58encode(price_key_bytes).decode()
+
+    def price_unit_db_key_generator(self):
+        price_unit_key_bytes = struct.pack(">B", 12)
+        return base58.b58encode(price_unit_key_bytes).decode()
+
+    def token_locked_db_key_generator(self):
+        token_locked_key_bytes = struct.pack(">B", 13)
+        return base58.b58encode(token_locked_key_bytes).decode()
+
+    def token_collected_db_key_generator(self):
+        token_collected_key_bytes = struct.pack(">B", 14)
+        return base58.b58encode(token_collected_key_bytes).decode()
+
+    def base_token_balance_db_key_generator(self, address):
+        base_token_balance_index_bytes = struct.pack(">B", 0)
+        address_data_entry = DataEntry(address, Type.address)
+        base_token_balance_key_bytes = base_token_balance_index_bytes + address_data_entry.bytes
+        return base58.b58encode(base_token_balance_key_bytes).decode()
+
+    def target_token_balance_db_key_generator(self, address):
+        target_token_balance_index_bytes = struct.pack(">B", 1)
+        address_data_entry = DataEntry(address, Type.address)
+        target_token_balance_key_bytes = target_token_balance_index_bytes + address_data_entry.bytes
+        return base58.b58encode(target_token_balance_key_bytes)
+
+    def option_token_balance_db_key_generator(self, address):
+        option_token_balance_index_bytes = struct.pack(">B", 2)
+        address_data_entry = DataEntry(address, Type.address)
+        option_token_balance_key = option_token_balance_index_bytes + address_data_entry.bytes
+        return base58.b58encode(option_token_balance_key)
+
+    def proof_token_balance_db_key_generator(self, address):
+        proof_token_balance_index_bytes = struct.pack(">B", 3)
+        address_data_entry = DataEntry(address, Type.address)
+        proof_token_balance_key = proof_token_balance_index_bytes + address_data_entry.bytes
+        return base58.b58encode(proof_token_balance_key)
