@@ -1,6 +1,6 @@
 from .contract import Contract, DataEntry, Type
 from .setting import Contract_Token_With_Split, Contract_Token_Without_Split, Contract_Payment_Channel,\
-    Contract_Lock, Contract_Non_Fungible_Token, Contract_V_Option
+    Contract_Lock, Contract_Non_Fungible_Token, Contract_V_Option, Contract_V_Swap
 from .crypto import bytes2str, sign
 import struct
 import base58
@@ -396,7 +396,8 @@ class VOptionContractHelper(object):
         proof_token_id_data_entry = DataEntry(proof_token_id, Type.token_id)
         execute_time_data_entry = DataEntry(execute_time, Type.timestamp)
         execute_deadline_data_entry = DataEntry(execute_deadline, Type.timestamp)
-        return [base_token_id_data_entry, target_token_id_data_entry, option_token_id_data_entry, proof_token_id_data_entry, execute_time_data_entry, execute_deadline_data_entry]
+        return [base_token_id_data_entry, target_token_id_data_entry, option_token_id_data_entry,
+                proof_token_id_data_entry, execute_time_data_entry, execute_deadline_data_entry]
 
     def supersede_data_stack_generator(self, new_owner):
         new_owner_data_entry = DataEntry(new_owner, Type.address)
@@ -507,3 +508,70 @@ class VOptionContractHelper(object):
         address_data_entry = DataEntry(address, Type.address)
         proof_token_balance_key = proof_token_balance_index_bytes + address_data_entry.bytes
         return base58.b58encode(proof_token_balance_key)
+
+class VSwapContractHelper(object):
+    contract_object = Contract(Contract_V_Swap)
+    supersede_function_index = 0
+    set_swap_function_index = 1
+    add_liquidity_function_index = 2
+    remove_liquidity_function_index = 3
+    swap_token_for_exact_base_token_function_index = 4
+    swap_exact_token_for_exact_base_token_function_index = 5
+    swap_token_for_exact_target_token_function_index = 6
+    swap_exact_token_for_target_token_function_index = 7
+
+    def register_data_stack_generator(self, token_a_id, token_b_id, liquidity_token_id, minimum_liquidity):
+        token_a_id_data_entry = DataEntry(token_a_id, Type.token_id)
+        token_b_id_data_entry = DataEntry(token_b_id, Type.token_id)
+        liquidity_token_id_data_entry = DataEntry(liquidity_token_id, Type.token_id)
+        minimum_liquidity_data_entry = DataEntry(minimum_liquidity, Type.amount)
+        return [token_a_id_data_entry, token_b_id_data_entry, liquidity_token_id_data_entry, minimum_liquidity_data_entry]
+
+    def supersede_data_stack_generator(self, new_owner):
+        new_owner_data_entry = DataEntry(new_owner, Type.address)
+        return [new_owner_data_entry]
+
+    def set_swap_data_stack_generator(self, amount_a_desired, amount_b_desired):
+        amount_a_desired_data_entry = DataEntry(amount_a_desired, Type.amount)
+        amount_b_desired_data_entry = DataEntry(amount_b_desired, Type.amount)
+        return [amount_a_desired_data_entry, amount_b_desired_data_entry]
+
+    def add_liquidity_data_stack_generator(self, amount_a_desired, amount_b_desired, amount_a_min, amount_b_min, deadline):
+        amount_a_desired_data_entry = DataEntry(amount_a_desired, Type.amount)
+        amount_b_desired_data_entry = DataEntry(amount_b_desired, Type.amount)
+        amount_a_min_data_entry = DataEntry(amount_a_min, Type.amount)
+        amount_b_min_data_entry = DataEntry(amount_b_min, Type.amount)
+        deadline_data_entry = DataEntry(deadline, Type.timestamp)
+        return [amount_a_desired_data_entry, amount_b_desired_data_entry, amount_a_min_data_entry,
+                amount_b_min_data_entry, deadline_data_entry]
+
+    def remove_liquidity_data_stack_generator(self, liquidity, amount_a_desired, amount_b_desired, deadline):
+        liquidity_data_entry = DataEntry(liquidity, Type.amount)
+        amount_a_desired_data_entry = DataEntry(amount_a_desired, Type.amount)
+        amount_b_desired_data_entry = DataEntry(amount_b_desired, Type.amount)
+        deadline_data_entry = DataEntry(deadline, Type.timestamp)
+        return [liquidity_data_entry, amount_a_desired_data_entry, amount_b_desired_data_entry, deadline_data_entry]
+
+    def swap_token_for_exact_base_token_data_stack_generator(self, amount_out, amount_in_max, deadline):
+        amount_out_data_entry = DataEntry(amount_out, Type.amount)
+        amount_in_max_data_entry = DataEntry(amount_in_max, Type.amount)
+        deadline_data_entry = DataEntry(deadline, Type.timestamp)
+        return [amount_out_data_entry, amount_in_max_data_entry, deadline_data_entry]
+
+    def swap_exact_token_for_base_token_data_stack_generator(self, amount_out_min, amount_in, deadline):
+        amount_out_min_data_entry = DataEntry(amount_out_min, Type.amount)
+        amount_in_data_entry = DataEntry(amount_in, Type.amount)
+        deadline_data_entry = DataEntry(deadline, Type.timestamp)
+        return [amount_out_min_data_entry, amount_in_data_entry, deadline_data_entry]
+
+    def swap_token_for_exact_target_token_data_stack_generator(self, amount_out, amount_in_max, deadline):
+        amount_out_data_entry = DataEntry(amount_out, Type.amount)
+        amount_in_max_data_entry = DataEntry(amount_in_max, Type.amount)
+        deadline_data_entry = DataEntry(deadline, Type.timestamp)
+        return [amount_out_data_entry, amount_in_max_data_entry, deadline_data_entry]
+
+    def swap_exact_token_for_target_token_data_stack_generator(self, amount_out_min, amount_in, deadline):
+        amount_out_min_data_entry = DataEntry(amount_out_min, Type.amount)
+        amount_in_data_entry = DataEntry(amount_in, Type.amount)
+        deadline_data_entry = DataEntry(deadline, Type.timestamp)
+        return [amount_out_min_data_entry, amount_in_data_entry, deadline_data_entry]
