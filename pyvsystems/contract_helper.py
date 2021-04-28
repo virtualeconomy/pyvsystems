@@ -1,10 +1,19 @@
 from .contract import Contract, DataEntry, Type
 from .setting import Contract_Token_With_Split, Contract_Token_Without_Split, Contract_Payment_Channel,\
-    Contract_Lock, Contract_Non_Fungible_Token, Contract_V_Option, Contract_V_Swap,\
-    Contract_Non_Fungible_Token_V2_Black_List, Contract_Non_Fungible_Token_V2_White_List
+    Contract_Lock, Contract_Non_Fungible_Token, Contract_V_Option, Contract_V_Swap, Contract_Non_Fungible_Token_V2_Black_List,\
+    Contract_Non_Fungible_Token_V2_White_List, Contract_V_Stable_Swap
 from .crypto import bytes2str, sign
 import struct
 import base58
+
+def state_var_generator(index):
+    index_bytes = struct.pack(">B", index)
+    return base58.b58encode(index_bytes).decode()
+
+def state_map_generator(index, data_entry):
+    index_bytes = struct.pack(">B", index)
+    data_entry_bytes = data_entry.bytes
+    return base58.b58encode(index_bytes + data_entry_bytes).decode()
 
 class SystemContractHelper(object):
     send_function_index = 0
@@ -109,12 +118,10 @@ class TokenWithSplitContractHelper(object):
         return []
 
     def issuer_db_key_generator(self):
-        issuer_key_bytes = struct.pack(">B", 0)
-        return base58.b58encode(issuer_key_bytes).decode()
+        return state_var_generator(0)
 
     def maker_db_key_generator(self):
-        maker_key_bytes = struct.pack(">B", 1)
-        return base58.b58encode(maker_key_bytes).decode()
+        return state_var_generator(1)
 
 class TokenWithoutSplitContractHelper(object):
     contract_object = Contract(Contract_Token_Without_Split)
@@ -185,12 +192,10 @@ class TokenWithoutSplitContractHelper(object):
         return []
 
     def issuer_db_key_generator(self):
-        issuer_key_bytes = struct.pack(">B", 0)
-        return base58.b58encode(issuer_key_bytes).decode()
+        return state_var_generator(0)
 
     def maker_db_key_generator(self):
-        maker_key_bytes = struct.pack(">B", 1)
-        return base58.b58encode(maker_key_bytes).decode()
+        return state_var_generator(1)
 
 class PaymentChannelContractHelper(object):
     contract_object = Contract(Contract_Payment_Channel)
@@ -243,60 +248,34 @@ class PaymentChannelContractHelper(object):
         return bytes2str(sign(private_key, message))
 
     def maker_db_key_generator(self):
-        maker_key_bytes = struct.pack(">B", 0)
-        return base58.b58encode(maker_key_bytes).decode()
+        return state_var_generator(0)
 
     def token_id_db_key_generator(self):
-        token_id_key_bytes = struct.pack(">B", 1)
-        return base58.b58encode(token_id_key_bytes).decode()
+        return state_var_generator(1)
 
     def contract_balance_db_key_generator(self, address):
-        contract_balance_index_byte = struct.pack(">B", 0)
-        address_data_entry = DataEntry(address, Type.address)
-        contract_balance_key_bytes = contract_balance_index_byte + address_data_entry.bytes
-        return base58.b58encode(contract_balance_key_bytes).decode()
+        return state_map_generator(0, DataEntry(address, Type.address))
 
     def channel_creator_db_key_generator(self, channel_id):
-        channel_creator_index_byte = struct.pack(">B", 1)
-        channel_id_data_entry = DataEntry(channel_id, Type.short_bytes_string)
-        channel_creator_key_bytes = channel_creator_index_byte + channel_id_data_entry.bytes
-        return base58.b58encode(channel_creator_key_bytes).decode()
+        return state_map_generator(1, DataEntry(channel_id, Type.short_bytes_string))
 
     def channel_creator_public_key_db_key_generator(self, channel_id):
-        channel_creator_public_key_index_byte = struct.pack(">B", 2)
-        channel_id_data_entry = DataEntry(channel_id, Type.short_bytes_string)
-        channel_creator_public_key_key_bytes = channel_creator_public_key_index_byte + channel_id_data_entry.bytes
-        return base58.b58encode(channel_creator_public_key_key_bytes).decode()
+        return state_map_generator(2, DataEntry(channel_id, Type.short_bytes_string))
 
     def channel_recipient_db_key_generator(self, channel_id):
-        channel_recipient_index_byte = struct.pack(">B", 3)
-        channel_id_data_entry = DataEntry(channel_id, Type.short_bytes_string)
-        channel_recipient_key_bytes = channel_recipient_index_byte + channel_id_data_entry.bytes
-        return base58.b58encode(channel_recipient_key_bytes).decode()
+        return state_map_generator(3, DataEntry(channel_id, Type.short_bytes_string))
 
     def channel_accumulated_load_db_key_generator(self, channel_id):
-        channel_accumulated_load_index_byte = struct.pack(">B", 4)
-        channel_id_data_entry = DataEntry(channel_id, Type.short_bytes_string)
-        channel_accumulated_load_key_bytes = channel_accumulated_load_index_byte + channel_id_data_entry.bytes
-        return base58.b58encode(channel_accumulated_load_key_bytes).decode()
+        return state_map_generator(4, DataEntry(channel_id, Type.short_bytes_string))
 
     def channel_accumulated_payment_db_key_generator(self, channel_id):
-        channel_accumulated_payment_index_byte = struct.pack(">B", 5)
-        channel_id_data_entry = DataEntry(channel_id, Type.short_bytes_string)
-        channel_accumulated_payment_key_bytes = channel_accumulated_payment_index_byte + channel_id_data_entry.bytes
-        return base58.b58encode(channel_accumulated_payment_key_bytes).decode()
+        return state_map_generator(5, DataEntry(channel_id, Type.short_bytes_string))
 
     def channel_expiration_time_db_key_generator(self, channel_id):
-        channel_expiration_time_index_byte = struct.pack(">B", 6)
-        channel_id_data_entry = DataEntry(channel_id, Type.short_bytes_string)
-        channel_expiration_time_key_bytes = channel_expiration_time_index_byte + channel_id_data_entry.bytes
-        return base58.b58encode(channel_expiration_time_key_bytes).decode()
+        return state_map_generator(6, DataEntry(channel_id, Type.short_bytes_string))
 
     def channel_status_db_key_generator(self, channel_id):
-        channel_status_index_byte = struct.pack(">B", 7)
-        channel_id_data_entry = DataEntry(channel_id, Type.short_bytes_string)
-        channel_status_key_bytes = channel_status_index_byte + channel_id_data_entry.bytes
-        return base58.b58encode(channel_status_key_bytes).decode()
+        return state_map_generator(7, DataEntry(channel_id, Type.short_bytes_string))
 
 class LockContractHelper(object):
     contract_object = Contract(Contract_Lock)
@@ -311,24 +290,16 @@ class LockContractHelper(object):
         return [timestamp_data_entry]
 
     def maker_db_key_generator(self):
-        maker_key_bytes = struct.pack(">B", 0)
-        return base58.b58encode(maker_key_bytes).decode()
+        return state_var_generator(0)
 
     def token_id_db_key_generator(self):
-        token_id_key_bytes = struct.pack(">B", 1)
-        return base58.b58encode(token_id_key_bytes).decode()
+        return state_var_generator(1)
 
     def contract_balance_db_key_generator(self, address):
-        contract_balance_index_byte = struct.pack(">B", 0)
-        address_data_entry = DataEntry(address, Type.address)
-        contract_balance_key_bytes = contract_balance_index_byte + address_data_entry.bytes
-        return base58.b58encode(contract_balance_key_bytes).decode()
+        return state_map_generator(0, DataEntry(address, Type.address))
 
     def contract_lock_time_db_key_generator(self, address):
-        contract_lock_time_index_byte = struct.pack(">B", 1)
-        address_data_entry = DataEntry(address, Type.address)
-        contract_lock_time_key_bytes = contract_lock_time_index_byte + address_data_entry.bytes
-        return base58.b58encode(contract_lock_time_key_bytes).decode()
+        return state_map_generator(1, DataEntry(address, Type.address))
 
 class NonFungibleContractHelper(object):
     contract_object = Contract(Contract_Non_Fungible_Token)
@@ -374,13 +345,10 @@ class NonFungibleContractHelper(object):
         return [contract_data_entry, recipient_data_entry, token_index_data_entry]
 
     def issuer_db_key_generator(self):
-        issuer_key_bytes = struct.pack(">B", 0)
-        return base58.b58encode(issuer_key_bytes).decode()
+        return state_var_generator(0)
 
     def maker_db_key_generator(self):
-        maker_key_bytes = struct.pack(">B", 1)
-        return base58.b58encode(maker_key_bytes).decode()
-
+        return state_var_generator(1)
 
 class NonFungibleV2ContractHelper(NonFungibleContractHelper):
     contract_white_object = Contract(Contract_Non_Fungible_Token_V2_White_List)
@@ -450,88 +418,61 @@ class VOptionContractHelper(object):
         return [amount_data_entry]
 
     def maker_db_key_generator(self):
-        maker_key_bytes = struct.pack(">B", 0)
-        return base58.b58encode(maker_key_bytes)
+        return state_var_generator(0)
 
     def base_token_id_db_key_generator(self):
-        base_token_id_key_bytes = struct.pack(">B", 1)
-        return base58.b58encode(base_token_id_key_bytes).decode()
+        return state_var_generator(1)
 
     def target_token_id_db_key_generator(self):
-        target_token_id_key_bytes = struct.pack(">B", 2)
-        return base58.b58encode(target_token_id_key_bytes).decode()
+        return state_var_generator(2)
 
     def option_token_id_db_key_generator(self):
-        option_token_id_key_bytes = struct.pack(">B", 3)
-        return base58.b58encode(option_token_id_key_bytes).decode()
+        return state_var_generator(3)
 
     def proof_token_id_db_key_generator(self):
-        proof_token_id_key_bytes = struct.pack(">B", 4)
-        return base58.b58encode(proof_token_id_key_bytes).decode()
+        return state_var_generator(4)
 
     def execute_time_db_key_generator(self):
-        execute_time_key_bytes = struct.pack(">B", 5)
-        return base58.b58encode(execute_time_key_bytes).decode()
+        return state_var_generator(5)
 
     def execute_deadline_db_key_generator(self):
-        execute_deadline_key_bytes = struct.pack(">B", 6)
-        return base58.b58encode(execute_deadline_key_bytes).decode()
+        return state_var_generator(6)
 
     def option_status_db_key_generator(self):
-        option_status_key_bytes = struct.pack(">B", 7)
-        return base58.b58encode(option_status_key_bytes).decode()
+        return state_var_generator(7)
 
     def max_issue_num_db_key_generator(self):
-        max_issue_num_key_bytes = struct.pack(">B", 8)
-        return base58.b58encode(max_issue_num_key_bytes).decode()
+        return state_var_generator(8)
 
     def reserved_option_db_key_generator(self):
-        reserved_option_num_key_bytes = struct.pack(">B", 9)
-        return base58.b58encode(reserved_option_num_key_bytes).decode()
+        return state_var_generator(9)
 
     def reserved_proof_db_key_generator(self):
-        reserved_proof_key_bytes = struct.pack(">B", 10)
-        return base58.b58encode(reserved_proof_key_bytes).decode()
+        return state_var_generator(10)
 
     def price_db_key_generator(self):
-        price_key_bytes = struct.pack(">B", 11)
-        return base58.b58encode(price_key_bytes).decode()
+        return state_var_generator(11)
 
     def price_unit_db_key_generator(self):
-        price_unit_key_bytes = struct.pack(">B", 12)
-        return base58.b58encode(price_unit_key_bytes).decode()
+        return state_var_generator(12)
 
     def token_locked_db_key_generator(self):
-        token_locked_key_bytes = struct.pack(">B", 13)
-        return base58.b58encode(token_locked_key_bytes).decode()
+        return state_var_generator(13)
 
     def token_collected_db_key_generator(self):
-        token_collected_key_bytes = struct.pack(">B", 14)
-        return base58.b58encode(token_collected_key_bytes).decode()
+        return state_var_generator(14)
 
     def base_token_balance_db_key_generator(self, address):
-        base_token_balance_index_bytes = struct.pack(">B", 0)
-        address_data_entry = DataEntry(address, Type.address)
-        base_token_balance_key_bytes = base_token_balance_index_bytes + address_data_entry.bytes
-        return base58.b58encode(base_token_balance_key_bytes).decode()
+        return state_map_generator(0, DataEntry(address, Type.address))
 
     def target_token_balance_db_key_generator(self, address):
-        target_token_balance_index_bytes = struct.pack(">B", 1)
-        address_data_entry = DataEntry(address, Type.address)
-        target_token_balance_key_bytes = target_token_balance_index_bytes + address_data_entry.bytes
-        return base58.b58encode(target_token_balance_key_bytes)
+        return state_map_generator(1, DataEntry(address, Type.address))
 
     def option_token_balance_db_key_generator(self, address):
-        option_token_balance_index_bytes = struct.pack(">B", 2)
-        address_data_entry = DataEntry(address, Type.address)
-        option_token_balance_key = option_token_balance_index_bytes + address_data_entry.bytes
-        return base58.b58encode(option_token_balance_key)
+        return state_map_generator(2, DataEntry(address, Type.address))
 
     def proof_token_balance_db_key_generator(self, address):
-        proof_token_balance_index_bytes = struct.pack(">B", 3)
-        address_data_entry = DataEntry(address, Type.address)
-        proof_token_balance_key = proof_token_balance_index_bytes + address_data_entry.bytes
-        return base58.b58encode(proof_token_balance_key)
+        return state_map_generator(3, DataEntry(address, Type.address))
 
 class VSwapContractHelper(object):
     contract_object = Contract(Contract_V_Swap)
@@ -540,7 +481,7 @@ class VSwapContractHelper(object):
     add_liquidity_function_index = 2
     remove_liquidity_function_index = 3
     swap_token_for_exact_base_token_function_index = 4
-    swap_exact_token_for_exact_base_token_function_index = 5
+    swap_exact_token_for_base_token_function_index = 5
     swap_token_for_exact_target_token_function_index = 6
     swap_exact_token_for_target_token_function_index = 7
 
@@ -569,10 +510,10 @@ class VSwapContractHelper(object):
         return [amount_a_desired_data_entry, amount_b_desired_data_entry, amount_a_min_data_entry,
                 amount_b_min_data_entry, deadline_data_entry]
 
-    def remove_liquidity_data_stack_generator(self, liquidity, amount_a_desired, amount_b_desired, deadline):
+    def remove_liquidity_data_stack_generator(self, liquidity, amount_a_min, amount_b_min, deadline):
         liquidity_data_entry = DataEntry(liquidity, Type.amount)
-        amount_a_desired_data_entry = DataEntry(amount_a_desired, Type.amount)
-        amount_b_desired_data_entry = DataEntry(amount_b_desired, Type.amount)
+        amount_a_desired_data_entry = DataEntry(amount_a_min, Type.amount)
+        amount_b_desired_data_entry = DataEntry(amount_b_min, Type.amount)
         deadline_data_entry = DataEntry(deadline, Type.timestamp)
         return [liquidity_data_entry, amount_a_desired_data_entry, amount_b_desired_data_entry, deadline_data_entry]
 
@@ -599,3 +540,174 @@ class VSwapContractHelper(object):
         amount_in_data_entry = DataEntry(amount_in, Type.amount)
         deadline_data_entry = DataEntry(deadline, Type.timestamp)
         return [amount_out_min_data_entry, amount_in_data_entry, deadline_data_entry]
+
+    def maker_db_key_generator(self):
+        return state_var_generator(0)
+
+    def token_a_id_db_key_generator(self):
+        return state_var_generator(1)
+
+    def token_b_id_db_key_generator(self):
+        return state_var_generator(2)
+
+    def liquidity_token_db_key_generator(self):
+        return state_var_generator(3)
+
+    def swap_status_db_key_generator(self):
+        return state_var_generator(4)
+
+    def minimum_liquidity_db_key_generator(self):
+        return state_var_generator(5)
+
+    def token_a_reserved_db_key_generator(self):
+        return state_var_generator(6)
+
+    def token_b_reserved_db_key_generator(self):
+        return state_var_generator(7)
+
+    def total_supply_db_key_generator(self):
+        return state_var_generator(8)
+
+    def liquidity_token_left_db_key_generator(self):
+        return state_var_generator(9)
+
+    def token_a_balance_db_key_generator(self, address):
+        return state_map_generator(0, DataEntry(address, Type.address))
+
+    def token_b_balance_db_key_generator(self, address):
+        return state_map_generator(1, DataEntry(address, Type.address))
+
+    def liquidity_token_balance_db_key_generator(self, address):
+        return state_map_generator(2, DataEntry(address, Type.address))
+
+class VStableSwapContractHelper(object):
+    contract_object = Contract(Contract_V_Stable_Swap)
+    supersede_function_index = 0
+    set_order_function_index = 1
+    update_function_index = 2
+    order_deposit_function_index = 3
+    order_withdraw_function_index = 4
+    close_function_index = 5
+    swap_base_to_target_function_index = 6
+    swap_target_to_base_function_index = 7
+
+    def supersede_data_stack_generator(self, new_owner):
+        new_owner_data_entry = DataEntry(new_owner, Type.address)
+        return [new_owner_data_entry]
+
+    def set_order_data_stack_generator(self, fee_base, fee_target, min_base, max_base, min_target, max_target, price_base,
+                                       price_target, base_deposit, target_deposit):
+        fee_base_data_entry = DataEntry(fee_base, Type.amount)
+        fee_target_data_entry = DataEntry(fee_target, Type.amount)
+        min_base_data_entry = DataEntry(min_base, Type.amount)
+        max_base_data_entry = DataEntry(max_base, Type.amount)
+        min_target_data_entry = DataEntry(min_target, Type.amount)
+        max_target_data_entry = DataEntry(max_target, Type.amount)
+        price_base_data_entry = DataEntry(price_base, Type.amount)
+        price_target_data_entry = DataEntry(price_target, Type.amount)
+        base_deposit_data_entry = DataEntry(base_deposit, Type.amount)
+        target_deposit_data_entry = DataEntry(target_deposit, Type.amount)
+        return [fee_base_data_entry, fee_target_data_entry, min_base_data_entry, min_base_data_entry, max_base_data_entry,
+                min_target_data_entry, max_target_data_entry, price_base_data_entry, price_target_data_entry,
+                base_deposit_data_entry, target_deposit_data_entry]
+
+    def update_order_data_stack_generator(self, order_id, fee_base, fee_target, min_base, max_base, min_target, max_target,
+                                          price_base, price_target):
+        order_id_data_entry = DataEntry(order_id, Type.short_bytes_string)
+        fee_base_data_entry = DataEntry(fee_base, Type.amount)
+        fee_target_data_entry = DataEntry(fee_target, Type.amount)
+        min_base_data_entry = DataEntry(min_base, Type.amount)
+        max_base_data_entry = DataEntry(max_base, Type.amount)
+        min_target_data_entry = DataEntry(min_target, Type.amount)
+        max_target_data_entry = DataEntry(max_target, Type.amount)
+        price_base_data_entry = DataEntry(price_base, Type.amount)
+        price_target_data_entry = DataEntry(price_target, Type.amount)
+        return [order_id_data_entry, fee_base_data_entry, fee_target_data_entry, min_base_data_entry, max_base_data_entry,
+                min_target_data_entry, max_target_data_entry, price_base_data_entry, price_target_data_entry]
+
+    def order_deposit_data_stack_generator(self, order_id, base_deposit, target_deposit):
+        order_id_data_entry = DataEntry(order_id, Type.short_bytes_string)
+        base_deposit_data_entry = DataEntry(base_deposit, Type.amount)
+        target_deposit_data_entry = DataEntry(target_deposit, Type.amount)
+        return [order_id_data_entry, base_deposit_data_entry, target_deposit_data_entry]
+
+    def order_withdraw_data_stack_generator(self, order_id, base_withdraw, target_withdraw):
+        order_id_data_entry = DataEntry(order_id, Type.short_bytes_string)
+        base_withdraw_data_entry = DataEntry(base_withdraw, Type.amount)
+        target_withdraw_data_entry = DataEntry(target_withdraw, Type.amount)
+        return [order_id_data_entry, base_withdraw_data_entry, target_withdraw_data_entry]
+
+    def close_order_data_stack_generator(self, order_id):
+        order_id_data_entry = DataEntry(order_id, Type.short_bytes_string)
+        return [order_id_data_entry]
+
+    def swap_base_to_target_data_stack_generator(self, order_id, amount, fee, price, deadline):
+        order_id_data_entry = DataEntry(order_id, Type.short_bytes_string)
+        amount_data_entry = DataEntry(amount, Type.amount)
+        fee_data_entry = DataEntry(fee, Type.amount)
+        price_data_entry = DataEntry(price, Type.amount)
+        deadline_data_entry = DataEntry(deadline, Type.timestamp)
+        return [order_id_data_entry, amount_data_entry, fee_data_entry, price_data_entry, deadline_data_entry]
+
+    def maker_db_key_generator(self):
+        return state_var_generator(0)
+
+    def base_token_id_key_generator(self):
+        return state_var_generator(1)
+
+    def target_token_id_key_generator(self):
+        return state_var_generator(2)
+
+    def max_order_per_user_key_generator(self):
+        return state_var_generator(3)
+
+    def unit_price_base_key_generator(self):
+        return state_var_generator(4)
+
+    def unit_price_target_key_generator(self):
+        return state_var_generator(5)
+
+    def base_token_balance_key_generator(self, address):
+        return state_map_generator(0, DataEntry(address, Type.address))
+
+    def target_token_balance_key_generator(self, address):
+        return state_map_generator(1, DataEntry(address, Type.address))
+
+    def user_orders_key_generator(self, address):
+        return state_map_generator(2, DataEntry(address, Type.address))
+
+    def order_owner_key_generator(self, order_id):
+        return state_map_generator(3, DataEntry(order_id, Type.short_bytes_string))
+
+    def fee_base_key_generator(self, order_id):
+        return state_map_generator(4, DataEntry(order_id, Type.short_bytes_string))
+
+    def fee_target_key_generator(self, order_id):
+        return state_map_generator(5, DataEntry(order_id, Type.short_bytes_string))
+
+    def min_base_key_generator(self, order_id):
+        return state_map_generator(6, DataEntry(order_id, Type.short_bytes_string))
+
+    def max_base_key_generator(self, order_id):
+        return state_map_generator(7, DataEntry(order_id, Type.short_bytes_string))
+
+    def min_target_key_generator(self, order_id):
+        return state_map_generator(8, DataEntry(order_id, Type.short_bytes_string))
+
+    def max_target_key_generator(self, order_id):
+        return state_map_generator(9, DataEntry(order_id, Type.short_bytes_string))
+
+    def price_base_key_generator(self, order_id):
+        return state_map_generator(10, DataEntry(order_id, Type.short_bytes_string))
+
+    def price_target_key_generaotr(self, order_id):
+        return state_map_generator(11, DataEntry(order_id, Type.short_bytes_string))
+
+    def base_token_locked_key_generator(self, order_id):
+        return state_map_generator(12, DataEntry(order_id, Type.short_bytes_string))
+
+    def target_token_locked_key_generator(self, order_id):
+        return state_map_generator(13, DataEntry(order_id, Type.short_bytes_string))
+
+    def order_status_key_generator(self, order_id):
+        return state_map_generator(14, DataEntry(order_id, Type.short_bytes_string))
