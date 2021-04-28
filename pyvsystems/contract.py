@@ -205,6 +205,8 @@ class TypeStruct(NamedTuple):
           return Deser.serialize_array(str2bytes(data))
       elif self.data_category == 'short_bytes_string':
           return Deser.serialize_array(base58.b58decode(data))
+      elif self.data_category == 'bool':
+          return struct.pack(">B", data)
 
   def parse_data_entry_size(self, bytes_object, start_position):
       if (self.data_category == 'short_type'):
