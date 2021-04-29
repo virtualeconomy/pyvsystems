@@ -1,7 +1,10 @@
 from .contract import Contract, DataEntry, Type
 from .setting import Contract_Token_With_Split, Contract_Token_Without_Split, Contract_Payment_Channel,\
     Contract_Lock, Contract_Non_Fungible_Token, Contract_V_Option, Contract_V_Swap, Contract_Non_Fungible_Token_V2_Black_List,\
-    Contract_Non_Fungible_Token_V2_White_List, Contract_V_Stable_Swap
+    Contract_Non_Fungible_Token_V2_White_List, Contract_V_Stable_Swap, \
+    Contract_Non_Fungible_Token, Contract_V_Option, Contract_V_Swap,\
+    Contract_Non_Fungible_Token_V2_Black_List, Contract_Non_Fungible_Token_V2_White_List, \
+    Contract_Token_V2_White_List, Contract_Token_V2_Black_List
 from .crypto import bytes2str, sign
 import struct
 import base58
@@ -197,6 +200,41 @@ class TokenWithoutSplitContractHelper(object):
     def maker_db_key_generator(self):
         return state_var_generator(1)
 
+class TokenV2ContractHelper(TokenWithoutSplitContractHelper):
+    contract_white_object = Contract(Contract_Token_V2_White_List)
+    contract_black_object = Contract(Contract_Token_V2_Black_List)
+    supersede_function_index = 0
+    issue_function_index = 1
+    destroy_function_index = 2
+    update_list_function_index = 3
+    send_function_index = 4
+    transfer_function_index = 5
+    deposit_function_index = 6
+    withdraw_function_index = 7
+    totalSupply_function_index = 8
+    maxSupply_function_index = 9
+    balanceOf_function_index = 10
+    get_issuer_function_index = 11
+
+    def supersede_data_stack_generator(self, new_issuer, new_update_lister):
+        new_issuer_data_entry = DataEntry(new_issuer, Type.address)
+        new_update_lister_data_entry = DataEntry(new_update_lister, Type.address)
+        return [new_issuer_data_entry, new_update_lister_data_entry]
+
+    def update_list_user_account_data_stack_generator(self, user_account, value):
+        user_account_data_entry = DataEntry(user_account, Type.address)
+        value_data_entry = DataEntry(value, Type.boolean)
+        return [user_account_data_entry, value_data_entry]
+
+    def update_list_contract_account_data_stack_generator(self, contract_account, value):
+        contract_account_data_entry = DataEntry(contract_account, Type.contract_account)
+        value_data_entry = DataEntry(value, Type.boolean)
+        return [contract_account_data_entry, value_data_entry]
+
+    def regulator_db_key_generator(self):
+        regulator_key_bytes = struct.pack(">B", 2)
+        return base58.b58encode(regulator_key_bytes).decode()
+
 class PaymentChannelContractHelper(object):
     contract_object = Contract(Contract_Payment_Channel)
     create_and_load_function_index = 0
@@ -366,10 +404,10 @@ class NonFungibleV2ContractHelper(NonFungibleContractHelper):
         value_data_entry = DataEntry(value, Type.boolean)
         return [user_account_data_entry, value_data_entry]
 
-    def update_list_contract_account_data_stack_generator(self, user_account, value):
-        user_account_data_entry = DataEntry(user_account, Type.contract_account)
+    def update_list_contract_account_data_stack_generator(self, contract_account, value):
+        contract_account_data_entry = DataEntry(contract_account, Type.contract_account)
         value_data_entry = DataEntry(value, Type.boolean)
-        return [user_account_data_entry, value_data_entry]
+        return [contract_account_data_entry, value_data_entry]
 
 
 class VOptionContractHelper(object):
