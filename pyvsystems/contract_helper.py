@@ -1,22 +1,25 @@
 from .contract import Contract, DataEntry, Type
 from .setting import Contract_Token_With_Split, Contract_Token_Without_Split, Contract_Payment_Channel,\
-    Contract_Lock, Contract_Non_Fungible_Token, Contract_V_Option, Contract_V_Swap, Contract_Non_Fungible_Token_V2_Black_List,\
-    Contract_Non_Fungible_Token_V2_White_List, Contract_V_Stable_Swap, \
+    Contract_Lock,  Contract_V_Stable_Swap, \
     Contract_Non_Fungible_Token, Contract_V_Option, Contract_V_Swap,\
     Contract_Non_Fungible_Token_V2_Black_List, Contract_Non_Fungible_Token_V2_White_List, \
-    Contract_Token_V2_White_List, Contract_Token_V2_Black_List
+    Contract_Token_V2_White_List, Contract_Token_V2_Black_List, Contract_V_Escrow
+
 from .crypto import bytes2str, sign
 import struct
 import base58
+
 
 def state_var_generator(index):
     index_bytes = struct.pack(">B", index)
     return base58.b58encode(index_bytes).decode()
 
+
 def state_map_generator(index, data_entry):
     index_bytes = struct.pack(">B", index)
     data_entry_bytes = data_entry.bytes
     return base58.b58encode(index_bytes + data_entry_bytes).decode()
+
 
 class SystemContractHelper(object):
     send_function_index = 0
@@ -46,6 +49,7 @@ class SystemContractHelper(object):
         recipient_data_entry = DataEntry(recipient, Type.address)
         amount_data_entry = DataEntry(amount, Type.amount)
         return [sender_data_entry, recipient_data_entry, amount_data_entry]
+
 
 class TokenWithSplitContractHelper(object):
     contract_object = Contract(Contract_Token_With_Split)
@@ -126,6 +130,7 @@ class TokenWithSplitContractHelper(object):
     def maker_db_key_generator(self):
         return state_var_generator(1)
 
+
 class TokenWithoutSplitContractHelper(object):
     contract_object = Contract(Contract_Token_Without_Split)
     supersede_function_index = 0
@@ -200,6 +205,7 @@ class TokenWithoutSplitContractHelper(object):
     def maker_db_key_generator(self):
         return state_var_generator(1)
 
+
 class TokenV2ContractHelper(TokenWithoutSplitContractHelper):
     contract_white_object = Contract(Contract_Token_V2_White_List)
     contract_black_object = Contract(Contract_Token_V2_Black_List)
@@ -234,6 +240,7 @@ class TokenV2ContractHelper(TokenWithoutSplitContractHelper):
     def regulator_db_key_generator(self):
         regulator_key_bytes = struct.pack(">B", 2)
         return base58.b58encode(regulator_key_bytes).decode()
+
 
 class PaymentChannelContractHelper(object):
     contract_object = Contract(Contract_Payment_Channel)
@@ -315,6 +322,7 @@ class PaymentChannelContractHelper(object):
     def channel_status_db_key_generator(self, channel_id):
         return state_map_generator(7, DataEntry(channel_id, Type.short_bytes_string))
 
+
 class LockContractHelper(object):
     contract_object = Contract(Contract_Lock)
     lock_function_index = 0
@@ -338,6 +346,7 @@ class LockContractHelper(object):
 
     def contract_lock_time_db_key_generator(self, address):
         return state_map_generator(1, DataEntry(address, Type.address))
+
 
 class NonFungibleContractHelper(object):
     contract_object = Contract(Contract_Non_Fungible_Token)
@@ -387,6 +396,7 @@ class NonFungibleContractHelper(object):
 
     def maker_db_key_generator(self):
         return state_var_generator(1)
+
 
 class NonFungibleV2ContractHelper(NonFungibleContractHelper):
     contract_white_object = Contract(Contract_Non_Fungible_Token_V2_White_List)
@@ -618,16 +628,27 @@ class VSwapContractHelper(object):
     def liquidity_token_balance_db_key_generator(self, address):
         return state_map_generator(2, DataEntry(address, Type.address))
 
+
 class VStableSwapContractHelper(object):
     contract_object = Contract(Contract_V_Stable_Swap)
     supersede_function_index = 0
     set_order_function_index = 1
-    update_function_index = 2
+    update_order_function_index = 2
     order_deposit_function_index = 3
     order_withdraw_function_index = 4
-    close_function_index = 5
+    close_order_function_index = 5
     swap_base_to_target_function_index = 6
     swap_target_to_base_function_index = 7
+
+    def register_data_stack_generator(self, base_token_id, target_token_id, max_order_per_user, unit_price_base,
+                                      unit_price_target):
+        base_token_id_data_entry = DataEntry(base_token_id, Type.token_id)
+        target_token_id_data_entry = DataEntry(target_token_id, Type.token_id)
+        max_order_per_user_data_entry = DataEntry(max_order_per_user, Type.amount)
+        unit_price_base_data_entry = DataEntry(unit_price_base, Type.amount)
+        unit_price_target_data_entry = DataEntry(unit_price_target, Type.amount)
+        return [base_token_id_data_entry, target_token_id_data_entry, max_order_per_user_data_entry,
+                unit_price_base_data_entry, unit_price_target_data_entry]
 
     def supersede_data_stack_generator(self, new_owner):
         new_owner_data_entry = DataEntry(new_owner, Type.address)
@@ -645,7 +666,7 @@ class VStableSwapContractHelper(object):
         price_target_data_entry = DataEntry(price_target, Type.amount)
         base_deposit_data_entry = DataEntry(base_deposit, Type.amount)
         target_deposit_data_entry = DataEntry(target_deposit, Type.amount)
-        return [fee_base_data_entry, fee_target_data_entry, min_base_data_entry, min_base_data_entry, max_base_data_entry,
+        return [fee_base_data_entry, fee_target_data_entry, min_base_data_entry, max_base_data_entry,
                 min_target_data_entry, max_target_data_entry, price_base_data_entry, price_target_data_entry,
                 base_deposit_data_entry, target_deposit_data_entry]
 
@@ -687,65 +708,237 @@ class VStableSwapContractHelper(object):
         deadline_data_entry = DataEntry(deadline, Type.timestamp)
         return [order_id_data_entry, amount_data_entry, fee_data_entry, price_data_entry, deadline_data_entry]
 
+    def swap_target_to_base_data_stack_generator(self, order_id, amount, fee, price, deadline):
+        order_id_data_entry = DataEntry(order_id, Type.short_bytes_string)
+        amount_data_entry = DataEntry(amount, Type.amount)
+        fee_data_entry = DataEntry(fee, Type.amount)
+        price_data_entry = DataEntry(price, Type.amount)
+        deadline_data_entry = DataEntry(deadline, Type.timestamp)
+        return [order_id_data_entry, amount_data_entry, fee_data_entry, price_data_entry, deadline_data_entry]
+
     def maker_db_key_generator(self):
         return state_var_generator(0)
 
-    def base_token_id_key_generator(self):
+    def base_token_id_db_key_generator(self):
         return state_var_generator(1)
 
-    def target_token_id_key_generator(self):
+    def target_token_id_db_key_generator(self):
         return state_var_generator(2)
 
-    def max_order_per_user_key_generator(self):
+    def max_order_per_user_db_key_generator(self):
         return state_var_generator(3)
 
-    def unit_price_base_key_generator(self):
+    def unit_price_base_db_key_generator(self):
         return state_var_generator(4)
 
-    def unit_price_target_key_generator(self):
+    def unit_price_target_db_key_generator(self):
         return state_var_generator(5)
 
-    def base_token_balance_key_generator(self, address):
+    def base_token_balance_db_key_generator(self, address):
         return state_map_generator(0, DataEntry(address, Type.address))
 
-    def target_token_balance_key_generator(self, address):
+    def target_token_balance_db_key_generator(self, address):
         return state_map_generator(1, DataEntry(address, Type.address))
 
-    def user_orders_key_generator(self, address):
+    def user_orders_db_key_generator(self, address):
         return state_map_generator(2, DataEntry(address, Type.address))
 
-    def order_owner_key_generator(self, order_id):
+    def order_owner_db_key_generator(self, order_id):
         return state_map_generator(3, DataEntry(order_id, Type.short_bytes_string))
 
-    def fee_base_key_generator(self, order_id):
+    def fee_base_db_key_generator(self, order_id):
         return state_map_generator(4, DataEntry(order_id, Type.short_bytes_string))
 
-    def fee_target_key_generator(self, order_id):
+    def fee_target_db_key_generator(self, order_id):
         return state_map_generator(5, DataEntry(order_id, Type.short_bytes_string))
 
-    def min_base_key_generator(self, order_id):
+    def min_base_db_key_generator(self, order_id):
         return state_map_generator(6, DataEntry(order_id, Type.short_bytes_string))
 
-    def max_base_key_generator(self, order_id):
+    def max_base_db_key_generator(self, order_id):
         return state_map_generator(7, DataEntry(order_id, Type.short_bytes_string))
 
-    def min_target_key_generator(self, order_id):
+    def min_target_db_key_generator(self, order_id):
         return state_map_generator(8, DataEntry(order_id, Type.short_bytes_string))
 
-    def max_target_key_generator(self, order_id):
+    def max_target_db_key_generator(self, order_id):
         return state_map_generator(9, DataEntry(order_id, Type.short_bytes_string))
 
-    def price_base_key_generator(self, order_id):
+    def price_base_db_key_generator(self, order_id):
         return state_map_generator(10, DataEntry(order_id, Type.short_bytes_string))
 
-    def price_target_key_generaotr(self, order_id):
+    def price_target_db_key_generator(self, order_id):
         return state_map_generator(11, DataEntry(order_id, Type.short_bytes_string))
 
-    def base_token_locked_key_generator(self, order_id):
+    def base_token_db_locked_key_generator(self, order_id):
         return state_map_generator(12, DataEntry(order_id, Type.short_bytes_string))
 
-    def target_token_locked_key_generator(self, order_id):
+    def target_token_db_locked_key_generator(self, order_id):
         return state_map_generator(13, DataEntry(order_id, Type.short_bytes_string))
 
-    def order_status_key_generator(self, order_id):
+    def order_status_db_key_generator(self, order_id):
         return state_map_generator(14, DataEntry(order_id, Type.short_bytes_string))
+
+
+class VEscrowContractHelper(object):
+    contract_object = Contract(Contract_V_Escrow)
+    supersede_function_index = 0
+    create_order_function_index = 1
+    recipient_deposit_function_index = 2
+    judge_deposit_function_index = 3
+    payer_cancel_function_index = 4
+    recipient_cancel_function_index = 5
+    judge_cancel_function_index = 6
+    submit_work_function_index = 7
+    approve_work_function_index = 8
+    apply_to_judge_function_index = 9
+    judge_order_function_index = 10
+    submit_penalty_function_index = 11
+    payer_refund_function_index = 12
+    recipient_refund_function_index = 13
+    collect_function_index = 14
+
+    def register_data_stack_generator(self, token_id, duration, judge_duration):
+        token_id_data_entry = DataEntry(token_id, Type.token_id)
+        duration_data_entry = DataEntry(duration, Type.timestamp)
+        judge_duration_data_entry = DataEntry(judge_duration, Type.timestamp)
+        return [token_id_data_entry, duration_data_entry, judge_duration_data_entry]
+
+    def supersede_data_stack_generator(self, new_judge):
+        new_judge_data_entry = DataEntry(new_judge, Type.address)
+        return [new_judge_data_entry]
+
+    def create_order_data_stack_generator(self, recipient, amount, recipient_deposit, judge_deposit,
+                                          fee, refund, expiration_time):
+        recipient_data_entry = DataEntry(recipient, Type.address)
+        amount_data_entry = DataEntry(amount, Type.amount)
+        recipient_deposit_data_entry = DataEntry(recipient_deposit, Type.amount)
+        judge_deposit_data_entry = DataEntry(judge_deposit, Type.amount)
+        fee_data_entry = DataEntry(fee, Type.amount)
+        refund_data_entry = DataEntry(refund, Type.amount)
+        expiration_time_data_entry = DataEntry(expiration_time, Type.timestamp)
+        return [recipient_data_entry, amount_data_entry, recipient_deposit_data_entry, judge_deposit_data_entry,
+                fee_data_entry, refund_data_entry, expiration_time_data_entry]
+
+    def recipient_deposit_data_stack_generator(self, order_id):
+        order_id_data_entry = DataEntry(order_id, Type.short_bytes_string)
+        return [order_id_data_entry]
+
+    def judge_deposit_data_stack_generator(self, order_id):
+        order_id_data_entry = DataEntry(order_id, Type.short_bytes_string)
+        return [order_id_data_entry]
+
+    def payer_cancel_data_stack_generator(self, order_id):
+        order_id_data_entry = DataEntry(order_id, Type.short_bytes_string)
+        return [order_id_data_entry]
+
+    def recipient_cancel_data_stack_generator(self, order_id):
+        order_id_data_entry = DataEntry(order_id, Type.short_bytes_string)
+        return [order_id_data_entry]
+
+    def judge_cancel_data_stack_generator(self, order_id):
+        order_id_data_entry = DataEntry(order_id, Type.short_bytes_string)
+        return [order_id_data_entry]
+
+    def submit_work_data_stack_generator(self, order_id):
+        order_id_data_entry = DataEntry(order_id, Type.short_bytes_string)
+        return [order_id_data_entry]
+
+    def approve_work_data_stack_generator(self, order_id):
+        order_id_data_entry = DataEntry(order_id, Type.short_bytes_string)
+        return [order_id_data_entry]
+
+    def apply_to_judge_data_stack_generator(self, order_id):
+        order_id_data_entry = DataEntry(order_id, Type.short_bytes_string)
+        return [order_id_data_entry]
+
+    def judge_order_data_stack_generator(self, order_id, payer_amount, recipient_amount):
+        order_id_data_entry = DataEntry(order_id, Type.short_bytes_string)
+        payer_amount_data_entry = DataEntry(payer_amount, Type.amount)
+        recipient_amount_data_entry = DataEntry(recipient_amount, Type.amount)
+        return [order_id_data_entry, payer_amount_data_entry, recipient_amount_data_entry]
+
+    def submit_penalty_data_stack_generator(self, order_id):
+        order_id_data_entry = DataEntry(order_id, Type.short_bytes_string)
+        return [order_id_data_entry]
+
+    def payer_refund_data_stack_generator(self, order_id):
+        order_id_data_entry = DataEntry(order_id, Type.short_bytes_string)
+        return [order_id_data_entry]
+
+    def recipient_refund_data_stack_generator(self, order_id):
+        order_id_data_entry = DataEntry(order_id, Type.short_bytes_string)
+        return [order_id_data_entry]
+
+    def collect_data_stack_generator(self, order_id):
+        order_id_data_entry = DataEntry(order_id, Type.short_bytes_string)
+        return [order_id_data_entry]
+
+    def maker_db_key_generator(self):
+        return state_var_generator(0)
+
+    def judge_db_key_generator(self):
+        return state_var_generator(1)
+
+    def token_id_db_key_generator(self):
+        return state_var_generator(2)
+
+    def duration_db_key_generator(self):
+        return state_var_generator(3)
+
+    def judge_duration_db_key_generator(self):
+        return state_var_generator(4)
+
+    def contract_balance_db_key_generator(self, address):
+        return state_map_generator(0, DataEntry(address, Type.address))
+
+    def order_payer_db_key_generator(self, order_id):
+        return state_map_generator(1, DataEntry(order_id, Type.short_bytes_string))
+
+    def order_recipient_db_key_generator(self, order_id):
+        return state_map_generator(2, DataEntry(order_id, Type.short_bytes_string))
+
+    def order_amount_db_key_generator(self, order_id):
+        return state_map_generator(3, DataEntry(order_id, Type.short_bytes_string))
+
+    def order_recipient_deposit_db_key_generator(self, order_id):
+        return state_map_generator(4, DataEntry(order_id, Type.short_bytes_string))
+
+    def order_judge_deposit_db_key_generator(self, order_id):
+        return state_map_generator(5, DataEntry(order_id, Type.short_bytes_string))
+
+    def order_fee_db_key_generator(self, order_id):
+        return state_map_generator(6, DataEntry(order_id, Type.short_bytes_string))
+
+    def order_recipient_amount_db_key_generator(self, order_id):
+        return state_map_generator(7, DataEntry(order_id, Type.short_bytes_string))
+
+    def order_refund_amount_db_key_generator(self, order_id):
+        return state_map_generator(8, DataEntry(order_id, Type.short_bytes_string))
+
+    def order_recipient_refund_db_key_generator(self, order_id):
+        return state_map_generator(9, DataEntry(order_id, Type.short_bytes_string))
+
+    def order_expiration_time_db_key_generator(self, order_id):
+        return state_map_generator(10, DataEntry(order_id, Type.short_bytes_string))
+
+    def order_status_db_key_generator(self, order_id):
+        return state_map_generator(11, DataEntry(order_id, Type.short_bytes_string))
+
+    def order_recipient_deposit_status_db_key_generator(self, order_id):
+        return state_map_generator(12, DataEntry(order_id, Type.short_bytes_string))
+
+    def order_judge_deposit_status_db_key_generator(self, order_id):
+        return state_map_generator(13, DataEntry(order_id, Type.short_bytes_string))
+
+    def order_submit_status_db_key_generator(self, order_id):
+        return state_map_generator(14, DataEntry(order_id, Type.short_bytes_string))
+
+    def order_judge_status_db_key_generator(self, order_id):
+        return state_map_generator(15, DataEntry(order_id, Type.short_bytes_string))
+
+    def order_recipient_locked_amount_db_key_generator(self, order_id):
+        return state_map_generator(16, DataEntry(order_id, Type.short_bytes_string))
+
+    def order_judge_locked_amount_db_key_generator(self, order_id):
+        return state_map_generator(17, DataEntry(order_id, Type.short_bytes_string))
