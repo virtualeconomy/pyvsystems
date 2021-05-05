@@ -443,15 +443,15 @@ class VOptionContractHelper(object):
         amount_data_entry = DataEntry(amount, Type.amount)
         return [amount_data_entry]
 
-    def unlock_data_stack(self, amount):
+    def unlock_data_stack_generator(self, amount):
         amount_data_entry = DataEntry(amount, Type.amount)
         return [amount_data_entry]
 
-    def execute_data_stack(self, amount):
+    def execute_data_stack_generator(self, amount):
         amount_data_entry = DataEntry(amount, Type.amount)
         return [amount_data_entry]
 
-    def collect_data_stack(self, amount):
+    def collect_data_stack_generator(self, amount):
         amount_data_entry = DataEntry(amount, Type.amount)
         return [amount_data_entry]
 
