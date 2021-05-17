@@ -89,6 +89,12 @@ class Chain(object):
     def contract_db_query(self, contract_id, db_key):
         return self.api_wrapper.request('contract/data/%s/%s' % (contract_id, db_key))
 
+    def system_contract_id(self):
+        unhashedAddress = chr(6) + str(self.chain_id) + hashChain(base58.b58encode(''))[0:20]
+        addressHash = hashChain(str2bytes(unhashedAddress))[0:4]
+        contract_id = bytes2str(base58.b58encode(str2bytes(unhashedAddress + addressHash)))
+        return contract_id
+
     def validate_address(self, address):
         addr = bytes2str(base58.b58decode(address))
         if addr[0] != chr(self.address_version):
