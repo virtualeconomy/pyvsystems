@@ -3,7 +3,7 @@ from .setting import Contract_Token_With_Split, Contract_Token_Without_Split, Co
     Contract_Lock,  Contract_V_Stable_Swap, \
     Contract_Non_Fungible_Token, Contract_V_Option, Contract_V_Swap,\
     Contract_Non_Fungible_Token_V2_Black_List, Contract_Non_Fungible_Token_V2_White_List, \
-    Contract_Token_V2_White_List, Contract_Token_V2_Black_List, Contract_V_Escrow
+    Contract_Token_V2_White_List, Contract_Token_V2_Black_List, Contract_V_Escrow, Contract_Atomic_Swap
 
 from .crypto import bytes2str, sign
 import struct
@@ -240,6 +240,60 @@ class TokenV2ContractHelper(TokenWithoutSplitContractHelper):
     def regulator_db_key_generator(self):
         regulator_key_bytes = struct.pack(">B", 2)
         return base58.b58encode(regulator_key_bytes).decode()
+
+
+class AtomicSwapContractHelper(object):
+    contract_object = Contract(Contract_Atomic_Swap)
+    lock_function_index = 0
+    solve_puzzle_function_index = 1
+    expire_withdraw_index = 2
+
+    def register_data_stack_generator(self, token_id):
+        token_id_data_entry = DataEntry(token_id, Type.token_id)
+        return [token_id_data_entry]
+
+    def lock_data_stack_generator(self, amount, recipient, puzzle, expired_time):
+        amount_data_entry = DataEntry(amount, Type.amount)
+        recipient_data_entry = DataEntry(recipient, Type.address)
+        puzzle_data_entry = DataEntry(puzzle, Type.short_bytes_string)
+        expired_time_data_entry = DataEntry(expired_time, Type.timestamp)
+        return [amount_data_entry, recipient_data_entry, puzzle_data_entry, expired_time_data_entry]
+
+    def solve_puzzle_data_stack_generator(self, tx_id, key):
+        tx_id_data_entry = DataEntry(tx_id, Type.short_bytes_string)
+        key_data_entry = DataEntry(key, Type.short_bytes_string)
+        return [tx_id_data_entry, key_data_entry]
+
+    def expire_withdraw_data_stack_generator(self, tx_id):
+        tx_id_data_entry = DataEntry(tx_id, Type.short_bytes_string)
+        return [tx_id_data_entry]
+
+    def maker_db_key_generator(self):
+        return state_var_generator(0)
+
+    def token_id_db_key_generator(self):
+        return state_var_generator(1)
+
+    def token_balance_db_key_generator(self, address):
+        return state_map_generator(0, DataEntry(address, Type.address))
+
+    def swap_owner_db_key_generator(self, swap_id):
+        return state_map_generator(1, DataEntry(swap_id, Type.short_bytes_string))
+
+    def swap_recipient_db_key_generator(self, swap_id):
+        return state_map_generator(2, DataEntry(swap_id, Type.short_bytes_string))
+
+    def swap_puzzle_db_key_generator(self, swap_id):
+        return state_map_generator(3, DataEntry(swap_id, Type.short_bytes_string))
+
+    def swap_amount_db_key_generator(self, swap_id):
+        return state_map_generator(4, DataEntry(swap_id, Type.short_bytes_string))
+
+    def swap_expired_time_db_key_generator(self, swap_id):
+        return state_map_generator(5, DataEntry(swap_id, Type.short_bytes_string))
+
+    def swap_status_db_key_generator(self, swap_id):
+        return state_map_generator(6, DataEntry(swap_id, Type.short_bytes_string))
 
 
 class PaymentChannelContractHelper(object):
