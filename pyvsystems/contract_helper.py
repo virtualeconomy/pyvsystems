@@ -652,7 +652,7 @@ class VSwapContractHelper(object):
     def token_b_id_db_key_generator(self):
         return state_var_generator(2)
 
-    def liquidity_token_db_key_generator(self):
+    def liquidity_token_id_db_key_generator(self):
         return state_var_generator(3)
 
     def swap_status_db_key_generator(self):
