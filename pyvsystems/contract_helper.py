@@ -824,10 +824,10 @@ class VStableSwapContractHelper(object):
     def price_target_db_key_generator(self, order_id):
         return state_map_generator(11, DataEntry(order_id, Type.short_bytes_string))
 
-    def base_token_db_locked_key_generator(self, order_id):
+    def base_token_locked_db_key_generator(self, order_id):
         return state_map_generator(12, DataEntry(order_id, Type.short_bytes_string))
 
-    def target_token_db_locked_key_generator(self, order_id):
+    def target_token_locked_db_key_generator(self, order_id):
         return state_map_generator(13, DataEntry(order_id, Type.short_bytes_string))
 
     def order_status_db_key_generator(self, order_id):
