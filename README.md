@@ -1,4 +1,7 @@
 # pyvsystems
+
+> **DEPRECATED. Please use the new Python SDK [py-vsys](https://github.com/virtualeconomy/py-vsys) instead.**
+
 A python wrapper for vsys api.
 
 For more detail, please refer:
