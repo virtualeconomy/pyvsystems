@@ -8,7 +8,7 @@ with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="pyvsystems",
-    version="0.3.2",
+    version="0.4.0",
     description="A python wrapper for vsys api.",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -19,5 +19,5 @@ setup(
     license="MIT",
     packages=["pyvsystems"],
     install_requires=["requests", "python-axolotl-curve25519", "base58"],
-    python_requires='>=3.4'
+    python_requires='>=3.6'
 )
