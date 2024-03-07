@@ -1,5 +1,4 @@
 import hashlib
-import pyblake2
 import axolotl_curve25519 as curve
 import base58
 import os
@@ -268,7 +267,7 @@ def sha256(s):
 
 
 def hashChain(s):
-    a=pyblake2.blake2b(s, digest_size=32).digest()
+    a=hashlib.blake2b(s, digest_size=32).digest()
     b=keccak256.digest(a)
     return b
 

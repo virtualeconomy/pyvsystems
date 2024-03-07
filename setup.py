@@ -18,6 +18,6 @@ setup(
     author_email="developers@v.systems",
     license="MIT",
     packages=["pyvsystems"],
-    install_requires=["requests", "python-axolotl-curve25519", "pyblake2", "base58"],
+    install_requires=["requests", "python-axolotl-curve25519", "base58"],
     python_requires='>=3.4'
 )
