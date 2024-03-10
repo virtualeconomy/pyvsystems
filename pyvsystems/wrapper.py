@@ -4,30 +4,24 @@ import requests
 
 
 class Wrapper(object):
-    def __init__(self, node_host, api_key='', timeout=None):
+    def __init__(self, node_host, api_key="", timeout=None):
         self.node_host = node_host
         self.api_key = api_key
-        self.timeout = timeout
-
-    def request(self, api, post_data=''):
-        headers = {}
-        url = self.node_host + '/' + api
+        self.session = requests.Session()
+        self.session.headers.update({"Content-Type": "application/json"})
         if self.api_key:
-            headers['api_key'] = self.api_key
+            self.session.headers.update({"api_key": self.api_key})
+        if timeout:
+            self.session.timeout = timeout
+
+    def request(self, api, post_data=""):
+        url = self.node_host + "/" + api
         try:
             if post_data:
-                headers['Content-Type'] = 'application/json'
-                if self.timeout:
-                    return requests.post(url, data=post_data, headers=headers, timeout=self.timeout).json()
-                else:
-                    return requests.post(url, data=post_data, headers=headers).json()
+                return self.session.post(url, data=post_data).json()
             else:
-                if self.timeout:
-                    resp = requests.get(url, headers=headers, timeout=self.timeout)
-                    return resp.json()
-                else:
-                    resp = requests.get(url, headers=headers)
-                    return resp.json()
+                return self.session.get(url).json()
+
         except RequestException as ex:
-            msg = 'Failed to get response: {}'.format(ex)
+            msg = "Failed to get response: {}".format(ex)
             raise NetworkException(msg)
